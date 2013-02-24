@@ -79,9 +79,15 @@ while     {printf("KEYWORD %s\n", yytext);}
 {error} {printf("ERROR(%d): Unrecognized Symbol \"%s\"\n", line, yytext);}
 %%
 
-void main() {
-  int val;
-  while ((val = yylex()) > 0) {
+void main(int argc, char **argv) {
+  if (argc != 2) {
+    printf("Usage: lexer filename\n");
+  } else {
+    stdin = fopen(argv[1], "r");
+    int val;
+    while ((val = yylex()) > 0) {
+    }
+    fclose(stdin);
   }
 }
 
