@@ -190,7 +190,7 @@ componentSelection: TOKEN_DOT TOKEN_ID componentSelection | TOKEN_LBRACKET expre
 
 actualParameterList: expressionList |;
 
-expressionList: expressionList expression | expression;
+expressionList: expressionList TOKEN_COMMAS expression | expression;
 
 identifierList: identifierList TOKEN_COMMAS TOKEN_ID | TOKEN_ID;
 

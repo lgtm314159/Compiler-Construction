@@ -132,7 +132,6 @@ return TOKEN_RPAR;}
 return TOKEN_LBRACKET;}
 "]" {//printf("RBRACKET\n");
 return TOKEN_RBRACKET;}
-"\"" {}
 {ERROR} {printf("ERROR(%d): Unrecognized Symbol \"%s\"\n", line, yytext);}
 %%
 

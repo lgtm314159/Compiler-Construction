@@ -368,8 +368,8 @@ static void yy_fatal_error (yyconst char msg[]  );
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
 
-#define YY_NUM_RULES 54
-#define YY_END_OF_BUFFER 55
+#define YY_NUM_RULES 53
+#define YY_END_OF_BUFFER 54
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -379,11 +379,11 @@ struct yy_trans_info
 	};
 static yyconst flex_int16_t yy_accept[129] =
     {   0,
-        0,    0,   55,   53,    1,    2,   52,   48,   49,   29,
+        0,    0,   54,   52,    1,    2,   52,   48,   49,   29,
        27,   43,   28,   42,   30,   38,   44,   45,   32,   31,
        34,   37,   37,   50,   51,   37,   37,   37,   37,   37,
-       37,   37,   37,   37,   37,   37,   37,   37,   37,   54,
-       54,    1,    0,   41,    0,   38,   47,   39,   38,    0,
+       37,   37,   37,   37,   37,   37,   37,   37,   37,   53,
+       53,    1,    0,   41,    0,   38,   47,   39,   38,    0,
        46,   33,   36,   35,   37,   37,   37,   37,   37,    8,
        37,   37,   37,   37,   13,   37,   37,   17,   18,   37,
        37,   37,   23,   37,   37,   37,    0,    3,    0,   40,
@@ -1141,22 +1141,17 @@ YY_RULE_SETUP
 return TOKEN_RBRACKET;}
 	YY_BREAK
 case 52:
+/* rule 52 can match eol */
 YY_RULE_SETUP
 #line 135 "lexicalAnalyzer.l"
-{}
-	YY_BREAK
-case 53:
-/* rule 53 can match eol */
-YY_RULE_SETUP
-#line 136 "lexicalAnalyzer.l"
 {printf("ERROR(%d): Unrecognized Symbol \"%s\"\n", line, yytext);}
 	YY_BREAK
-case 54:
+case 53:
 YY_RULE_SETUP
-#line 137 "lexicalAnalyzer.l"
+#line 136 "lexicalAnalyzer.l"
 ECHO;
 	YY_BREAK
-#line 1160 "lex.yy.c"
+#line 1155 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2154,7 +2149,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 137 "lexicalAnalyzer.l"
+#line 136 "lexicalAnalyzer.l"
 
 
 
