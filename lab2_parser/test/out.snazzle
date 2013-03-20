@@ -1,0 +1,18 @@
+reading a snazzle file version 1.3
+
+new defined snazzle type: foo
+
+new defined snazzle type: bar
+
+new defined snazzle type: bas
+
+new snazzle: 00105foo
+
+new snazzle: 20103020foo
+
+new snazzle: 781213bas
+
+new snazzle: 78124100256bar
+
+done with a snazzle file!
+

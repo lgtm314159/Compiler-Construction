@@ -80,6 +80,7 @@ while     {printf("KEYWORD %s\n", yytext);}
 {error} {printf("ERROR(%d): Unrecognized Symbol \"%s\"\n", line, yytext);}
 %%
 
+/*
 void main(int argc, char **argv) {
   if (argc != 2) {
     printf("Usage: lexer filename\n");
@@ -91,4 +92,4 @@ void main(int argc, char **argv) {
     fclose(stdin);
   }
 }
-
+*/
