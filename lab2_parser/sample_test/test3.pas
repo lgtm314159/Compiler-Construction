@@ -6,6 +6,4 @@ begin
 end;
 
 begin
-end
-
-.
+end.

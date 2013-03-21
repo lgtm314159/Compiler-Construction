@@ -177,3 +177,16 @@ statement
 statement_sequence_more
 compound_statement
 program
+addr:0 id:scanner_test type:nil
+addr:1 id:i type:integer
+addr:2 id:j type:integer
+addr:3 id:num type:integer
+addr:4 id:integer type:nil
+addr:5 id:x type:float
+addr:6 id:y type:integer
+addr:7 id:boolean type:nil
+addr:8 id:divides type:0
+addr:9 id:float type:nil
+addr:10 id:other type:0
+addr:11 id:pi type:nil
+addr:12 id:readint type:nil

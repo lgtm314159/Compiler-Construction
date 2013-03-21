@@ -1,0 +1,6 @@
+#!/bin/bash
+
+./oneliner.sh
+./parser sample_test/test8.pas > tmp8
+diff -b tmp8 sample_test/test8_rule.out
+

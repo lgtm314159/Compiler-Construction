@@ -5,7 +5,9 @@
 #define YY_DECL extern "C" int yylex()
 #define MYNEWLINE 10;
 int line = 1;
-
+int address = 1;
+int funcSavedAddr;
+int procSavedAddr;
 %}
 
 DELIM   [ \t]
@@ -49,6 +51,8 @@ return TOKEN_END;}
 for     {//printf("KEYWORD %s\n", yytext);
 return TOKEN_FOR;}
 function     {//printf("KEYWORD %s\n", yytext);
+funcSavedAddr = address;
+++address;
 return TOKEN_FUNCTION;}
 if     {//printf("KEYWORD %s\n", yytext);
 return TOKEN_IF;}

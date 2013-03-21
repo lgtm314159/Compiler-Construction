@@ -82,3 +82,6 @@ statement
 statement_sequence_more
 compound_statement
 program
+id:a type:integer addr:1
+id:integer type:nil addr:0
+id:test4 type:nil addr:2

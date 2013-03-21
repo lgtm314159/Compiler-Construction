@@ -27,3 +27,10 @@ statement
 statement_sequence_more
 compound_statement
 program
+addr:0 id:errorfree type:nil
+addr:1 id:s type:nil
+addr:2 id:string type:nil
+addr:3 id:in type:nil
+addr:4 id:integer type:nil
+addr:5 id:z type:s
+addr:6 id:m type:in
