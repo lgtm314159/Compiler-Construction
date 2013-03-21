@@ -2,4 +2,5 @@
 
 ./oneliner.sh
 ./parser sample_test/test2.pas > tmp2
+diff -b tmp2 sample_test/test2_rule.out
 

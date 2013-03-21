@@ -87,6 +87,7 @@ variable
 component_selection_empty
 variable
 factor
+term
 mulop
 component_selection_empty
 variable

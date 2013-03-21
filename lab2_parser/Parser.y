@@ -13,9 +13,10 @@ extern "C" FILE *yyin;
 void yyerror(const char *s);
 static void lookup(char *token_buffer);
 
-//#define YYPRINT
+#define YYPRINT
 %}
 
+%expect 1
 
 %union {
   int ival;
@@ -167,9 +168,7 @@ fieldList: fieldListSeq |;
 fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
     | identifierList TOKEN_COLON type;
 
-constant: groupSign TOKEN_INT;
-
-groupSign: sign |;
+constant: TOKEN_INT | sign TOKEN_INT;
 
 expression: simpleExpression groupRelOpSimExpr { cout << "expression" << endl; };
 
@@ -182,20 +181,16 @@ relationalOp: TOKEN_LT { cout << "relational_op" << endl; }
     | TOKEN_NOTEQ { cout << "relational_op" << endl; }
     | TOKEN_EQ { cout << "relational_op" << endl; };
 
-simpleExpression: groupSign term addOpTermList { cout << "simple_expression_more" << endl; }
-    | groupSign term { cout << "simple_expression" << endl; };
-
-addOpTermList: addOpTermList addOp term | addOp term;
+simpleExpression: sign term { cout << "simple_expression" << endl; }
+    | term { cout << "simple_expression" << endl; }
+    | simpleExpression addOp term { cout << "simple_expression_more" << endl; };
 
 addOp: TOKEN_PLUS { cout << "addop" << endl; }
     | TOKEN_MINUS { cout << "addop" << endl; }
     | TOKEN_OR { cout << "addop" << endl; };
 
-term: factor mulOpFactorList { cout << "term_more" << endl; }
+term: term mulOp factor { cout << "term_more" << endl; }
     | factor { cout << "term" << endl; } ;
-
-mulOpFactorList: mulOpFactorList mulOp factor 
-    | mulOp factor;
 
 mulOp: TOKEN_MULTIPLY { cout << "mulop" << endl; }
   | TOKEN_DIV { cout << "mulop" << endl; } 
@@ -239,7 +234,7 @@ main(int argc, char **argv) {
   
   yyin = myfile;
 
-  yydebug = 1;
+  //yydebug = 1;
   do {
     yyparse();
   } while (!feof(yyin));
@@ -253,31 +248,11 @@ void yyerror(const char *s) {
 
 /* Lookup literal names */
 static void lookup(char *token_buffer) {
-int i;
-for (i = 0; i < YYNTOKENS; i++) {
-  if (!strncmp(yytname[i], token_buffer, strlen(token_buffer))) {
-    cout << yytname[i] << endl;
+  int i;
+  for (i = 0; i < YYNTOKENS; i++) {
+    if (!strncmp(yytname[i], token_buffer, strlen(token_buffer))) {
+      cout << yytname[i] << endl;
+    }
   }
-}
-/* 
-if (yytname[i] != 0
-&& yytname[i][0] == '"'
-&& !strncmp (yytname[i] + 1, token_buffer,
-strlen (token_buffer))
-&& yytname[i][strlen (token_buffer) + 1] == '"'
-&& yytname[i][strlen (token_buffer) + 2] == 0) {
-printf("---Match Success: %s, %d\n",token_buffer,i,yytname[i]);
-yylval.sval = token_buffer;
-//return yytoknum[i];
-return 0;
-*/
-/*
-cout << "yytname[i]: " << yytname[i] << " yytname[i][0]: " << yytname[i][0] <<
-    " yytname[i] + 1: " << yytname[i] + 1 << " strlen: " << strlen(token_buffer) <<
-    " strlen + 1: " << yytname[i][strlen (token_buffer) + 1] <<
-    " strlen + 2: " << yytname[i][strlen (token_buffer) + 2] << endl;
-}*/
-//printf("---Match Fail: %s\n",token_buffer);
-//yylval.sval = token_buffer;
 }
 

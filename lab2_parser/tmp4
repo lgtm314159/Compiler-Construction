@@ -21,10 +21,12 @@ relational_op
 component_selection_empty
 variable
 factor
+term
 mulop
 component_selection_empty
 variable
 factor
+term
 mulop
 component_selection_empty
 variable
@@ -54,6 +56,7 @@ variable
 component_selection_empty
 variable
 factor
+term
 mulop
 factor
 term_more
@@ -61,12 +64,14 @@ simple_expression
 expression
 factor
 term
+simple_expression
 addop
 factor
 term
 simple_expression_more
 expression
 factor
+term
 mulop
 component_selection_empty
 variable
@@ -76,6 +81,7 @@ simple_expression
 expression
 factor
 term
+simple_expression
 addop
 factor
 term
@@ -149,6 +155,7 @@ component_selection_empty
 variable
 factor
 term
+simple_expression
 addop
 component_selection_empty
 variable

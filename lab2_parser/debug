@@ -9,51 +9,8 @@ Entering state 3
 Reading a token: Next token is token TOKEN_SEMICOLON ()
 Shifting token TOKEN_SEMICOLON ()
 Entering state 5
-Reading a token: Next token is token TOKEN_TYPE ()
-Shifting token TOKEN_TYPE ()
-Entering state 6
-Reading a token: Next token is token TOKEN_ID ()
-Shifting token TOKEN_ID ()
-Entering state 9
-Reading a token: Next token is token TOKEN_EQ ()
-Shifting token TOKEN_EQ ()
-Entering state 15
-Reading a token: Next token is token TOKEN_ID ()
-Shifting token TOKEN_ID ()
-Entering state 30
-Reducing stack by rule 47 (line 160):
-   $1 = token TOKEN_ID ()
-type_ID
--> $$ = nterm type ()
-Stack now 0 1 3 5 6 9 15
-Entering state 31
-Reading a token: Next token is token TOKEN_SEMICOLON ()
-Shifting token TOKEN_SEMICOLON ()
-Entering state 45
-Reducing stack by rule 19 (line 110):
-   $1 = token TOKEN_ID ()
-   $2 = token TOKEN_EQ ()
-   $3 = nterm type ()
-   $4 = token TOKEN_SEMICOLON ()
-type_definition
--> $$ = nterm typeDefinition ()
-Stack now 0 1 3 5 6
-Entering state 11
-Reducing stack by rule 10 (line 96):
-   $1 = nterm typeDefinition ()
--> $$ = nterm typeDefinitionList ()
-Stack now 0 1 3 5 6
-Entering state 10
 Reading a token: Next token is token TOKEN_VAR ()
-Reducing stack by rule 8 (line 94):
-   $1 = token TOKEN_TYPE ()
-   $2 = nterm typeDefinitionList ()
-type_definition
--> $$ = nterm typeDefinitions ()
-Stack now 0 1 3 5
-Entering state 8
-Reducing stack by rule 2 (line 90):
-   $1 = nterm typeDefinitions ()
+Reducing stack by rule 3 (line 90):
 -> $$ = nterm groupTypeDefinitions ()
 Stack now 0 1 3 5
 Entering state 7
@@ -63,9 +20,37 @@ Entering state 12
 Reading a token: Next token is token TOKEN_ID ()
 Shifting token TOKEN_ID ()
 Entering state 17
-Reducing stack by rule 97 (line 220):
+Reducing stack by rule 97 (line 228):
    $1 = token TOKEN_ID ()
 identifier_list
+-> $$ = nterm identifierList ()
+Stack now 0 1 3 5 7 12
+Entering state 20
+Reading a token: Next token is token TOKEN_COMMAS ()
+Shifting token TOKEN_COMMAS ()
+Entering state 33
+Reading a token: Next token is token TOKEN_ID ()
+Shifting token TOKEN_ID ()
+Entering state 46
+Reducing stack by rule 96 (line 227):
+   $1 = nterm identifierList ()
+   $2 = token TOKEN_COMMAS ()
+   $3 = token TOKEN_ID ()
+identifier_list_more
+-> $$ = nterm identifierList ()
+Stack now 0 1 3 5 7 12
+Entering state 20
+Reading a token: Next token is token TOKEN_COMMAS ()
+Shifting token TOKEN_COMMAS ()
+Entering state 33
+Reading a token: Next token is token TOKEN_ID ()
+Shifting token TOKEN_ID ()
+Entering state 46
+Reducing stack by rule 96 (line 227):
+   $1 = nterm identifierList ()
+   $2 = token TOKEN_COMMAS ()
+   $3 = token TOKEN_ID ()
+identifier_list_more
 -> $$ = nterm identifierList ()
 Stack now 0 1 3 5 7 12
 Entering state 20
@@ -75,7 +60,7 @@ Entering state 34
 Reading a token: Next token is token TOKEN_ID ()
 Shifting token TOKEN_ID ()
 Entering state 30
-Reducing stack by rule 47 (line 160):
+Reducing stack by rule 46 (line 160):
    $1 = token TOKEN_ID ()
 type_ID
 -> $$ = nterm type ()
@@ -84,7 +69,7 @@ Entering state 47
 Reading a token: Next token is token TOKEN_SEMICOLON ()
 Shifting token TOKEN_SEMICOLON ()
 Entering state 72
-Reducing stack by rule 20 (line 113):
+Reducing stack by rule 20 (line 114):
    $1 = nterm identifierList ()
    $2 = token TOKEN_COLON ()
    $3 = nterm type ()
@@ -93,94 +78,14 @@ variable_declaration
 -> $$ = nterm variableDeclaration ()
 Stack now 0 1 3 5 7 12
 Entering state 19
-Reducing stack by rule 13 (line 101):
+Reducing stack by rule 13 (line 102):
    $1 = nterm variableDeclaration ()
 variable_declaration
 -> $$ = nterm variableDeclarationList ()
 Stack now 0 1 3 5 7 12
 Entering state 18
-Reading a token: Next token is token TOKEN_ID ()
-Shifting token TOKEN_ID ()
-Entering state 17
-Reducing stack by rule 97 (line 220):
-   $1 = token TOKEN_ID ()
-identifier_list
--> $$ = nterm identifierList ()
-Stack now 0 1 3 5 7 12 18
-Entering state 20
-Reading a token: Next token is token TOKEN_COLON ()
-Shifting token TOKEN_COLON ()
-Entering state 34
-Reading a token: Next token is token TOKEN_ID ()
-Shifting token TOKEN_ID ()
-Entering state 30
-Reducing stack by rule 47 (line 160):
-   $1 = token TOKEN_ID ()
-type_ID
--> $$ = nterm type ()
-Stack now 0 1 3 5 7 12 18 20 34
-Entering state 47
-Reading a token: Next token is token TOKEN_SEMICOLON ()
-Shifting token TOKEN_SEMICOLON ()
-Entering state 72
-Reducing stack by rule 20 (line 113):
-   $1 = nterm identifierList ()
-   $2 = token TOKEN_COLON ()
-   $3 = nterm type ()
-   $4 = token TOKEN_SEMICOLON ()
-variable_declaration
--> $$ = nterm variableDeclaration ()
-Stack now 0 1 3 5 7 12 18
-Entering state 32
-Reducing stack by rule 12 (line 100):
-   $1 = nterm variableDeclarationList ()
-   $2 = nterm variableDeclaration ()
-variable_declaration_more
--> $$ = nterm variableDeclarationList ()
-Stack now 0 1 3 5 7 12
-Entering state 18
-Reading a token: Next token is token TOKEN_ID ()
-Shifting token TOKEN_ID ()
-Entering state 17
-Reducing stack by rule 97 (line 220):
-   $1 = token TOKEN_ID ()
-identifier_list
--> $$ = nterm identifierList ()
-Stack now 0 1 3 5 7 12 18
-Entering state 20
-Reading a token: Next token is token TOKEN_COLON ()
-Shifting token TOKEN_COLON ()
-Entering state 34
-Reading a token: Next token is token TOKEN_ID ()
-Shifting token TOKEN_ID ()
-Entering state 30
-Reducing stack by rule 47 (line 160):
-   $1 = token TOKEN_ID ()
-type_ID
--> $$ = nterm type ()
-Stack now 0 1 3 5 7 12 18 20 34
-Entering state 47
-Reading a token: Next token is token TOKEN_SEMICOLON ()
-Shifting token TOKEN_SEMICOLON ()
-Entering state 72
-Reducing stack by rule 20 (line 113):
-   $1 = nterm identifierList ()
-   $2 = token TOKEN_COLON ()
-   $3 = nterm type ()
-   $4 = token TOKEN_SEMICOLON ()
-variable_declaration
--> $$ = nterm variableDeclaration ()
-Stack now 0 1 3 5 7 12 18
-Entering state 32
-Reducing stack by rule 12 (line 100):
-   $1 = nterm variableDeclarationList ()
-   $2 = nterm variableDeclaration ()
-variable_declaration_more
--> $$ = nterm variableDeclarationList ()
-Stack now 0 1 3 5 7 12
-Entering state 18
 Reading a token: Next token is token TOKEN_FUNCTION ()
-Reducing stack by rule 11 (line 98):
+Reducing stack by rule 11 (line 99):
    $1 = token TOKEN_VAR ()
    $2 = nterm variableDeclarationList ()
 -> $$ = nterm variableDeclarations ()
@@ -203,9 +108,23 @@ Entering state 48
 Reading a token: Next token is token TOKEN_ID ()
 Shifting token TOKEN_ID ()
 Entering state 17
-Reducing stack by rule 97 (line 220):
+Reducing stack by rule 97 (line 228):
    $1 = token TOKEN_ID ()
 identifier_list
+-> $$ = nterm identifierList ()
+Stack now 0 1 3 5 7 13 21 35 48
+Entering state 75
+Reading a token: Next token is token TOKEN_COMMAS ()
+Shifting token TOKEN_COMMAS ()
+Entering state 33
+Reading a token: Next token is token TOKEN_ID ()
+Shifting token TOKEN_ID ()
+Entering state 46
+Reducing stack by rule 96 (line 227):
+   $1 = nterm identifierList ()
+   $2 = token TOKEN_COMMAS ()
+   $3 = token TOKEN_ID ()
+identifier_list_more
 -> $$ = nterm identifierList ()
 Stack now 0 1 3 5 7 13 21 35 48
 Entering state 75
@@ -215,13 +134,13 @@ Entering state 95
 Reading a token: Next token is token TOKEN_ID ()
 Shifting token TOKEN_ID ()
 Entering state 30
-Reducing stack by rule 47 (line 160):
+Reducing stack by rule 46 (line 160):
    $1 = token TOKEN_ID ()
 type_ID
 -> $$ = nterm type ()
 Stack now 0 1 3 5 7 13 21 35 48 75 95
 Entering state 128
-Reducing stack by rule 28 (line 131):
+Reducing stack by rule 28 (line 132):
    $1 = nterm identifierList ()
    $2 = token TOKEN_COLON ()
    $3 = nterm type ()
@@ -230,7 +149,7 @@ identifier_lists
 Stack now 0 1 3 5 7 13 21 35 48
 Entering state 74
 Reading a token: Next token is token TOKEN_RPAR ()
-Reducing stack by rule 25 (line 127):
+Reducing stack by rule 25 (line 128):
    $1 = nterm formalParamSeq ()
 formal_parameter_list
 -> $$ = nterm formalParameterList ()
@@ -244,28 +163,329 @@ Shifting token TOKEN_COLON ()
 Entering state 126
 Reading a token: Next token is token TOKEN_ID ()
 Shifting token TOKEN_ID ()
-Entering state 150
-Reducing stack by rule 50 (line 163):
+Entering state 154
+Reducing stack by rule 49 (line 163):
    $1 = token TOKEN_ID ()
 result_type
 -> $$ = nterm resultType ()
 Stack now 0 1 3 5 7 13 21 35 48 73 93 126
-Entering state 151
+Entering state 155
 Reading a token: Next token is token TOKEN_SEMICOLON ()
 Shifting token TOKEN_SEMICOLON ()
-Entering state 171
-Reading a token: Next token is token TOKEN_FORWARD ()
-Shifting token TOKEN_FORWARD ()
-Entering state 153
-Reducing stack by rule 24 (line 125):
-   $1 = token TOKEN_FORWARD ()
+Entering state 172
+Reading a token: Next token is token TOKEN_BEGIN ()
+Reducing stack by rule 5 (line 91):
+-> $$ = nterm groupVariableDeclarations ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172
+Entering state 158
+Next token is token TOKEN_BEGIN ()
+Shifting token TOKEN_BEGIN ()
+Entering state 37
+Reading a token: Next token is token TOKEN_ID ()
+Shifting token TOKEN_ID ()
+Entering state 53
+Reading a token: Next token is token TOKEN_ASSIGN ()
+Reducing stack by rule 91 (line 218):
+component_selection_empty
+-> $$ = nterm componentSelection ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 53
+Entering state 85
+Reducing stack by rule 88 (line 215):
+   $1 = token TOKEN_ID ()
+   $2 = nterm componentSelection ()
+variable
+-> $$ = nterm variable ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37
+Entering state 62
+Next token is token TOKEN_ASSIGN ()
+Shifting token TOKEN_ASSIGN ()
+Entering state 88
+Reading a token: Next token is token TOKEN_ID ()
+Reducing stack by rule 56 (line 172):
+-> $$ = nterm groupSign ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88
+Entering state 78
+Next token is token TOKEN_ID ()
+Shifting token TOKEN_ID ()
+Entering state 100
+Reading a token: Next token is token TOKEN_EQ ()
+Reducing stack by rule 91 (line 218):
+component_selection_empty
+-> $$ = nterm componentSelection ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88 78 100
+Entering state 85
+Reducing stack by rule 88 (line 215):
+   $1 = token TOKEN_ID ()
+   $2 = nterm componentSelection ()
+variable
+-> $$ = nterm variable ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88 78
+Entering state 106
+Reducing stack by rule 83 (line 207):
+   $1 = nterm variable ()
+factor
+-> $$ = nterm factor ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88 78
+Entering state 104
+Next token is token TOKEN_EQ ()
+Reducing stack by rule 74 (line 195):
+   $1 = nterm factor ()
+term
+-> $$ = nterm term ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88 78
+Entering state 103
+Next token is token TOKEN_EQ ()
+Reducing stack by rule 67 (line 186):
+   $1 = nterm groupSign ()
+   $2 = nterm term ()
+simple_expression
+-> $$ = nterm simpleExpression ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88
+Entering state 80
+Next token is token TOKEN_EQ ()
+Shifting token TOKEN_EQ ()
+Entering state 108
+Reducing stack by rule 65 (line 183):
+   $1 = token TOKEN_EQ ()
+relational_op
+-> $$ = nterm relationalOp ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88 80
+Entering state 115
+Reading a token: Next token is token TOKEN_ID ()
+Reducing stack by rule 56 (line 172):
+-> $$ = nterm groupSign ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88 80 115
+Entering state 78
+Next token is token TOKEN_ID ()
+Shifting token TOKEN_ID ()
+Entering state 100
+Reading a token: Next token is token TOKEN_MULTIPLY ()
+Reducing stack by rule 91 (line 218):
+component_selection_empty
+-> $$ = nterm componentSelection ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88 80 115 78 100
+Entering state 85
+Reducing stack by rule 88 (line 215):
+   $1 = token TOKEN_ID ()
+   $2 = nterm componentSelection ()
+variable
+-> $$ = nterm variable ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88 80 115 78
+Entering state 106
+Reducing stack by rule 83 (line 207):
+   $1 = nterm variable ()
+factor
+-> $$ = nterm factor ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88 80 115 78
+Entering state 104
+Next token is token TOKEN_MULTIPLY ()
+Shifting token TOKEN_MULTIPLY ()
+Entering state 142
+Reducing stack by rule 77 (line 200):
+   $1 = token TOKEN_MULTIPLY ()
+mulop
+-> $$ = nterm mulOp ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88 80 115 78 104
+Entering state 144
+Reading a token: Next token is token TOKEN_LPAR ()
+Shifting token TOKEN_LPAR ()
+Entering state 102
+Reading a token: Next token is token TOKEN_ID ()
+Reducing stack by rule 56 (line 172):
+-> $$ = nterm groupSign ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88 80 115 78 104 144 102
+Entering state 78
+Next token is token TOKEN_ID ()
+Shifting token TOKEN_ID ()
+Entering state 100
+Reading a token: Next token is token TOKEN_DIV ()
+Reducing stack by rule 91 (line 218):
+component_selection_empty
+-> $$ = nterm componentSelection ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88 80 115 78 104 144 102 78 100
+Entering state 85
+Reducing stack by rule 88 (line 215):
+   $1 = token TOKEN_ID ()
+   $2 = nterm componentSelection ()
+variable
+-> $$ = nterm variable ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88 80 115 78 104 144 102 78
+Entering state 106
+Reducing stack by rule 83 (line 207):
+   $1 = nterm variable ()
+factor
+-> $$ = nterm factor ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88 80 115 78 104 144 102 78
+Entering state 104
+Next token is token TOKEN_DIV ()
+Shifting token TOKEN_DIV ()
+Entering state 140
+Reducing stack by rule 78 (line 201):
+   $1 = token TOKEN_DIV ()
+mulop
+-> $$ = nterm mulOp ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88 80 115 78 104 144 102 78 104
+Entering state 144
+Reading a token: Next token is token TOKEN_ID ()
+Shifting token TOKEN_ID ()
+Entering state 100
+Reading a token: Next token is token TOKEN_RPAR ()
+Reducing stack by rule 91 (line 218):
+component_selection_empty
+-> $$ = nterm componentSelection ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88 80 115 78 104 144 102 78 104 144 100
+Entering state 85
+Reducing stack by rule 88 (line 215):
+   $1 = token TOKEN_ID ()
+   $2 = nterm componentSelection ()
+variable
+-> $$ = nterm variable ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88 80 115 78 104 144 102 78 104 144
+Entering state 106
+Reducing stack by rule 83 (line 207):
+   $1 = nterm variable ()
+factor
+-> $$ = nterm factor ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88 80 115 78 104 144 102 78 104 144
+Entering state 167
+Reducing stack by rule 76 (line 198):
+   $1 = nterm mulOp ()
+   $2 = nterm factor ()
+-> $$ = nterm mulOpFactorList ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88 80 115 78 104 144 102 78 104
+Entering state 143
+Next token is token TOKEN_RPAR ()
+Reducing stack by rule 73 (line 194):
+   $1 = nterm factor ()
+   $2 = nterm mulOpFactorList ()
+term_more
+-> $$ = nterm term ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88 80 115 78 104 144 102 78
+Entering state 103
+Next token is token TOKEN_RPAR ()
+Reducing stack by rule 67 (line 186):
+   $1 = nterm groupSign ()
+   $2 = nterm term ()
+simple_expression
+-> $$ = nterm simpleExpression ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88 80 115 78 104 144 102
+Entering state 80
+Next token is token TOKEN_RPAR ()
+Reducing stack by rule 59 (line 176):
+-> $$ = nterm groupRelOpSimExpr ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88 80 115 78 104 144 102 80
+Entering state 114
+Reducing stack by rule 57 (line 174):
+   $1 = nterm simpleExpression ()
+   $2 = nterm groupRelOpSimExpr ()
+expression
+-> $$ = nterm expression ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88 80 115 78 104 144 102
+Entering state 133
+Next token is token TOKEN_RPAR ()
+Shifting token TOKEN_RPAR ()
+Entering state 163
+Reducing stack by rule 86 (line 210):
+   $1 = token TOKEN_LPAR ()
+   $2 = nterm expression ()
+   $3 = token TOKEN_RPAR ()
+factor
+-> $$ = nterm factor ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88 80 115 78 104 144
+Entering state 167
+Reducing stack by rule 76 (line 198):
+   $1 = nterm mulOp ()
+   $2 = nterm factor ()
+-> $$ = nterm mulOpFactorList ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88 80 115 78 104
+Entering state 143
+Reading a token: Next token is token TOKEN_END ()
+Reducing stack by rule 73 (line 194):
+   $1 = nterm factor ()
+   $2 = nterm mulOpFactorList ()
+term_more
+-> $$ = nterm term ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88 80 115 78
+Entering state 103
+Next token is token TOKEN_END ()
+Reducing stack by rule 67 (line 186):
+   $1 = nterm groupSign ()
+   $2 = nterm term ()
+simple_expression
+-> $$ = nterm simpleExpression ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88 80 115
+Entering state 146
+Reducing stack by rule 58 (line 176):
+   $1 = nterm relationalOp ()
+   $2 = nterm simpleExpression ()
+-> $$ = nterm groupRelOpSimExpr ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88 80
+Entering state 114
+Reducing stack by rule 57 (line 174):
+   $1 = nterm simpleExpression ()
+   $2 = nterm groupRelOpSimExpr ()
+expression
+-> $$ = nterm expression ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37 62 88
+Entering state 123
+Reducing stack by rule 39 (line 149):
+   $1 = nterm variable ()
+   $2 = token TOKEN_ASSIGN ()
+   $3 = nterm expression ()
+assignment_statement
+-> $$ = nterm assignmentStatement ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37
+Entering state 59
+Reducing stack by rule 36 (line 145):
+   $1 = nterm assignmentStatement ()
+simple_statement
+-> $$ = nterm simpleStatement ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37
+Entering state 58
+Reducing stack by rule 34 (line 143):
+   $1 = nterm simpleStatement ()
+-> $$ = nterm groupSimStruStatement ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37
+Entering state 57
+Reducing stack by rule 33 (line 141):
+   $1 = nterm groupSimStruStatement ()
+statement
+-> $$ = nterm statement ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37
+Entering state 56
+Reducing stack by rule 32 (line 139):
+   $1 = nterm statement ()
+statement_sequence
+-> $$ = nterm statementSequence ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158 37
+Entering state 55
+Next token is token TOKEN_END ()
+Shifting token TOKEN_END ()
+Entering state 86
+Reducing stack by rule 30 (line 136):
+   $1 = token TOKEN_BEGIN ()
+   $2 = nterm statementSequence ()
+   $3 = token TOKEN_END ()
+compound_statement
+-> $$ = nterm compoundStatement ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172 158
+Entering state 174
+Reducing stack by rule 29 (line 134):
+   $1 = nterm groupVariableDeclarations ()
+   $2 = nterm compoundStatement ()
+block
+-> $$ = nterm block ()
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172
+Entering state 160
+Reducing stack by rule 23 (line 126):
+   $1 = nterm block ()
 -> $$ = nterm groupBlockForward ()
-Stack now 0 1 3 5 7 13 21 35 48 73 93 126 151 171
-Entering state 181
+Stack now 0 1 3 5 7 13 21 35 48 73 93 126 155 172
+Entering state 182
 Reading a token: Next token is token TOKEN_SEMICOLON ()
 Shifting token TOKEN_SEMICOLON ()
-Entering state 183
-Reducing stack by rule 22 (line 120):
+Entering state 184
+Reducing stack by rule 22 (line 121):
    $1 = token TOKEN_FUNCTION ()
    $2 = token TOKEN_ID ()
    $3 = token TOKEN_LPAR ()
@@ -280,29 +500,29 @@ function_declaration
 -> $$ = nterm functionDeclaration ()
 Stack now 0 1 3 5 7 13
 Entering state 27
-Reducing stack by rule 18 (line 108):
+Reducing stack by rule 18 (line 109):
    $1 = nterm functionDeclaration ()
 sub_program_declarations
 -> $$ = nterm subprogramDeclarationList ()
 Stack now 0 1 3 5 7 13
 Entering state 25
-Reading a token: Next token is token TOKEN_PROCEDURE ()
-Shifting token TOKEN_PROCEDURE ()
-Entering state 22
+Reading a token: Next token is token TOKEN_FUNCTION ()
+Shifting token TOKEN_FUNCTION ()
+Entering state 21
 Reading a token: Next token is token TOKEN_ID ()
 Shifting token TOKEN_ID ()
-Entering state 36
+Entering state 35
 Reading a token: Next token is token TOKEN_LPAR ()
 Shifting token TOKEN_LPAR ()
-Entering state 49
+Entering state 48
 Reading a token: Next token is token TOKEN_ID ()
 Shifting token TOKEN_ID ()
 Entering state 17
-Reducing stack by rule 97 (line 220):
+Reducing stack by rule 97 (line 228):
    $1 = token TOKEN_ID ()
 identifier_list
 -> $$ = nterm identifierList ()
-Stack now 0 1 3 5 7 13 25 22 36 49
+Stack now 0 1 3 5 7 13 25 21 35 48
 Entering state 75
 Reading a token: Next token is token TOKEN_COLON ()
 Shifting token TOKEN_COLON ()
@@ -310,66 +530,472 @@ Entering state 95
 Reading a token: Next token is token TOKEN_ID ()
 Shifting token TOKEN_ID ()
 Entering state 30
-Reducing stack by rule 47 (line 160):
+Reducing stack by rule 46 (line 160):
    $1 = token TOKEN_ID ()
 type_ID
 -> $$ = nterm type ()
-Stack now 0 1 3 5 7 13 25 22 36 49 75 95
+Stack now 0 1 3 5 7 13 25 21 35 48 75 95
 Entering state 128
-Reducing stack by rule 28 (line 131):
+Reducing stack by rule 28 (line 132):
    $1 = nterm identifierList ()
    $2 = token TOKEN_COLON ()
    $3 = nterm type ()
 identifier_lists
 -> $$ = nterm formalParamSeq ()
-Stack now 0 1 3 5 7 13 25 22 36 49
+Stack now 0 1 3 5 7 13 25 21 35 48
 Entering state 74
 Reading a token: Next token is token TOKEN_RPAR ()
-Reducing stack by rule 25 (line 127):
+Reducing stack by rule 25 (line 128):
    $1 = nterm formalParamSeq ()
 formal_parameter_list
 -> $$ = nterm formalParameterList ()
-Stack now 0 1 3 5 7 13 25 22 36 49
-Entering state 76
+Stack now 0 1 3 5 7 13 25 21 35 48
+Entering state 73
 Next token is token TOKEN_RPAR ()
 Shifting token TOKEN_RPAR ()
-Entering state 96
-Reading a token: Next token is token TOKEN_SEMICOLON ()
-Shifting token TOKEN_SEMICOLON ()
-Entering state 129
-Reading a token: Next token is token TOKEN_FORWARD ()
-Shifting token TOKEN_FORWARD ()
-Entering state 153
-Reducing stack by rule 24 (line 125):
-   $1 = token TOKEN_FORWARD ()
--> $$ = nterm groupBlockForward ()
-Stack now 0 1 3 5 7 13 25 22 36 49 76 96 129
+Entering state 93
+Reading a token: Next token is token TOKEN_COLON ()
+Shifting token TOKEN_COLON ()
+Entering state 126
+Reading a token: Next token is token TOKEN_ID ()
+Shifting token TOKEN_ID ()
+Entering state 154
+Reducing stack by rule 49 (line 163):
+   $1 = token TOKEN_ID ()
+result_type
+-> $$ = nterm resultType ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126
 Entering state 155
 Reading a token: Next token is token TOKEN_SEMICOLON ()
 Shifting token TOKEN_SEMICOLON ()
+Entering state 172
+Reading a token: Next token is token TOKEN_BEGIN ()
+Reducing stack by rule 5 (line 91):
+-> $$ = nterm groupVariableDeclarations ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172
+Entering state 158
+Next token is token TOKEN_BEGIN ()
+Shifting token TOKEN_BEGIN ()
+Entering state 37
+Reading a token: Next token is token TOKEN_ID ()
+Shifting token TOKEN_ID ()
+Entering state 53
+Reading a token: Next token is token TOKEN_ASSIGN ()
+Reducing stack by rule 91 (line 218):
+component_selection_empty
+-> $$ = nterm componentSelection ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 53
+Entering state 85
+Reducing stack by rule 88 (line 215):
+   $1 = token TOKEN_ID ()
+   $2 = nterm componentSelection ()
+variable
+-> $$ = nterm variable ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37
+Entering state 62
+Next token is token TOKEN_ASSIGN ()
+Shifting token TOKEN_ASSIGN ()
+Entering state 88
+Reading a token: Next token is token TOKEN_LPAR ()
+Reducing stack by rule 56 (line 172):
+-> $$ = nterm groupSign ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88
+Entering state 78
+Next token is token TOKEN_LPAR ()
+Shifting token TOKEN_LPAR ()
+Entering state 102
+Reading a token: Next token is token TOKEN_LPAR ()
+Reducing stack by rule 56 (line 172):
+-> $$ = nterm groupSign ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102
+Entering state 78
+Next token is token TOKEN_LPAR ()
+Shifting token TOKEN_LPAR ()
+Entering state 102
+Reading a token: Next token is token TOKEN_LPAR ()
+Reducing stack by rule 56 (line 172):
+-> $$ = nterm groupSign ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102 78 102
+Entering state 78
+Next token is token TOKEN_LPAR ()
+Shifting token TOKEN_LPAR ()
+Entering state 102
+Reading a token: Next token is token TOKEN_ID ()
+Reducing stack by rule 56 (line 172):
+-> $$ = nterm groupSign ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102 78 102 78 102
+Entering state 78
+Next token is token TOKEN_ID ()
+Shifting token TOKEN_ID ()
+Entering state 100
+Reading a token: Next token is token TOKEN_MULTIPLY ()
+Reducing stack by rule 91 (line 218):
+component_selection_empty
+-> $$ = nterm componentSelection ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102 78 102 78 102 78 100
+Entering state 85
+Reducing stack by rule 88 (line 215):
+   $1 = token TOKEN_ID ()
+   $2 = nterm componentSelection ()
+variable
+-> $$ = nterm variable ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102 78 102 78 102 78
+Entering state 106
+Reducing stack by rule 83 (line 207):
+   $1 = nterm variable ()
+factor
+-> $$ = nterm factor ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102 78 102 78 102 78
+Entering state 104
+Next token is token TOKEN_MULTIPLY ()
+Shifting token TOKEN_MULTIPLY ()
+Entering state 142
+Reducing stack by rule 77 (line 200):
+   $1 = token TOKEN_MULTIPLY ()
+mulop
+-> $$ = nterm mulOp ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102 78 102 78 102 78 104
+Entering state 144
+Reading a token: Next token is token TOKEN_INT ()
+Shifting token TOKEN_INT ()
+Entering state 101
+Reducing stack by rule 81 (line 205):
+   $1 = token TOKEN_INT ()
+factor
+-> $$ = nterm factor ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102 78 102 78 102 78 104 144
+Entering state 167
+Reducing stack by rule 76 (line 198):
+   $1 = nterm mulOp ()
+   $2 = nterm factor ()
+-> $$ = nterm mulOpFactorList ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102 78 102 78 102 78 104
+Entering state 143
+Reading a token: Next token is token TOKEN_RPAR ()
+Reducing stack by rule 73 (line 194):
+   $1 = nterm factor ()
+   $2 = nterm mulOpFactorList ()
+term_more
+-> $$ = nterm term ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102 78 102 78 102 78
+Entering state 103
+Next token is token TOKEN_RPAR ()
+Reducing stack by rule 67 (line 186):
+   $1 = nterm groupSign ()
+   $2 = nterm term ()
+simple_expression
+-> $$ = nterm simpleExpression ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102 78 102 78 102
+Entering state 80
+Next token is token TOKEN_RPAR ()
+Reducing stack by rule 59 (line 176):
+-> $$ = nterm groupRelOpSimExpr ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102 78 102 78 102 80
+Entering state 114
+Reducing stack by rule 57 (line 174):
+   $1 = nterm simpleExpression ()
+   $2 = nterm groupRelOpSimExpr ()
+expression
+-> $$ = nterm expression ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102 78 102 78 102
+Entering state 133
+Next token is token TOKEN_RPAR ()
+Shifting token TOKEN_RPAR ()
+Entering state 163
+Reducing stack by rule 86 (line 210):
+   $1 = token TOKEN_LPAR ()
+   $2 = nterm expression ()
+   $3 = token TOKEN_RPAR ()
+factor
+-> $$ = nterm factor ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102 78 102 78
+Entering state 104
+Reading a token: Next token is token TOKEN_PLUS ()
+Reducing stack by rule 74 (line 195):
+   $1 = nterm factor ()
+term
+-> $$ = nterm term ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102 78 102 78
+Entering state 103
+Next token is token TOKEN_PLUS ()
+Shifting token TOKEN_PLUS ()
+Entering state 135
+Reducing stack by rule 70 (line 190):
+   $1 = token TOKEN_PLUS ()
+addop
+-> $$ = nterm addOp ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102 78 102 78 103
+Entering state 138
+Reading a token: Next token is token TOKEN_INT ()
+Shifting token TOKEN_INT ()
+Entering state 101
+Reducing stack by rule 81 (line 205):
+   $1 = token TOKEN_INT ()
+factor
+-> $$ = nterm factor ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102 78 102 78 103 138
+Entering state 104
+Reading a token: Next token is token TOKEN_RPAR ()
+Reducing stack by rule 74 (line 195):
+   $1 = nterm factor ()
+term
+-> $$ = nterm term ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102 78 102 78 103 138
+Entering state 165
+Reducing stack by rule 69 (line 188):
+   $1 = nterm addOp ()
+   $2 = nterm term ()
+-> $$ = nterm addOpTermList ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102 78 102 78 103
+Entering state 137
+Next token is token TOKEN_RPAR ()
+Reducing stack by rule 66 (line 185):
+   $1 = nterm groupSign ()
+   $2 = nterm term ()
+   $3 = nterm addOpTermList ()
+simple_expression_more
+-> $$ = nterm simpleExpression ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102 78 102
+Entering state 80
+Next token is token TOKEN_RPAR ()
+Reducing stack by rule 59 (line 176):
+-> $$ = nterm groupRelOpSimExpr ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102 78 102 80
+Entering state 114
+Reducing stack by rule 57 (line 174):
+   $1 = nterm simpleExpression ()
+   $2 = nterm groupRelOpSimExpr ()
+expression
+-> $$ = nterm expression ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102 78 102
+Entering state 133
+Next token is token TOKEN_RPAR ()
+Shifting token TOKEN_RPAR ()
+Entering state 163
+Reducing stack by rule 86 (line 210):
+   $1 = token TOKEN_LPAR ()
+   $2 = nterm expression ()
+   $3 = token TOKEN_RPAR ()
+factor
+-> $$ = nterm factor ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102 78
+Entering state 104
+Reading a token: Next token is token TOKEN_DIV ()
+Shifting token TOKEN_DIV ()
+Entering state 140
+Reducing stack by rule 78 (line 201):
+   $1 = token TOKEN_DIV ()
+mulop
+-> $$ = nterm mulOp ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102 78 104
+Entering state 144
+Reading a token: Next token is token TOKEN_ID ()
+Shifting token TOKEN_ID ()
+Entering state 100
+Reading a token: Next token is token TOKEN_RPAR ()
+Reducing stack by rule 91 (line 218):
+component_selection_empty
+-> $$ = nterm componentSelection ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102 78 104 144 100
+Entering state 85
+Reducing stack by rule 88 (line 215):
+   $1 = token TOKEN_ID ()
+   $2 = nterm componentSelection ()
+variable
+-> $$ = nterm variable ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102 78 104 144
+Entering state 106
+Reducing stack by rule 83 (line 207):
+   $1 = nterm variable ()
+factor
+-> $$ = nterm factor ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102 78 104 144
+Entering state 167
+Reducing stack by rule 76 (line 198):
+   $1 = nterm mulOp ()
+   $2 = nterm factor ()
+-> $$ = nterm mulOpFactorList ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102 78 104
+Entering state 143
+Next token is token TOKEN_RPAR ()
+Reducing stack by rule 73 (line 194):
+   $1 = nterm factor ()
+   $2 = nterm mulOpFactorList ()
+term_more
+-> $$ = nterm term ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102 78
+Entering state 103
+Next token is token TOKEN_RPAR ()
+Reducing stack by rule 67 (line 186):
+   $1 = nterm groupSign ()
+   $2 = nterm term ()
+simple_expression
+-> $$ = nterm simpleExpression ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102
+Entering state 80
+Next token is token TOKEN_RPAR ()
+Reducing stack by rule 59 (line 176):
+-> $$ = nterm groupRelOpSimExpr ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102 80
+Entering state 114
+Reducing stack by rule 57 (line 174):
+   $1 = nterm simpleExpression ()
+   $2 = nterm groupRelOpSimExpr ()
+expression
+-> $$ = nterm expression ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 102
+Entering state 133
+Next token is token TOKEN_RPAR ()
+Shifting token TOKEN_RPAR ()
+Entering state 163
+Reducing stack by rule 86 (line 210):
+   $1 = token TOKEN_LPAR ()
+   $2 = nterm expression ()
+   $3 = token TOKEN_RPAR ()
+factor
+-> $$ = nterm factor ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78
+Entering state 104
+Reading a token: Next token is token TOKEN_MINUS ()
+Reducing stack by rule 74 (line 195):
+   $1 = nterm factor ()
+term
+-> $$ = nterm term ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78
+Entering state 103
+Next token is token TOKEN_MINUS ()
+Shifting token TOKEN_MINUS ()
+Entering state 136
+Reducing stack by rule 71 (line 191):
+   $1 = token TOKEN_MINUS ()
+addop
+-> $$ = nterm addOp ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 103
+Entering state 138
+Reading a token: Next token is token TOKEN_INT ()
+Shifting token TOKEN_INT ()
+Entering state 101
+Reducing stack by rule 81 (line 205):
+   $1 = token TOKEN_INT ()
+factor
+-> $$ = nterm factor ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 103 138
+Entering state 104
+Reading a token: Next token is token TOKEN_END ()
+Reducing stack by rule 74 (line 195):
+   $1 = nterm factor ()
+term
+-> $$ = nterm term ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 103 138
+Entering state 165
+Reducing stack by rule 69 (line 188):
+   $1 = nterm addOp ()
+   $2 = nterm term ()
+-> $$ = nterm addOpTermList ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 78 103
+Entering state 137
+Next token is token TOKEN_END ()
+Reducing stack by rule 66 (line 185):
+   $1 = nterm groupSign ()
+   $2 = nterm term ()
+   $3 = nterm addOpTermList ()
+simple_expression_more
+-> $$ = nterm simpleExpression ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88
+Entering state 80
+Next token is token TOKEN_END ()
+Reducing stack by rule 59 (line 176):
+-> $$ = nterm groupRelOpSimExpr ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88 80
+Entering state 114
+Reducing stack by rule 57 (line 174):
+   $1 = nterm simpleExpression ()
+   $2 = nterm groupRelOpSimExpr ()
+expression
+-> $$ = nterm expression ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37 62 88
+Entering state 123
+Reducing stack by rule 39 (line 149):
+   $1 = nterm variable ()
+   $2 = token TOKEN_ASSIGN ()
+   $3 = nterm expression ()
+assignment_statement
+-> $$ = nterm assignmentStatement ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37
+Entering state 59
+Reducing stack by rule 36 (line 145):
+   $1 = nterm assignmentStatement ()
+simple_statement
+-> $$ = nterm simpleStatement ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37
+Entering state 58
+Reducing stack by rule 34 (line 143):
+   $1 = nterm simpleStatement ()
+-> $$ = nterm groupSimStruStatement ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37
+Entering state 57
+Reducing stack by rule 33 (line 141):
+   $1 = nterm groupSimStruStatement ()
+statement
+-> $$ = nterm statement ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37
+Entering state 56
+Reducing stack by rule 32 (line 139):
+   $1 = nterm statement ()
+statement_sequence
+-> $$ = nterm statementSequence ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158 37
+Entering state 55
+Next token is token TOKEN_END ()
+Shifting token TOKEN_END ()
+Entering state 86
+Reducing stack by rule 30 (line 136):
+   $1 = token TOKEN_BEGIN ()
+   $2 = nterm statementSequence ()
+   $3 = token TOKEN_END ()
+compound_statement
+-> $$ = nterm compoundStatement ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172 158
 Entering state 174
-Reducing stack by rule 21 (line 116):
-   $1 = token TOKEN_PROCEDURE ()
+Reducing stack by rule 29 (line 134):
+   $1 = nterm groupVariableDeclarations ()
+   $2 = nterm compoundStatement ()
+block
+-> $$ = nterm block ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172
+Entering state 160
+Reducing stack by rule 23 (line 126):
+   $1 = nterm block ()
+-> $$ = nterm groupBlockForward ()
+Stack now 0 1 3 5 7 13 25 21 35 48 73 93 126 155 172
+Entering state 182
+Reading a token: Next token is token TOKEN_SEMICOLON ()
+Shifting token TOKEN_SEMICOLON ()
+Entering state 184
+Reducing stack by rule 22 (line 121):
+   $1 = token TOKEN_FUNCTION ()
    $2 = token TOKEN_ID ()
    $3 = token TOKEN_LPAR ()
    $4 = nterm formalParameterList ()
    $5 = token TOKEN_RPAR ()
-   $6 = token TOKEN_SEMICOLON ()
-   $7 = nterm groupBlockForward ()
+   $6 = token TOKEN_COLON ()
+   $7 = nterm resultType ()
    $8 = token TOKEN_SEMICOLON ()
-procedure_declaration
--> $$ = nterm procedureDeclaration ()
+   $9 = nterm groupBlockForward ()
+   $10 = token TOKEN_SEMICOLON ()
+function_declaration
+-> $$ = nterm functionDeclaration ()
 Stack now 0 1 3 5 7 13 25
-Entering state 39
-Reducing stack by rule 15 (line 105):
+Entering state 40
+Reducing stack by rule 16 (line 107):
    $1 = nterm subprogramDeclarationList ()
-   $2 = nterm procedureDeclaration ()
+   $2 = nterm functionDeclaration ()
 sub_program_declarations_more
 -> $$ = nterm subprogramDeclarationList ()
 Stack now 0 1 3 5 7 13
 Entering state 25
 Reading a token: Next token is token TOKEN_BEGIN ()
-Reducing stack by rule 14 (line 103):
+Reducing stack by rule 14 (line 104):
    $1 = nterm subprogramDeclarationList ()
 -> $$ = nterm subprogramDeclarations ()
 Stack now 0 1 3 5 7 13
@@ -386,12 +1012,12 @@ Reading a token: Next token is token TOKEN_ID ()
 Shifting token TOKEN_ID ()
 Entering state 53
 Reading a token: Next token is token TOKEN_ASSIGN ()
-Reducing stack by rule 91 (line 210):
+Reducing stack by rule 91 (line 218):
 component_selection_empty
 -> $$ = nterm componentSelection ()
 Stack now 0 1 3 5 7 13 23 37 53
 Entering state 85
-Reducing stack by rule 88 (line 207):
+Reducing stack by rule 88 (line 215):
    $1 = token TOKEN_ID ()
    $2 = nterm componentSelection ()
 variable
@@ -401,53 +1027,69 @@ Entering state 62
 Next token is token TOKEN_ASSIGN ()
 Shifting token TOKEN_ASSIGN ()
 Entering state 88
-Reading a token: Next token is token TOKEN_INT ()
-Reducing stack by rule 57 (line 172):
+Reading a token: Next token is token TOKEN_ID ()
+Reducing stack by rule 56 (line 172):
 -> $$ = nterm groupSign ()
 Stack now 0 1 3 5 7 13 23 37 62 88
 Entering state 78
-Next token is token TOKEN_INT ()
-Shifting token TOKEN_INT ()
-Entering state 101
-Reducing stack by rule 81 (line 198):
-   $1 = token TOKEN_INT ()
+Next token is token TOKEN_ID ()
+Shifting token TOKEN_ID ()
+Entering state 100
+Reading a token: Next token is token TOKEN_LPAR ()
+Shifting token TOKEN_LPAR ()
+Entering state 132
+Reading a token: Next token is token TOKEN_RPAR ()
+Reducing stack by rule 93 (line 221):
+actual_parameter_list_empty
+-> $$ = nterm actualParameterList ()
+Stack now 0 1 3 5 7 13 23 37 62 88 78 100 132
+Entering state 162
+Next token is token TOKEN_RPAR ()
+Shifting token TOKEN_RPAR ()
+Entering state 177
+Reducing stack by rule 87 (line 212):
+   $1 = token TOKEN_ID ()
+   $2 = token TOKEN_LPAR ()
+   $3 = nterm actualParameterList ()
+   $4 = token TOKEN_RPAR ()
+function_reference
+-> $$ = nterm functionReference ()
+Stack now 0 1 3 5 7 13 23 37 62 88 78
+Entering state 105
+Reducing stack by rule 84 (line 208):
+   $1 = nterm functionReference ()
 factor
 -> $$ = nterm factor ()
 Stack now 0 1 3 5 7 13 23 37 62 88 78
 Entering state 104
 Reading a token: Next token is token TOKEN_SEMICOLON ()
-Reducing stack by rule 74 (line 188):
+Reducing stack by rule 74 (line 195):
    $1 = nterm factor ()
 term
 -> $$ = nterm term ()
 Stack now 0 1 3 5 7 13 23 37 62 88 78
 Entering state 103
-Reducing stack by rule 69 (line 183):
--> $$ = nterm addOpTermList ()
-Stack now 0 1 3 5 7 13 23 37 62 88 78 103
-Entering state 134
 Next token is token TOKEN_SEMICOLON ()
-Reducing stack by rule 67 (line 181):
+Reducing stack by rule 67 (line 186):
    $1 = nterm groupSign ()
    $2 = nterm term ()
-   $3 = nterm addOpTermList ()
 simple_expression
 -> $$ = nterm simpleExpression ()
 Stack now 0 1 3 5 7 13 23 37 62 88
 Entering state 80
 Next token is token TOKEN_SEMICOLON ()
-Reducing stack by rule 60 (line 176):
+Reducing stack by rule 59 (line 176):
 -> $$ = nterm groupRelOpSimExpr ()
 Stack now 0 1 3 5 7 13 23 37 62 88 80
 Entering state 114
-Reducing stack by rule 58 (line 174):
+Reducing stack by rule 57 (line 174):
    $1 = nterm simpleExpression ()
    $2 = nterm groupRelOpSimExpr ()
 expression
 -> $$ = nterm expression ()
 Stack now 0 1 3 5 7 13 23 37 62 88
 Entering state 123
-Reducing stack by rule 39 (line 148):
+Reducing stack by rule 39 (line 149):
    $1 = nterm variable ()
    $2 = token TOKEN_ASSIGN ()
    $3 = nterm expression ()
@@ -455,24 +1097,24 @@ assignment_statement
 -> $$ = nterm assignmentStatement ()
 Stack now 0 1 3 5 7 13 23 37
 Entering state 59
-Reducing stack by rule 36 (line 144):
+Reducing stack by rule 36 (line 145):
    $1 = nterm assignmentStatement ()
 simple_statement
 -> $$ = nterm simpleStatement ()
 Stack now 0 1 3 5 7 13 23 37
 Entering state 58
-Reducing stack by rule 34 (line 142):
+Reducing stack by rule 34 (line 143):
    $1 = nterm simpleStatement ()
 -> $$ = nterm groupSimStruStatement ()
 Stack now 0 1 3 5 7 13 23 37
 Entering state 57
-Reducing stack by rule 33 (line 140):
+Reducing stack by rule 33 (line 141):
    $1 = nterm groupSimStruStatement ()
 statement
 -> $$ = nterm statement ()
 Stack now 0 1 3 5 7 13 23 37
 Entering state 56
-Reducing stack by rule 32 (line 138):
+Reducing stack by rule 32 (line 139):
    $1 = nterm statement ()
 statement_sequence
 -> $$ = nterm statementSequence ()
@@ -485,12 +1127,12 @@ Reading a token: Next token is token TOKEN_ID ()
 Shifting token TOKEN_ID ()
 Entering state 53
 Reading a token: Next token is token TOKEN_ASSIGN ()
-Reducing stack by rule 91 (line 210):
+Reducing stack by rule 91 (line 218):
 component_selection_empty
 -> $$ = nterm componentSelection ()
 Stack now 0 1 3 5 7 13 23 37 55 87 53
 Entering state 85
-Reducing stack by rule 88 (line 207):
+Reducing stack by rule 88 (line 215):
    $1 = token TOKEN_ID ()
    $2 = nterm componentSelection ()
 variable
@@ -501,65 +1143,68 @@ Next token is token TOKEN_ASSIGN ()
 Shifting token TOKEN_ASSIGN ()
 Entering state 88
 Reading a token: Next token is token TOKEN_ID ()
-Reducing stack by rule 57 (line 172):
+Reducing stack by rule 56 (line 172):
 -> $$ = nterm groupSign ()
 Stack now 0 1 3 5 7 13 23 37 55 87 62 88
 Entering state 78
 Next token is token TOKEN_ID ()
 Shifting token TOKEN_ID ()
 Entering state 100
-Reading a token: Next token is token TOKEN_SEMICOLON ()
-Reducing stack by rule 91 (line 210):
-component_selection_empty
--> $$ = nterm componentSelection ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88 78 100
-Entering state 85
-Reducing stack by rule 88 (line 207):
+Reading a token: Next token is token TOKEN_LPAR ()
+Shifting token TOKEN_LPAR ()
+Entering state 132
+Reading a token: Next token is token TOKEN_RPAR ()
+Reducing stack by rule 93 (line 221):
+actual_parameter_list_empty
+-> $$ = nterm actualParameterList ()
+Stack now 0 1 3 5 7 13 23 37 55 87 62 88 78 100 132
+Entering state 162
+Next token is token TOKEN_RPAR ()
+Shifting token TOKEN_RPAR ()
+Entering state 177
+Reducing stack by rule 87 (line 212):
    $1 = token TOKEN_ID ()
-   $2 = nterm componentSelection ()
-variable
--> $$ = nterm variable ()
+   $2 = token TOKEN_LPAR ()
+   $3 = nterm actualParameterList ()
+   $4 = token TOKEN_RPAR ()
+function_reference
+-> $$ = nterm functionReference ()
 Stack now 0 1 3 5 7 13 23 37 55 87 62 88 78
-Entering state 106
-Reducing stack by rule 83 (line 200):
-   $1 = nterm variable ()
+Entering state 105
+Reducing stack by rule 84 (line 208):
+   $1 = nterm functionReference ()
 factor
 -> $$ = nterm factor ()
 Stack now 0 1 3 5 7 13 23 37 55 87 62 88 78
 Entering state 104
-Next token is token TOKEN_SEMICOLON ()
-Reducing stack by rule 74 (line 188):
+Reading a token: Next token is token TOKEN_SEMICOLON ()
+Reducing stack by rule 74 (line 195):
    $1 = nterm factor ()
 term
 -> $$ = nterm term ()
 Stack now 0 1 3 5 7 13 23 37 55 87 62 88 78
 Entering state 103
-Reducing stack by rule 69 (line 183):
--> $$ = nterm addOpTermList ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88 78 103
-Entering state 134
 Next token is token TOKEN_SEMICOLON ()
-Reducing stack by rule 67 (line 181):
+Reducing stack by rule 67 (line 186):
    $1 = nterm groupSign ()
    $2 = nterm term ()
-   $3 = nterm addOpTermList ()
 simple_expression
 -> $$ = nterm simpleExpression ()
 Stack now 0 1 3 5 7 13 23 37 55 87 62 88
 Entering state 80
 Next token is token TOKEN_SEMICOLON ()
-Reducing stack by rule 60 (line 176):
+Reducing stack by rule 59 (line 176):
 -> $$ = nterm groupRelOpSimExpr ()
 Stack now 0 1 3 5 7 13 23 37 55 87 62 88 80
 Entering state 114
-Reducing stack by rule 58 (line 174):
+Reducing stack by rule 57 (line 174):
    $1 = nterm simpleExpression ()
    $2 = nterm groupRelOpSimExpr ()
 expression
 -> $$ = nterm expression ()
 Stack now 0 1 3 5 7 13 23 37 55 87 62 88
 Entering state 123
-Reducing stack by rule 39 (line 148):
+Reducing stack by rule 39 (line 149):
    $1 = nterm variable ()
    $2 = token TOKEN_ASSIGN ()
    $3 = nterm expression ()
@@ -567,24 +1212,24 @@ assignment_statement
 -> $$ = nterm assignmentStatement ()
 Stack now 0 1 3 5 7 13 23 37 55 87
 Entering state 59
-Reducing stack by rule 36 (line 144):
+Reducing stack by rule 36 (line 145):
    $1 = nterm assignmentStatement ()
 simple_statement
 -> $$ = nterm simpleStatement ()
 Stack now 0 1 3 5 7 13 23 37 55 87
 Entering state 58
-Reducing stack by rule 34 (line 142):
+Reducing stack by rule 34 (line 143):
    $1 = nterm simpleStatement ()
 -> $$ = nterm groupSimStruStatement ()
 Stack now 0 1 3 5 7 13 23 37 55 87
 Entering state 57
-Reducing stack by rule 33 (line 140):
+Reducing stack by rule 33 (line 141):
    $1 = nterm groupSimStruStatement ()
 statement
 -> $$ = nterm statement ()
 Stack now 0 1 3 5 7 13 23 37 55 87
 Entering state 122
-Reducing stack by rule 31 (line 137):
+Reducing stack by rule 31 (line 138):
    $1 = nterm statementSequence ()
    $2 = token TOKEN_SEMICOLON ()
    $3 = nterm statement ()
@@ -595,713 +1240,536 @@ Entering state 55
 Next token is token TOKEN_SEMICOLON ()
 Shifting token TOKEN_SEMICOLON ()
 Entering state 87
+Reading a token: Next token is token TOKEN_FOR ()
+Shifting token TOKEN_FOR ()
+Entering state 50
 Reading a token: Next token is token TOKEN_ID ()
 Shifting token TOKEN_ID ()
-Entering state 53
+Entering state 77
 Reading a token: Next token is token TOKEN_ASSIGN ()
-Reducing stack by rule 91 (line 210):
-component_selection_empty
--> $$ = nterm componentSelection ()
-Stack now 0 1 3 5 7 13 23 37 55 87 53
-Entering state 85
-Reducing stack by rule 88 (line 207):
-   $1 = token TOKEN_ID ()
-   $2 = nterm componentSelection ()
-variable
--> $$ = nterm variable ()
-Stack now 0 1 3 5 7 13 23 37 55 87
-Entering state 62
-Next token is token TOKEN_ASSIGN ()
 Shifting token TOKEN_ASSIGN ()
-Entering state 88
-Reading a token: Next token is token TOKEN_ID ()
-Reducing stack by rule 57 (line 172):
--> $$ = nterm groupSign ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88
-Entering state 78
-Next token is token TOKEN_ID ()
-Shifting token TOKEN_ID ()
-Entering state 100
-Reading a token: Next token is token TOKEN_SEMICOLON ()
-Reducing stack by rule 91 (line 210):
-component_selection_empty
--> $$ = nterm componentSelection ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88 78 100
-Entering state 85
-Reducing stack by rule 88 (line 207):
-   $1 = token TOKEN_ID ()
-   $2 = nterm componentSelection ()
-variable
--> $$ = nterm variable ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88 78
-Entering state 106
-Reducing stack by rule 83 (line 200):
-   $1 = nterm variable ()
-factor
--> $$ = nterm factor ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88 78
-Entering state 104
-Next token is token TOKEN_SEMICOLON ()
-Reducing stack by rule 74 (line 188):
-   $1 = nterm factor ()
-term
--> $$ = nterm term ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88 78
-Entering state 103
-Reducing stack by rule 69 (line 183):
--> $$ = nterm addOpTermList ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88 78 103
-Entering state 134
-Next token is token TOKEN_SEMICOLON ()
-Reducing stack by rule 67 (line 181):
-   $1 = nterm groupSign ()
-   $2 = nterm term ()
-   $3 = nterm addOpTermList ()
-simple_expression
--> $$ = nterm simpleExpression ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88
-Entering state 80
-Next token is token TOKEN_SEMICOLON ()
-Reducing stack by rule 60 (line 176):
--> $$ = nterm groupRelOpSimExpr ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88 80
-Entering state 114
-Reducing stack by rule 58 (line 174):
-   $1 = nterm simpleExpression ()
-   $2 = nterm groupRelOpSimExpr ()
-expression
--> $$ = nterm expression ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88
-Entering state 123
-Reducing stack by rule 39 (line 148):
-   $1 = nterm variable ()
-   $2 = token TOKEN_ASSIGN ()
-   $3 = nterm expression ()
-assignment_statement
--> $$ = nterm assignmentStatement ()
-Stack now 0 1 3 5 7 13 23 37 55 87
-Entering state 59
-Reducing stack by rule 36 (line 144):
-   $1 = nterm assignmentStatement ()
-simple_statement
--> $$ = nterm simpleStatement ()
-Stack now 0 1 3 5 7 13 23 37 55 87
-Entering state 58
-Reducing stack by rule 34 (line 142):
-   $1 = nterm simpleStatement ()
--> $$ = nterm groupSimStruStatement ()
-Stack now 0 1 3 5 7 13 23 37 55 87
-Entering state 57
-Reducing stack by rule 33 (line 140):
-   $1 = nterm groupSimStruStatement ()
-statement
--> $$ = nterm statement ()
-Stack now 0 1 3 5 7 13 23 37 55 87
-Entering state 122
-Reducing stack by rule 31 (line 137):
-   $1 = nterm statementSequence ()
-   $2 = token TOKEN_SEMICOLON ()
-   $3 = nterm statement ()
-statement_sequence_more
--> $$ = nterm statementSequence ()
-Stack now 0 1 3 5 7 13 23 37
-Entering state 55
-Next token is token TOKEN_SEMICOLON ()
-Shifting token TOKEN_SEMICOLON ()
-Entering state 87
-Reading a token: Next token is token TOKEN_ID ()
-Shifting token TOKEN_ID ()
-Entering state 53
-Reading a token: Next token is token TOKEN_ASSIGN ()
-Reducing stack by rule 91 (line 210):
-component_selection_empty
--> $$ = nterm componentSelection ()
-Stack now 0 1 3 5 7 13 23 37 55 87 53
-Entering state 85
-Reducing stack by rule 88 (line 207):
-   $1 = token TOKEN_ID ()
-   $2 = nterm componentSelection ()
-variable
--> $$ = nterm variable ()
-Stack now 0 1 3 5 7 13 23 37 55 87
-Entering state 62
-Next token is token TOKEN_ASSIGN ()
-Shifting token TOKEN_ASSIGN ()
-Entering state 88
+Entering state 97
 Reading a token: Next token is token TOKEN_INT ()
-Reducing stack by rule 57 (line 172):
+Reducing stack by rule 56 (line 172):
 -> $$ = nterm groupSign ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97
 Entering state 78
 Next token is token TOKEN_INT ()
 Shifting token TOKEN_INT ()
 Entering state 101
-Reducing stack by rule 81 (line 198):
+Reducing stack by rule 81 (line 205):
    $1 = token TOKEN_INT ()
 factor
 -> $$ = nterm factor ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88 78
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 78
 Entering state 104
-Reading a token: Next token is token TOKEN_SEMICOLON ()
-Reducing stack by rule 74 (line 188):
+Reading a token: Next token is token TOKEN_TO ()
+Reducing stack by rule 74 (line 195):
    $1 = nterm factor ()
 term
 -> $$ = nterm term ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88 78
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 78
 Entering state 103
-Reducing stack by rule 69 (line 183):
--> $$ = nterm addOpTermList ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88 78 103
-Entering state 134
-Next token is token TOKEN_SEMICOLON ()
-Reducing stack by rule 67 (line 181):
+Next token is token TOKEN_TO ()
+Reducing stack by rule 67 (line 186):
    $1 = nterm groupSign ()
    $2 = nterm term ()
-   $3 = nterm addOpTermList ()
 simple_expression
 -> $$ = nterm simpleExpression ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97
 Entering state 80
-Next token is token TOKEN_SEMICOLON ()
-Reducing stack by rule 60 (line 176):
+Next token is token TOKEN_TO ()
+Reducing stack by rule 59 (line 176):
 -> $$ = nterm groupRelOpSimExpr ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88 80
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 80
 Entering state 114
-Reducing stack by rule 58 (line 174):
+Reducing stack by rule 57 (line 174):
    $1 = nterm simpleExpression ()
    $2 = nterm groupRelOpSimExpr ()
 expression
 -> $$ = nterm expression ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88
-Entering state 123
-Reducing stack by rule 39 (line 148):
-   $1 = nterm variable ()
-   $2 = token TOKEN_ASSIGN ()
-   $3 = nterm expression ()
-assignment_statement
--> $$ = nterm assignmentStatement ()
-Stack now 0 1 3 5 7 13 23 37 55 87
-Entering state 59
-Reducing stack by rule 36 (line 144):
-   $1 = nterm assignmentStatement ()
-simple_statement
--> $$ = nterm simpleStatement ()
-Stack now 0 1 3 5 7 13 23 37 55 87
-Entering state 58
-Reducing stack by rule 34 (line 142):
-   $1 = nterm simpleStatement ()
--> $$ = nterm groupSimStruStatement ()
-Stack now 0 1 3 5 7 13 23 37 55 87
-Entering state 57
-Reducing stack by rule 33 (line 140):
-   $1 = nterm groupSimStruStatement ()
-statement
--> $$ = nterm statement ()
-Stack now 0 1 3 5 7 13 23 37 55 87
-Entering state 122
-Reducing stack by rule 31 (line 137):
-   $1 = nterm statementSequence ()
-   $2 = token TOKEN_SEMICOLON ()
-   $3 = nterm statement ()
-statement_sequence_more
--> $$ = nterm statementSequence ()
-Stack now 0 1 3 5 7 13 23 37
-Entering state 55
-Next token is token TOKEN_SEMICOLON ()
-Shifting token TOKEN_SEMICOLON ()
-Entering state 87
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97
+Entering state 130
+Next token is token TOKEN_TO ()
+Shifting token TOKEN_TO ()
+Entering state 161
 Reading a token: Next token is token TOKEN_ID ()
+Reducing stack by rule 56 (line 172):
+-> $$ = nterm groupSign ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161
+Entering state 78
+Next token is token TOKEN_ID ()
 Shifting token TOKEN_ID ()
-Entering state 53
-Reading a token: Next token is token TOKEN_ASSIGN ()
-Reducing stack by rule 91 (line 210):
+Entering state 100
+Reading a token: Next token is token TOKEN_DO ()
+Reducing stack by rule 91 (line 218):
 component_selection_empty
 -> $$ = nterm componentSelection ()
-Stack now 0 1 3 5 7 13 23 37 55 87 53
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 78 100
 Entering state 85
-Reducing stack by rule 88 (line 207):
+Reducing stack by rule 88 (line 215):
    $1 = token TOKEN_ID ()
    $2 = nterm componentSelection ()
 variable
 -> $$ = nterm variable ()
-Stack now 0 1 3 5 7 13 23 37 55 87
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 78
+Entering state 106
+Reducing stack by rule 83 (line 207):
+   $1 = nterm variable ()
+factor
+-> $$ = nterm factor ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 78
+Entering state 104
+Next token is token TOKEN_DO ()
+Reducing stack by rule 74 (line 195):
+   $1 = nterm factor ()
+term
+-> $$ = nterm term ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 78
+Entering state 103
+Next token is token TOKEN_DO ()
+Reducing stack by rule 67 (line 186):
+   $1 = nterm groupSign ()
+   $2 = nterm term ()
+simple_expression
+-> $$ = nterm simpleExpression ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161
+Entering state 80
+Next token is token TOKEN_DO ()
+Reducing stack by rule 59 (line 176):
+-> $$ = nterm groupRelOpSimExpr ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 80
+Entering state 114
+Reducing stack by rule 57 (line 174):
+   $1 = nterm simpleExpression ()
+   $2 = nterm groupRelOpSimExpr ()
+expression
+-> $$ = nterm expression ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161
+Entering state 176
+Next token is token TOKEN_DO ()
+Shifting token TOKEN_DO ()
+Entering state 183
+Reading a token: Next token is token TOKEN_BEGIN ()
+Shifting token TOKEN_BEGIN ()
+Entering state 37
+Reading a token: Next token is token TOKEN_IF ()
+Shifting token TOKEN_IF ()
+Entering state 51
+Reading a token: Next token is token TOKEN_ID ()
+Reducing stack by rule 56 (line 172):
+-> $$ = nterm groupSign ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51
+Entering state 78
+Next token is token TOKEN_ID ()
+Shifting token TOKEN_ID ()
+Entering state 100
+Reading a token: Next token is token TOKEN_LPAR ()
+Shifting token TOKEN_LPAR ()
+Entering state 132
+Reading a token: Next token is token TOKEN_ID ()
+Reducing stack by rule 56 (line 172):
+-> $$ = nterm groupSign ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 78 100 132
+Entering state 78
+Next token is token TOKEN_ID ()
+Shifting token TOKEN_ID ()
+Entering state 100
+Reading a token: Next token is token TOKEN_COMMAS ()
+Reducing stack by rule 91 (line 218):
+component_selection_empty
+-> $$ = nterm componentSelection ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 78 100 132 78 100
+Entering state 85
+Reducing stack by rule 88 (line 215):
+   $1 = token TOKEN_ID ()
+   $2 = nterm componentSelection ()
+variable
+-> $$ = nterm variable ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 78 100 132 78
+Entering state 106
+Reducing stack by rule 83 (line 207):
+   $1 = nterm variable ()
+factor
+-> $$ = nterm factor ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 78 100 132 78
+Entering state 104
+Next token is token TOKEN_COMMAS ()
+Reducing stack by rule 74 (line 195):
+   $1 = nterm factor ()
+term
+-> $$ = nterm term ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 78 100 132 78
+Entering state 103
+Next token is token TOKEN_COMMAS ()
+Reducing stack by rule 67 (line 186):
+   $1 = nterm groupSign ()
+   $2 = nterm term ()
+simple_expression
+-> $$ = nterm simpleExpression ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 78 100 132
+Entering state 80
+Next token is token TOKEN_COMMAS ()
+Reducing stack by rule 59 (line 176):
+-> $$ = nterm groupRelOpSimExpr ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 78 100 132 80
+Entering state 114
+Reducing stack by rule 57 (line 174):
+   $1 = nterm simpleExpression ()
+   $2 = nterm groupRelOpSimExpr ()
+expression
+-> $$ = nterm expression ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 78 100 132
+Entering state 118
+Reducing stack by rule 95 (line 225):
+   $1 = nterm expression ()
+expressions
+-> $$ = nterm expressionList ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 78 100 132
+Entering state 120
+Next token is token TOKEN_COMMAS ()
+Shifting token TOKEN_COMMAS ()
+Entering state 150
+Reading a token: Next token is token TOKEN_ID ()
+Reducing stack by rule 56 (line 172):
+-> $$ = nterm groupSign ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 78 100 132 120 150
+Entering state 78
+Next token is token TOKEN_ID ()
+Shifting token TOKEN_ID ()
+Entering state 100
+Reading a token: Next token is token TOKEN_RPAR ()
+Reducing stack by rule 91 (line 218):
+component_selection_empty
+-> $$ = nterm componentSelection ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 78 100 132 120 150 78 100
+Entering state 85
+Reducing stack by rule 88 (line 215):
+   $1 = token TOKEN_ID ()
+   $2 = nterm componentSelection ()
+variable
+-> $$ = nterm variable ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 78 100 132 120 150 78
+Entering state 106
+Reducing stack by rule 83 (line 207):
+   $1 = nterm variable ()
+factor
+-> $$ = nterm factor ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 78 100 132 120 150 78
+Entering state 104
+Next token is token TOKEN_RPAR ()
+Reducing stack by rule 74 (line 195):
+   $1 = nterm factor ()
+term
+-> $$ = nterm term ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 78 100 132 120 150 78
+Entering state 103
+Next token is token TOKEN_RPAR ()
+Reducing stack by rule 67 (line 186):
+   $1 = nterm groupSign ()
+   $2 = nterm term ()
+simple_expression
+-> $$ = nterm simpleExpression ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 78 100 132 120 150
+Entering state 80
+Next token is token TOKEN_RPAR ()
+Reducing stack by rule 59 (line 176):
+-> $$ = nterm groupRelOpSimExpr ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 78 100 132 120 150 80
+Entering state 114
+Reducing stack by rule 57 (line 174):
+   $1 = nterm simpleExpression ()
+   $2 = nterm groupRelOpSimExpr ()
+expression
+-> $$ = nterm expression ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 78 100 132 120 150
+Entering state 169
+Reducing stack by rule 94 (line 223):
+   $1 = nterm expressionList ()
+   $2 = token TOKEN_COMMAS ()
+   $3 = nterm expression ()
+expressions_more
+-> $$ = nterm expressionList ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 78 100 132
+Entering state 120
+Next token is token TOKEN_RPAR ()
+Reducing stack by rule 92 (line 220):
+   $1 = nterm expressionList ()
+actual_parameter_list
+-> $$ = nterm actualParameterList ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 78 100 132
+Entering state 162
+Next token is token TOKEN_RPAR ()
+Shifting token TOKEN_RPAR ()
+Entering state 177
+Reducing stack by rule 87 (line 212):
+   $1 = token TOKEN_ID ()
+   $2 = token TOKEN_LPAR ()
+   $3 = nterm actualParameterList ()
+   $4 = token TOKEN_RPAR ()
+function_reference
+-> $$ = nterm functionReference ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 78
+Entering state 105
+Reducing stack by rule 84 (line 208):
+   $1 = nterm functionReference ()
+factor
+-> $$ = nterm factor ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 78
+Entering state 104
+Reading a token: Next token is token TOKEN_THEN ()
+Reducing stack by rule 74 (line 195):
+   $1 = nterm factor ()
+term
+-> $$ = nterm term ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 78
+Entering state 103
+Next token is token TOKEN_THEN ()
+Reducing stack by rule 67 (line 186):
+   $1 = nterm groupSign ()
+   $2 = nterm term ()
+simple_expression
+-> $$ = nterm simpleExpression ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51
+Entering state 80
+Next token is token TOKEN_THEN ()
+Reducing stack by rule 59 (line 176):
+-> $$ = nterm groupRelOpSimExpr ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 80
+Entering state 114
+Reducing stack by rule 57 (line 174):
+   $1 = nterm simpleExpression ()
+   $2 = nterm groupRelOpSimExpr ()
+expression
+-> $$ = nterm expression ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51
+Entering state 79
+Next token is token TOKEN_THEN ()
+Shifting token TOKEN_THEN ()
+Entering state 107
+Reading a token: Next token is token TOKEN_ID ()
+Shifting token TOKEN_ID ()
+Entering state 53
+Reading a token: Next token is token TOKEN_ASSIGN ()
+Reducing stack by rule 91 (line 218):
+component_selection_empty
+-> $$ = nterm componentSelection ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 79 107 53
+Entering state 85
+Reducing stack by rule 88 (line 215):
+   $1 = token TOKEN_ID ()
+   $2 = nterm componentSelection ()
+variable
+-> $$ = nterm variable ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 79 107
 Entering state 62
 Next token is token TOKEN_ASSIGN ()
 Shifting token TOKEN_ASSIGN ()
 Entering state 88
 Reading a token: Next token is token TOKEN_ID ()
-Reducing stack by rule 57 (line 172):
+Reducing stack by rule 56 (line 172):
 -> $$ = nterm groupSign ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 79 107 62 88
 Entering state 78
 Next token is token TOKEN_ID ()
 Shifting token TOKEN_ID ()
 Entering state 100
-Reading a token: Next token is token TOKEN_SEMICOLON ()
-Reducing stack by rule 91 (line 210):
+Reading a token: Next token is token TOKEN_PLUS ()
+Reducing stack by rule 91 (line 218):
 component_selection_empty
 -> $$ = nterm componentSelection ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88 78 100
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 79 107 62 88 78 100
 Entering state 85
-Reducing stack by rule 88 (line 207):
+Reducing stack by rule 88 (line 215):
    $1 = token TOKEN_ID ()
    $2 = nterm componentSelection ()
 variable
 -> $$ = nterm variable ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88 78
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 79 107 62 88 78
 Entering state 106
-Reducing stack by rule 83 (line 200):
+Reducing stack by rule 83 (line 207):
    $1 = nterm variable ()
 factor
 -> $$ = nterm factor ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88 78
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 79 107 62 88 78
 Entering state 104
-Next token is token TOKEN_SEMICOLON ()
-Reducing stack by rule 74 (line 188):
+Next token is token TOKEN_PLUS ()
+Reducing stack by rule 74 (line 195):
    $1 = nterm factor ()
 term
 -> $$ = nterm term ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88 78
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 79 107 62 88 78
 Entering state 103
-Reducing stack by rule 69 (line 183):
--> $$ = nterm addOpTermList ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88 78 103
-Entering state 134
-Next token is token TOKEN_SEMICOLON ()
-Reducing stack by rule 67 (line 181):
-   $1 = nterm groupSign ()
-   $2 = nterm term ()
-   $3 = nterm addOpTermList ()
-simple_expression
--> $$ = nterm simpleExpression ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88
-Entering state 80
-Next token is token TOKEN_SEMICOLON ()
-Reducing stack by rule 60 (line 176):
--> $$ = nterm groupRelOpSimExpr ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88 80
-Entering state 114
-Reducing stack by rule 58 (line 174):
-   $1 = nterm simpleExpression ()
-   $2 = nterm groupRelOpSimExpr ()
-expression
--> $$ = nterm expression ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88
-Entering state 123
-Reducing stack by rule 39 (line 148):
-   $1 = nterm variable ()
-   $2 = token TOKEN_ASSIGN ()
-   $3 = nterm expression ()
-assignment_statement
--> $$ = nterm assignmentStatement ()
-Stack now 0 1 3 5 7 13 23 37 55 87
-Entering state 59
-Reducing stack by rule 36 (line 144):
-   $1 = nterm assignmentStatement ()
-simple_statement
--> $$ = nterm simpleStatement ()
-Stack now 0 1 3 5 7 13 23 37 55 87
-Entering state 58
-Reducing stack by rule 34 (line 142):
-   $1 = nterm simpleStatement ()
--> $$ = nterm groupSimStruStatement ()
-Stack now 0 1 3 5 7 13 23 37 55 87
-Entering state 57
-Reducing stack by rule 33 (line 140):
-   $1 = nterm groupSimStruStatement ()
-statement
--> $$ = nterm statement ()
-Stack now 0 1 3 5 7 13 23 37 55 87
-Entering state 122
-Reducing stack by rule 31 (line 137):
-   $1 = nterm statementSequence ()
-   $2 = token TOKEN_SEMICOLON ()
-   $3 = nterm statement ()
-statement_sequence_more
--> $$ = nterm statementSequence ()
-Stack now 0 1 3 5 7 13 23 37
-Entering state 55
-Next token is token TOKEN_SEMICOLON ()
-Shifting token TOKEN_SEMICOLON ()
-Entering state 87
-Reading a token: Next token is token TOKEN_ID ()
-Shifting token TOKEN_ID ()
-Entering state 53
-Reading a token: Next token is token TOKEN_ASSIGN ()
-Reducing stack by rule 91 (line 210):
-component_selection_empty
--> $$ = nterm componentSelection ()
-Stack now 0 1 3 5 7 13 23 37 55 87 53
-Entering state 85
-Reducing stack by rule 88 (line 207):
-   $1 = token TOKEN_ID ()
-   $2 = nterm componentSelection ()
-variable
--> $$ = nterm variable ()
-Stack now 0 1 3 5 7 13 23 37 55 87
-Entering state 62
-Next token is token TOKEN_ASSIGN ()
-Shifting token TOKEN_ASSIGN ()
-Entering state 88
-Reading a token: Next token is token TOKEN_ID ()
-Reducing stack by rule 57 (line 172):
--> $$ = nterm groupSign ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88
-Entering state 78
-Next token is token TOKEN_ID ()
-Shifting token TOKEN_ID ()
-Entering state 100
-Reading a token: Next token is token TOKEN_AND ()
-Reducing stack by rule 91 (line 210):
-component_selection_empty
--> $$ = nterm componentSelection ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88 78 100
-Entering state 85
-Reducing stack by rule 88 (line 207):
-   $1 = token TOKEN_ID ()
-   $2 = nterm componentSelection ()
-variable
--> $$ = nterm variable ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88 78
-Entering state 106
-Reducing stack by rule 83 (line 200):
-   $1 = nterm variable ()
-factor
--> $$ = nterm factor ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88 78
-Entering state 104
-Next token is token TOKEN_AND ()
-Shifting token TOKEN_AND ()
+Next token is token TOKEN_PLUS ()
+Shifting token TOKEN_PLUS ()
 Entering state 135
-Reducing stack by rule 80 (line 196):
-   $1 = token TOKEN_AND ()
-mulop
--> $$ = nterm mulOp ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88 78 104
-Entering state 140
+Reducing stack by rule 70 (line 190):
+   $1 = token TOKEN_PLUS ()
+addop
+-> $$ = nterm addOp ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 79 107 62 88 78 103
+Entering state 138
 Reading a token: Next token is token TOKEN_ID ()
 Shifting token TOKEN_ID ()
 Entering state 100
-Reading a token: Next token is token TOKEN_SEMICOLON ()
-Reducing stack by rule 91 (line 210):
+Reading a token: Next token is token TOKEN_END ()
+Reducing stack by rule 91 (line 218):
 component_selection_empty
 -> $$ = nterm componentSelection ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88 78 104 140 100
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 79 107 62 88 78 103 138 100
 Entering state 85
-Reducing stack by rule 88 (line 207):
+Reducing stack by rule 88 (line 215):
    $1 = token TOKEN_ID ()
    $2 = nterm componentSelection ()
 variable
 -> $$ = nterm variable ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88 78 104 140
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 79 107 62 88 78 103 138
 Entering state 106
-Reducing stack by rule 83 (line 200):
+Reducing stack by rule 83 (line 207):
    $1 = nterm variable ()
 factor
 -> $$ = nterm factor ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88 78 104 140
-Entering state 165
-Reducing stack by rule 76 (line 191):
-   $1 = nterm mulOp ()
-   $2 = nterm factor ()
--> $$ = nterm mulOpFactorList ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88 78 104
-Entering state 139
-Next token is token TOKEN_SEMICOLON ()
-Reducing stack by rule 73 (line 187):
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 79 107 62 88 78 103 138
+Entering state 104
+Next token is token TOKEN_END ()
+Reducing stack by rule 74 (line 195):
    $1 = nterm factor ()
-   $2 = nterm mulOpFactorList ()
-term_more
+term
 -> $$ = nterm term ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88 78
-Entering state 103
-Reducing stack by rule 69 (line 183):
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 79 107 62 88 78 103 138
+Entering state 165
+Reducing stack by rule 69 (line 188):
+   $1 = nterm addOp ()
+   $2 = nterm term ()
 -> $$ = nterm addOpTermList ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88 78 103
-Entering state 134
-Next token is token TOKEN_SEMICOLON ()
-Reducing stack by rule 67 (line 181):
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 79 107 62 88 78 103
+Entering state 137
+Next token is token TOKEN_END ()
+Reducing stack by rule 66 (line 185):
    $1 = nterm groupSign ()
    $2 = nterm term ()
    $3 = nterm addOpTermList ()
-simple_expression
+simple_expression_more
 -> $$ = nterm simpleExpression ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 79 107 62 88
 Entering state 80
-Next token is token TOKEN_SEMICOLON ()
-Reducing stack by rule 60 (line 176):
+Next token is token TOKEN_END ()
+Reducing stack by rule 59 (line 176):
 -> $$ = nterm groupRelOpSimExpr ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88 80
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 79 107 62 88 80
 Entering state 114
-Reducing stack by rule 58 (line 174):
+Reducing stack by rule 57 (line 174):
    $1 = nterm simpleExpression ()
    $2 = nterm groupRelOpSimExpr ()
 expression
 -> $$ = nterm expression ()
-Stack now 0 1 3 5 7 13 23 37 55 87 62 88
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 79 107 62 88
 Entering state 123
-Reducing stack by rule 39 (line 148):
+Reducing stack by rule 39 (line 149):
    $1 = nterm variable ()
    $2 = token TOKEN_ASSIGN ()
    $3 = nterm expression ()
 assignment_statement
 -> $$ = nterm assignmentStatement ()
-Stack now 0 1 3 5 7 13 23 37 55 87
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 79 107
 Entering state 59
-Reducing stack by rule 36 (line 144):
+Reducing stack by rule 36 (line 145):
    $1 = nterm assignmentStatement ()
 simple_statement
 -> $$ = nterm simpleStatement ()
-Stack now 0 1 3 5 7 13 23 37 55 87
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 79 107
 Entering state 58
-Reducing stack by rule 34 (line 142):
+Reducing stack by rule 34 (line 143):
    $1 = nterm simpleStatement ()
 -> $$ = nterm groupSimStruStatement ()
-Stack now 0 1 3 5 7 13 23 37 55 87
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 79 107
 Entering state 57
-Reducing stack by rule 33 (line 140):
+Reducing stack by rule 33 (line 141):
    $1 = nterm groupSimStruStatement ()
 statement
 -> $$ = nterm statement ()
-Stack now 0 1 3 5 7 13 23 37 55 87
-Entering state 122
-Reducing stack by rule 31 (line 137):
-   $1 = nterm statementSequence ()
-   $2 = token TOKEN_SEMICOLON ()
-   $3 = nterm statement ()
-statement_sequence_more
--> $$ = nterm statementSequence ()
-Stack now 0 1 3 5 7 13 23 37
-Entering state 55
-Next token is token TOKEN_SEMICOLON ()
-Shifting token TOKEN_SEMICOLON ()
-Entering state 87
-Reading a token: Next token is token TOKEN_ID ()
-Shifting token TOKEN_ID ()
-Entering state 53
-Reading a token: Next token is token TOKEN_LPAR ()
-Shifting token TOKEN_LPAR ()
-Entering state 83
-Reading a token: Next token is token TOKEN_ID ()
-Reducing stack by rule 57 (line 172):
--> $$ = nterm groupSign ()
-Stack now 0 1 3 5 7 13 23 37 55 87 53 83
-Entering state 78
-Next token is token TOKEN_ID ()
-Shifting token TOKEN_ID ()
-Entering state 100
-Reading a token: Next token is token TOKEN_RPAR ()
-Reducing stack by rule 91 (line 210):
-component_selection_empty
--> $$ = nterm componentSelection ()
-Stack now 0 1 3 5 7 13 23 37 55 87 53 83 78 100
-Entering state 85
-Reducing stack by rule 88 (line 207):
-   $1 = token TOKEN_ID ()
-   $2 = nterm componentSelection ()
-variable
--> $$ = nterm variable ()
-Stack now 0 1 3 5 7 13 23 37 55 87 53 83 78
-Entering state 106
-Reducing stack by rule 83 (line 200):
-   $1 = nterm variable ()
-factor
--> $$ = nterm factor ()
-Stack now 0 1 3 5 7 13 23 37 55 87 53 83 78
-Entering state 104
-Next token is token TOKEN_RPAR ()
-Reducing stack by rule 74 (line 188):
-   $1 = nterm factor ()
-term
--> $$ = nterm term ()
-Stack now 0 1 3 5 7 13 23 37 55 87 53 83 78
-Entering state 103
-Reducing stack by rule 69 (line 183):
--> $$ = nterm addOpTermList ()
-Stack now 0 1 3 5 7 13 23 37 55 87 53 83 78 103
-Entering state 134
-Next token is token TOKEN_RPAR ()
-Reducing stack by rule 67 (line 181):
-   $1 = nterm groupSign ()
-   $2 = nterm term ()
-   $3 = nterm addOpTermList ()
-simple_expression
--> $$ = nterm simpleExpression ()
-Stack now 0 1 3 5 7 13 23 37 55 87 53 83
-Entering state 80
-Next token is token TOKEN_RPAR ()
-Reducing stack by rule 60 (line 176):
--> $$ = nterm groupRelOpSimExpr ()
-Stack now 0 1 3 5 7 13 23 37 55 87 53 83 80
-Entering state 114
-Reducing stack by rule 58 (line 174):
-   $1 = nterm simpleExpression ()
-   $2 = nterm groupRelOpSimExpr ()
-expression
--> $$ = nterm expression ()
-Stack now 0 1 3 5 7 13 23 37 55 87 53 83
-Entering state 118
-Reducing stack by rule 95 (line 217):
-   $1 = nterm expression ()
-expressions
--> $$ = nterm expressionList ()
-Stack now 0 1 3 5 7 13 23 37 55 87 53 83
-Entering state 120
-Next token is token TOKEN_RPAR ()
-Reducing stack by rule 92 (line 212):
-   $1 = nterm expressionList ()
-actual_parameter_list
--> $$ = nterm actualParameterList ()
-Stack now 0 1 3 5 7 13 23 37 55 87 53 83
-Entering state 119
-Next token is token TOKEN_RPAR ()
-Shifting token TOKEN_RPAR ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37 51 79 107
 Entering state 145
-Reducing stack by rule 40 (line 150):
-   $1 = token TOKEN_ID ()
-   $2 = token TOKEN_LPAR ()
-   $3 = nterm actualParameterList ()
-   $4 = token TOKEN_RPAR ()
-procedure_statement
--> $$ = nterm procedureStatement ()
-Stack now 0 1 3 5 7 13 23 37 55 87
-Entering state 60
-Reducing stack by rule 37 (line 145):
-   $1 = nterm procedureStatement ()
-simple_statement
--> $$ = nterm simpleStatement ()
-Stack now 0 1 3 5 7 13 23 37 55 87
-Entering state 58
-Reducing stack by rule 34 (line 142):
-   $1 = nterm simpleStatement ()
+Next token is token TOKEN_END ()
+Reducing stack by rule 42 (line 155):
+   $1 = token TOKEN_IF ()
+   $2 = nterm expression ()
+   $3 = token TOKEN_THEN ()
+   $4 = nterm statement ()
+if_statement
+-> $$ = nterm structuredStatement ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37
+Entering state 61
+Reducing stack by rule 35 (line 143):
+   $1 = nterm structuredStatement ()
 -> $$ = nterm groupSimStruStatement ()
-Stack now 0 1 3 5 7 13 23 37 55 87
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37
 Entering state 57
-Reducing stack by rule 33 (line 140):
+Reducing stack by rule 33 (line 141):
    $1 = nterm groupSimStruStatement ()
 statement
 -> $$ = nterm statement ()
-Stack now 0 1 3 5 7 13 23 37 55 87
-Entering state 122
-Reducing stack by rule 31 (line 137):
-   $1 = nterm statementSequence ()
-   $2 = token TOKEN_SEMICOLON ()
-   $3 = nterm statement ()
-statement_sequence_more
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37
+Entering state 56
+Reducing stack by rule 32 (line 139):
+   $1 = nterm statement ()
+statement_sequence
 -> $$ = nterm statementSequence ()
-Stack now 0 1 3 5 7 13 23 37
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183 37
 Entering state 55
-Reading a token: Next token is token TOKEN_SEMICOLON ()
-Shifting token TOKEN_SEMICOLON ()
-Entering state 87
-Reading a token: Next token is token TOKEN_ID ()
-Shifting token TOKEN_ID ()
-Entering state 53
-Reading a token: Next token is token TOKEN_LPAR ()
-Shifting token TOKEN_LPAR ()
-Entering state 83
-Reading a token: Next token is token TOKEN_ID ()
-Reducing stack by rule 57 (line 172):
--> $$ = nterm groupSign ()
-Stack now 0 1 3 5 7 13 23 37 55 87 53 83
-Entering state 78
-Next token is token TOKEN_ID ()
-Shifting token TOKEN_ID ()
-Entering state 100
-Reading a token: Next token is token TOKEN_RPAR ()
-Reducing stack by rule 91 (line 210):
-component_selection_empty
--> $$ = nterm componentSelection ()
-Stack now 0 1 3 5 7 13 23 37 55 87 53 83 78 100
-Entering state 85
-Reducing stack by rule 88 (line 207):
-   $1 = token TOKEN_ID ()
-   $2 = nterm componentSelection ()
-variable
--> $$ = nterm variable ()
-Stack now 0 1 3 5 7 13 23 37 55 87 53 83 78
-Entering state 106
-Reducing stack by rule 83 (line 200):
-   $1 = nterm variable ()
-factor
--> $$ = nterm factor ()
-Stack now 0 1 3 5 7 13 23 37 55 87 53 83 78
-Entering state 104
-Next token is token TOKEN_RPAR ()
-Reducing stack by rule 74 (line 188):
-   $1 = nterm factor ()
-term
--> $$ = nterm term ()
-Stack now 0 1 3 5 7 13 23 37 55 87 53 83 78
-Entering state 103
-Reducing stack by rule 69 (line 183):
--> $$ = nterm addOpTermList ()
-Stack now 0 1 3 5 7 13 23 37 55 87 53 83 78 103
-Entering state 134
-Next token is token TOKEN_RPAR ()
-Reducing stack by rule 67 (line 181):
-   $1 = nterm groupSign ()
-   $2 = nterm term ()
-   $3 = nterm addOpTermList ()
-simple_expression
--> $$ = nterm simpleExpression ()
-Stack now 0 1 3 5 7 13 23 37 55 87 53 83
-Entering state 80
-Next token is token TOKEN_RPAR ()
-Reducing stack by rule 60 (line 176):
--> $$ = nterm groupRelOpSimExpr ()
-Stack now 0 1 3 5 7 13 23 37 55 87 53 83 80
-Entering state 114
-Reducing stack by rule 58 (line 174):
-   $1 = nterm simpleExpression ()
-   $2 = nterm groupRelOpSimExpr ()
-expression
--> $$ = nterm expression ()
-Stack now 0 1 3 5 7 13 23 37 55 87 53 83
-Entering state 118
-Reducing stack by rule 95 (line 217):
-   $1 = nterm expression ()
-expressions
--> $$ = nterm expressionList ()
-Stack now 0 1 3 5 7 13 23 37 55 87 53 83
-Entering state 120
-Next token is token TOKEN_RPAR ()
-Reducing stack by rule 92 (line 212):
-   $1 = nterm expressionList ()
-actual_parameter_list
--> $$ = nterm actualParameterList ()
-Stack now 0 1 3 5 7 13 23 37 55 87 53 83
-Entering state 119
-Next token is token TOKEN_RPAR ()
-Shifting token TOKEN_RPAR ()
-Entering state 145
-Reducing stack by rule 40 (line 150):
-   $1 = token TOKEN_ID ()
-   $2 = token TOKEN_LPAR ()
-   $3 = nterm actualParameterList ()
-   $4 = token TOKEN_RPAR ()
-procedure_statement
--> $$ = nterm procedureStatement ()
+Next token is token TOKEN_END ()
+Shifting token TOKEN_END ()
+Entering state 86
+Reducing stack by rule 30 (line 136):
+   $1 = token TOKEN_BEGIN ()
+   $2 = nterm statementSequence ()
+   $3 = token TOKEN_END ()
+compound_statement
+-> $$ = nterm compoundStatement ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183
+Entering state 54
+Reducing stack by rule 41 (line 154):
+   $1 = nterm compoundStatement ()
+compound_statement
+-> $$ = nterm structuredStatement ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183
+Entering state 61
+Reducing stack by rule 35 (line 143):
+   $1 = nterm structuredStatement ()
+-> $$ = nterm groupSimStruStatement ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183
+Entering state 57
+Reducing stack by rule 33 (line 141):
+   $1 = nterm groupSimStruStatement ()
+statement
+-> $$ = nterm statement ()
+Stack now 0 1 3 5 7 13 23 37 55 87 50 77 97 130 161 176 183
+Entering state 185
+Reducing stack by rule 45 (line 158):
+   $1 = token TOKEN_FOR ()
+   $2 = token TOKEN_ID ()
+   $3 = token TOKEN_ASSIGN ()
+   $4 = nterm expression ()
+   $5 = token TOKEN_TO ()
+   $6 = nterm expression ()
+   $7 = token TOKEN_DO ()
+   $8 = nterm statement ()
+for_statement
+-> $$ = nterm structuredStatement ()
 Stack now 0 1 3 5 7 13 23 37 55 87
-Entering state 60
-Reducing stack by rule 37 (line 145):
-   $1 = nterm procedureStatement ()
-simple_statement
--> $$ = nterm simpleStatement ()
-Stack now 0 1 3 5 7 13 23 37 55 87
-Entering state 58
-Reducing stack by rule 34 (line 142):
-   $1 = nterm simpleStatement ()
+Entering state 61
+Reducing stack by rule 35 (line 143):
+   $1 = nterm structuredStatement ()
 -> $$ = nterm groupSimStruStatement ()
 Stack now 0 1 3 5 7 13 23 37 55 87
 Entering state 57
-Reducing stack by rule 33 (line 140):
+Reducing stack by rule 33 (line 141):
    $1 = nterm groupSimStruStatement ()
 statement
 -> $$ = nterm statement ()
 Stack now 0 1 3 5 7 13 23 37 55 87
 Entering state 122
-Reducing stack by rule 31 (line 137):
+Reducing stack by rule 31 (line 138):
    $1 = nterm statementSequence ()
    $2 = token TOKEN_SEMICOLON ()
    $3 = nterm statement ()
@@ -1312,7 +1780,7 @@ Entering state 55
 Reading a token: Next token is token TOKEN_END ()
 Shifting token TOKEN_END ()
 Entering state 86
-Reducing stack by rule 30 (line 135):
+Reducing stack by rule 30 (line 136):
    $1 = token TOKEN_BEGIN ()
    $2 = nterm statementSequence ()
    $3 = token TOKEN_END ()
