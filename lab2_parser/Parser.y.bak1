@@ -75,7 +75,6 @@ static void lookup(char *token_buffer);
 %token TOKEN_LBRACKET
 %token TOKEN_RBRACKET
 
-%right TOKEN_ELSE
 %left TOKEN_PLUS TOKEN_MINUS
 %left TOKEN_MULTIPLY TOKEN_DIV
 %right UPLUS UMINUS
@@ -129,22 +128,30 @@ compoundStatement: TOKEN_BEGIN statementSequence TOKEN_END;
 
 statementSequence: statementSequence TOKEN_SEMICOLON statement | statement;
 
-statement: groupSimStruStatement;
+closedCompoundStatement: TOKEN_BEGIN closedStatementSequence TOKEN_END;
 
-groupSimStruStatement: simpleStatement | structuredStatement;
+closedStatementSequence: closedStatementSequence TOKEN_SEMICOLON closedStatement | closedStatement;
+
+statement: openStatement | closedStatement;
+
+openStatement: compoundStatement
+    | TOKEN_IF expression TOKEN_THEN statement
+    | TOKEN_IF expression TOKEN_THEN closedStatement TOKEN_ELSE openStatement
+    | TOKEN_WHILE expression TOKEN_DO openStatement
+    | TOKEN_FOR TOKEN_ID TOKEN_ASSIGN expression TOKEN_TO expression TOKEN_DO openStatement;
+
+closedStatement: simpleStatement
+    | closedCompoundStatement
+    | TOKEN_IF expression TOKEN_THEN closedStatement TOKEN_ELSE closedStatement 
+    | TOKEN_WHILE expression TOKEN_DO closedStatement
+    | TOKEN_FOR TOKEN_ID TOKEN_ASSIGN expression TOKEN_TO expression TOKEN_DO closedStatement;
+
 
 simpleStatement: assignmentStatement | procedureStatement |;
 
 assignmentStatement: variable TOKEN_ASSIGN expression;
 
 procedureStatement: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
-
-structuredStatement: compoundStatement
-    | TOKEN_IF expression TOKEN_THEN statement groupElseStatement
-    | TOKEN_WHILE expression TOKEN_DO statement
-    | TOKEN_FOR TOKEN_ID TOKEN_ASSIGN expression TOKEN_TO expression TOKEN_DO statement;
-
-groupElseStatement: TOKEN_ELSE statement |;
 
 type: TOKEN_ID | TOKEN_ARRAY TOKEN_LBRACKET constant TOKEN_RANGE constant TOKEN_RBRACKET TOKEN_OF type
     | TOKEN_RECORD fieldList TOKEN_END;
@@ -198,8 +205,8 @@ identifierList: identifierList TOKEN_COMMAS TOKEN_ID | TOKEN_ID;
 sign: TOKEN_PLUS | TOKEN_MINUS %prec UMINUS
 
 %%
-main(int argc, char **argv) {
-  FILE *myfile = fopen(argv[1], "r");
+main() {
+  FILE *myfile = fopen("test.pas", "r");
   if (!myfile) {
     cout << "Error in openning test.pas!" << endl;
     return -1;

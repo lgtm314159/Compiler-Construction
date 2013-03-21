@@ -1,0 +1,89 @@
+Starting parse
+Entering state 0
+Reading a token: Next token is token TOKEN_PROGRAM ()
+Shifting token TOKEN_PROGRAM ()
+Entering state 1
+Reading a token: Next token is token TOKEN_ID ()
+Shifting token TOKEN_ID ()
+Entering state 3
+Reading a token: Next token is token TOKEN_SEMICOLON ()
+Shifting token TOKEN_SEMICOLON ()
+Entering state 5
+Reading a token: Next token is token TOKEN_TYPE ()
+Shifting token TOKEN_TYPE ()
+Entering state 6
+Reading a token: Next token is token TOKEN_ID ()
+Shifting token TOKEN_ID ()
+Entering state 9
+Reading a token: Next token is token TOKEN_EQ ()
+Shifting token TOKEN_EQ ()
+Entering state 15
+Reading a token: Next token is token TOKEN_RECORD ()
+Shifting token TOKEN_RECORD ()
+Entering state 29
+Reading a token: Next token is token TOKEN_ID ()
+Shifting token TOKEN_ID ()
+Entering state 17
+Reducing stack by rule 96 (line 198):
+   $1 = token TOKEN_ID ()
+-> $$ = nterm identifierList ()
+Stack now 0 1 3 5 6 9 15 29
+Entering state 44
+Reading a token: Next token is token TOKEN_COMMAS ()
+Shifting token TOKEN_COMMAS ()
+Entering state 33
+Reading a token: Next token is token TOKEN_ID ()
+Shifting token TOKEN_ID ()
+Entering state 46
+Reducing stack by rule 95 (line 198):
+   $1 = nterm identifierList ()
+   $2 = token TOKEN_COMMAS ()
+   $3 = token TOKEN_ID ()
+-> $$ = nterm identifierList ()
+Stack now 0 1 3 5 6 9 15 29
+Entering state 44
+Reading a token: Next token is token TOKEN_COLON ()
+Shifting token TOKEN_COLON ()
+Entering state 71
+Reading a token: Next token is token TOKEN_ID ()
+Shifting token TOKEN_ID ()
+Entering state 30
+Reducing stack by rule 47 (line 151):
+   $1 = token TOKEN_ID ()
+TYPE_ID
+-> $$ = nterm type ()
+Stack now 0 1 3 5 6 9 15 29 44 71
+Entering state 92
+Reading a token: Next token is token TOKEN_SEMICOLON ()
+Shifting token TOKEN_SEMICOLON ()
+Entering state 126
+Reducing stack by rule 54 (line 159):
+   $1 = nterm identifierList ()
+   $2 = token TOKEN_COLON ()
+   $3 = nterm type ()
+   $4 = token TOKEN_SEMICOLON ()
+-> $$ = nterm fieldListSeq ()
+Stack now 0 1 3 5 6 9 15 29
+Entering state 43
+Reading a token: Next token is token TOKEN_ID ()
+Shifting token TOKEN_ID ()
+Entering state 17
+Reducing stack by rule 96 (line 198):
+   $1 = token TOKEN_ID ()
+-> $$ = nterm identifierList ()
+Stack now 0 1 3 5 6 9 15 29 43
+Entering state 70
+Reading a token: Next token is token TOKEN_COLON ()
+Shifting token TOKEN_COLON ()
+Entering state 91
+Reading a token: Next token is token TOKEN_ID ()
+Shifting token TOKEN_ID ()
+Entering state 30
+Reducing stack by rule 47 (line 151):
+   $1 = token TOKEN_ID ()
+TYPE_ID
+-> $$ = nterm type ()
+Stack now 0 1 3 5 6 9 15 29 43 70 91
+Entering state 125
+Reading a token: Next token is token TOKEN_END ()
+EEK, parse error!  Message: syntax error

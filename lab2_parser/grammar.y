@@ -108,3 +108,72 @@ identifierList: identifierList TOKEN_COMMAS TOKEN_ID | TOKEN_ID;
 
 sign: TOKEN_PLUS | TOKEN_MINUS %prec UMINUS
 
+
+
+
+
+
+
+compoundStatement: TOKEN_BEGIN statementSequence TOKEN_END;
+
+statementSequence: statementSequence TOKEN_SEMICOLON statement | statement;
+
+statement: groupSimStruStatement;
+
+groupSimStruStatement: simpleStatement | structuredStatement;
+
+simpleStatement: assignmentStatement | procedureStatement |;
+
+assignmentStatement: variable TOKEN_ASSIGN expression;
+
+procedureStatement: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
+
+structuredStatement: compoundStatement
+    | conditionalStatement
+    | TOKEN_WHILE expression TOKEN_DO statement
+    | TOKEN_FOR TOKEN_ID TOKEN_ASSIGN expression TOKEN_TO expression TOKEN_DO statement;
+
+conditionalStatement: matchedStatement | openStatement;
+
+matchedStatement: TOKEN_IF expression TOKEN_THEN matchedStatement TOKEN_ELSE matchedStatement
+    | simpleStatement | compoundStatement | TOKEN_WHILE expression TOKEN_DO matchedStatement | TOKEN_FOR TOKEN_ID TOKEN_ASSIGN expression TOKEN_TO expression TOKEN_DO matchedStatement;
+
+openStatement: TOKEN_IF expression TOKEN_THEN statement
+    | TOKEN_IF expression TOKEN_THEN matchedStatement TOKEN_ELSE openStatement;
+
+
+
+
+ 
+
+conditionalStatement: TOKEN_IF expression TOKEN_THEN statement
+    | TOKEN_IF expressoin TOKEN_THEN closedStatement TOKEN_ELSE openStatement
+    | TOKEN_IF expressoin TOKEN_THEN closedStatement TOKEN_ELSE closedStatement;
+
+whileStatement: TOKEN_WHILE expression TOKEN_DO openStatement
+    | TOKEN_WHILE expression TOKEN_DO closedStatement;
+
+forStatement: TOKEN_FOR TOKEN_ID TOKEN_ASSIGN expression TOKEN_TO expression TOKEN_DO openStatement
+    | TOKEN_FOR TOKEN_ID TOKEN_ASSIGN expression TOKEN_TO expression TOKEN_DO closedStatement
+
+
+
+
+closedCompoundStatement: TOKEN_BEGIN closedStatementSequence TOKEN_END;
+
+closedStatementSequence: closedStatementSequence TOKEN_SEMICOLON closedStatement | closedStatement;
+
+statement: openStatement | closedStatement;
+
+openStatement: compoundStatement
+    | TOKEN_IF expression TOKEN_THEN statement
+    | TOKEN_IF expressoin TOKEN_THEN closedStatement TOKEN_ELSE openStatement
+    | TOKEN_WHILE expression TOKEN_DO openStatement
+    | TOKEN_FOR TOKEN_ID TOKEN_ASSIGN expression TOKEN_TO expression TOKEN_DO openStatement;
+
+closedStatement: simpleStatment
+    | closedCompoundStatement
+    | TOKEN_IF expressoin TOKEN_THEN closedStatement TOKEN_ELSE closedStatement 
+    | TOKEN_WHILE expression TOKEN_DO closedStatement
+    | TOKEN_FOR TOKEN_ID TOKEN_ASSIGN expression TOKEN_TO expression TOKEN_DO closedStatement;
+

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+./oneliner.sh
+./parser sample_test/test4.pas > tmp4
+

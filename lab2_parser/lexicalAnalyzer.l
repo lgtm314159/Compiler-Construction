@@ -10,7 +10,7 @@ int line = 1;
 
 DELIM   [ \t]
 WS      {DELIM}+
-NEWLINE \n
+NEWLINE [\n\r]
 LETTER  [A-Za-z]
 DIGIT   [0-9]
 ID      {LETTER}({LETTER}|{DIGIT}|_)*
