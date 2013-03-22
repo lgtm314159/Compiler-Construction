@@ -1,20 +1,27 @@
-CC=gcc
+CC=g++
 FLEX=flex
+BISON=bison
 CFLAGS=-lfl
-SOURCES=lex.yy.c
+FLEX_SOURCES=lex.yy.c
+BISON_SOURCES=parser.tab.c
 FLEXFILE=lexicalAnalyzer.l
-EXECUTABLE=lexer
+BISONFILE=parser.y
+BISONFLAGS=-d
+EXECUTABLE=parser
 
-all: run_lexer
+all: run_parser
 	
-run_lexer: $(EXECUTABLE)
+run_parser: $(EXECUTABLE)
 	./$(EXECUTABLE) $(ARGS)
 
-$(EXECUTABLE): $(SOURCES)
-	$(CC) $(SOURCES) $(CFLAGS) -o $(EXECUTABLE)
+$(EXECUTABLE): $(FLEX_SOURCES) $(BISON_SOURCES)
+	$(CC) $(FLEX_SOURCES) $(BISON_SOURCES) $(CFLAGS) -o $(EXECUTABLE)
 
-$(SOURCES):
+$(FLEX_SOURCES):
 	$(FLEX) $(FLEXFILE)
 
+$(BISON_SOURCES):
+	$(BISON) $(BISONFLAGS) $(BISONFILE)
+
 clean:
-	rm -rf $(SOURCES) $(EXECUTABLE)
+	rm -rf $(SOURCES) *.h $(EXECUTABLE)

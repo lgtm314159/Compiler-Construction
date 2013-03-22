@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <map>
 #include <vector>
-//#include "lex.yy.c"
 #define YYDEBUG 1
 using namespace std;
 
@@ -118,7 +117,6 @@ program: TOKEN_PROGRAM TOKEN_ID TOKEN_SEMICOLON groupTypeDefinitions
       string id($2);
       symTable[id].first = 0;
       symTable[id].second = "nil";
-      //addSymbol($2, nilStr)
     };
 
 groupTypeDefinitions: typeDefinitions |;
@@ -424,7 +422,6 @@ main(int argc, char **argv) {
   
   map<string, pair<int, string> >::iterator it;
   for (it = symTable.begin(); it != symTable.end(); ++it) {
-    //cout << "id:" << it->first << " type:" << it->second.second << " addr:" << it->second.first << endl;
     symTableIndexedByAddr[it->second.first] = make_pair(it->first, it->second.second);
   }
 
@@ -453,7 +450,7 @@ void yyerror(const char *s) {
   exit(-1);
 }
 
-/* Lookup literal names */
+/* Lookup literal names. */
 static void lookup(char *token_buffer) {
   int i;
   for (i = 0; i < YYNTOKENS; i++) {

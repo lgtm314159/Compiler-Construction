@@ -1,5 +1,5 @@
 #!/bin/bash
 
-bison -vd Parser.y
+bison -vd parser.y
 flex lexicalAnalyzer.l
-g++ Parser.tab.c lex.yy.c -lfl -o parser
+g++ parser.tab.c lex.yy.c -lfl -o parser

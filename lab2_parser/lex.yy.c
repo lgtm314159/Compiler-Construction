@@ -546,7 +546,7 @@ char *yytext;
 #line 2 "lexicalAnalyzer.l"
 #include <stdio.h>
 #include <stdlib.h>
-#include "Parser.tab.h" 
+#include "parser.tab.h" 
 #define YY_DECL extern "C" int yylex()
 #define MYNEWLINE 10;
 int line = 1;
