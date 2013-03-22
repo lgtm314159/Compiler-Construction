@@ -8,6 +8,8 @@ int line = 1;
 int address = 1;
 int funcSavedAddr;
 int procSavedAddr;
+int recSavedAddr;
+int arrSavedAddr;
 %}
 
 DELIM   [ \t]
@@ -57,6 +59,8 @@ return TOKEN_FUNCTION;}
 if     {//printf("KEYWORD %s\n", yytext);
 return TOKEN_IF;}
 array     {//printf("KEYWORD %s\n", yytext);
+arrSavedAddr = address;
+++address;
 return TOKEN_ARRAY;}
 mod     {//printf("KEYWORD %s\n", yytext);
 return TOKEN_MOD;}
@@ -67,10 +71,14 @@ return TOKEN_OF;}
 or     {//printf("KEYWORD %s\n", yytext);
 return TOKEN_OR;}
 procedure     {//printf("KEYWORD %s\n", yytext);
+procSavedAddr = address;
+++address;
 return TOKEN_PROCEDURE;}
 program     {//printf("KEYWORD %s\n", yytext);
 return TOKEN_PROGRAM;}
 record     {//printf("KEYWORD %s\n", yytext);
+recSavedAddr = address;
+++address;
 return TOKEN_RECORD;}
 then     {//printf("KEYWORD %s\n", yytext); 
 return TOKEN_THEN;}

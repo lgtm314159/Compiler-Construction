@@ -2,5 +2,6 @@
 
 ./oneliner.sh
 ./parser sample_test/test6.pas > tmp6
-diff -b tmp6 sample_test/test6_rule.out
+diff -b rules.out sample_test/test6_rule.out
+diff -b symtable.out sample_test/test6_symtable.out
 

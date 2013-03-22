@@ -1,18 +1,24 @@
 %{
 #include <cstdio>
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 #include <string.h>
 #include <stdio.h>
 #include <map>
 #include <vector>
-#include "lex.yy.c"
+//#include "lex.yy.c"
 #define YYDEBUG 1
 using namespace std;
 
 extern "C" int yylex();
 extern "C" int yyparse();
 extern "C" FILE *yyin;
+extern "C" int address;
+extern "C" int funcSavedAddr;
+extern "C" int procSavedAddr;
+extern "C" int recSavedAddr;
+extern "C" int arrSavedAddr;
 
 void yyerror(const char *s);
 static void lookup(char *token_buffer);
@@ -22,14 +28,12 @@ void addSymbol(const string &id, const char *type);
 void addSymbol(const char* id, const int type);
 void addSymbol(const string &id, const string &type);
 vector<string> split(char *ids);
+void fixAddress(int addr);
 
 #define YYPRINT
 
 map<string, pair<int, string> > symTable;
 map<int, pair<string, string> > symTableIndexedByAddr;
-//int address = 1;
-//int funcSavedAddr;
-//int procSavedAddr;
 string nilStr("nil");
 char recordStr[] = "record";
 char arrayStr[] = "array";
@@ -37,6 +41,7 @@ string rec(recordStr);
 string arr(arrayStr);
 %}
 
+%expect 1
 
 %union {
   int ival;
@@ -139,10 +144,22 @@ subprogramDeclarationList: subprogramDeclarationList procedureDeclaration { cout
 
 typeDefinition: TOKEN_ID TOKEN_EQ type TOKEN_SEMICOLON
     { cout << "type_definition" << endl;
-      addSymbol($1, $3);
       string type($3);
       if (type.compare(rec) != 0 && type.compare(arr) !=0) {
+        addSymbol($1, $3);
         addSymbol($3, nilStr);
+      } else if (type.compare(rec) == 0) {
+        string id($1);
+        if (symTable.find(id) == symTable.end()) {
+          symTable[id].first = recSavedAddr;
+          symTable[id].second = string($3); 
+        }
+      } else {
+        string id($1);
+        if (symTable.find(id) == symTable.end()) {
+          symTable[id].first = arrSavedAddr;
+          symTable[id].second = string($3); 
+        }
       }
     };
 
@@ -154,7 +171,9 @@ variableDeclaration: identifierList TOKEN_COLON type TOKEN_SEMICOLON
       }
       string type($3);
       if (type.compare(rec) != 0 && type.compare(arr) !=0) {
-        addSymbol($3, nilStr);
+        if (symTable.find(type) == symTable.end()) {
+          addSymbol($3, nilStr);
+        }
       }
     };
 
@@ -162,12 +181,14 @@ procedureDeclaration: TOKEN_PROCEDURE TOKEN_ID TOKEN_LPAR formalParameterList
     TOKEN_RPAR TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
     { cout << "procedure_declaration" << endl;
       string id($2);
-      if (symTable.find(id) == symTable.end()) {
-        symTable[id].first = procSavedAddr;
-        ostringstream convert;
-        convert << $4;
-        symTable[id].second = convert.str(); 
+      if (symTable.find(id) != symTable.end()) {
+        int addr = symTable[id].first;
+        fixAddress(addr);
       }
+      symTable[id].first = procSavedAddr;
+      ostringstream convert;
+      convert << $4;
+      symTable[id].second = convert.str(); 
     };
 
 functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList
@@ -175,17 +196,20 @@ functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList
     TOKEN_SEMICOLON
     { cout << "function_declaration" << endl;
       string id($2);
-      if (symTable.find(id) == symTable.end()) {
-        symTable[id].first = funcSavedAddr;
-        ostringstream convert;
-        convert << $4;
-        symTable[id].second = convert.str(); 
+      // This might have flaws.
+      if (symTable.find(id) != symTable.end()) {
+        int addr = symTable[id].first;
+        fixAddress(addr);
       }
+      symTable[id].first = funcSavedAddr;
+      ostringstream convert;
+      convert << $4;
+      symTable[id].second = convert.str(); 
     };
 
 groupBlockForward: block | TOKEN_FORWARD;
 
-formalParameterList: formalParamSeq { cout << "formal_parameter_list" << endl; $$ = 0; }
+formalParameterList: formalParamSeq { cout << "formal_parameter_list" << endl; $$ = $1; }
     | { $$ = 0; };
 
 formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
@@ -196,8 +220,11 @@ formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
       }
       string type($5);
       if (type.compare(rec) != 0 && type.compare(arr) !=0) {
-        addSymbol($5, nilStr);
+        if (symTable.find(type) == symTable.end()) {
+          addSymbol($5, nilStr);
+        }
       }
+      $$ = $1 + ids.size();
     }
     | identifierList TOKEN_COLON type
       { cout << "identifier_lists" << endl;
@@ -207,8 +234,11 @@ formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
         }
         string type($3);
         if (type.compare(rec) != 0 && type.compare(arr) !=0) {
-          addSymbol($3, nilStr);
+          if (symTable.find(type) == symTable.end()) {
+            addSymbol($3, nilStr);
+          }
         }
+        $$ = ids.size();
       };
 
 block: groupVariableDeclarations compoundStatement { cout << "block" << endl; };
@@ -264,8 +294,33 @@ resultType: TOKEN_ID { cout << "result_type" << endl;
 fieldList: fieldListSeq { cout << "field_list" << endl; }
     | { cout << "field_list_empty" << endl; };
 
-fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type { cout << "identifier_lists_more" << endl; }
-    | identifierList TOKEN_COLON type { cout << "identifier_lists" << endl; };
+fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
+    { cout << "identifier_lists_more" << endl;
+      vector<string> ids = split($3);
+      for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+        addSymbol(*it, $5);
+      }
+      string type($5);
+      if (type.compare(rec) != 0 && type.compare(arr) !=0) {
+        if (symTable.find(type) == symTable.end()) {
+          addSymbol($5, nilStr);
+        }
+      }
+      
+    }
+    | identifierList TOKEN_COLON type
+    { cout << "identifier_lists" << endl;
+      vector<string> ids = split($1);
+      for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+        addSymbol(*it, $3);
+      }
+      string type($3);
+      if (type.compare(rec) != 0 && type.compare(arr) !=0) {
+        if (symTable.find(type) == symTable.end()) {
+          addSymbol($3, nilStr);
+        }
+      }
+    };
 
 constant: TOKEN_INT { cout << "constant" << endl; }
     | sign TOKEN_INT { cout << "constant" << endl; };
@@ -354,6 +409,7 @@ sign: TOKEN_PLUS | TOKEN_MINUS %prec UMINUS
 %%
 main(int argc, char **argv) {
   FILE *myfile = fopen(argv[1], "r");
+  freopen ("rules.out", "w", stdout);
   if (!myfile) {
     cout << "Error in openning test.pas!" << endl;
     return -1;
@@ -361,21 +417,34 @@ main(int argc, char **argv) {
   
   yyin = myfile;
 
-  yydebug = 1;
+  //yydebug = 1;
   do {
     yyparse();
   } while (!feof(yyin));
-
+  
   map<string, pair<int, string> >::iterator it;
   for (it = symTable.begin(); it != symTable.end(); ++it) {
     //cout << "id:" << it->first << " type:" << it->second.second << " addr:" << it->second.first << endl;
     symTableIndexedByAddr[it->second.first] = make_pair(it->first, it->second.second);
   }
+
   map<int, pair<string, string> >::iterator it2;
+  stringstream ss; 
+  freopen("symtable.out", "w", stdout);
   for (it2 = symTableIndexedByAddr.begin(); it2 != symTableIndexedByAddr.end(); ++it2) {
-    cout << "addr:" << it2->first << " id:" << it2->second.first << " type:" << it2->second.second << endl;
+    ss.str(string());
+    ss << "address: " << it2->first;
+    cout << setw(14) << std::left << ss.str();
+    ss.str(string());
+    ss << ", identifier: " << it2->second.first;
+    cout << setw(29) << std::left << ss.str();
+    ss.str(string());
+    ss << ", type: " << it2->second.second;
+    cout << setw(18) << std::left << ss.str();
+    cout << endl;
   }
-  
+  fclose(stdout);
+  fclose(myfile);
 }
 
 void yyerror(const char *s) {
@@ -395,21 +464,6 @@ static void lookup(char *token_buffer) {
 }
 
 void addSymbol(const char* id, const char *type) {
-  /*
-  string idName, typeName;
-  if (id == 0) {
-    char tmp[] = "nullId";
-    idName = string(tmp);
-  } else {
-    idName = string(id);
-  }
-  
-  if (type == 0) {
-    char tmp[] = "nullType";
-    typeName = string(tmp);
-  } else {
-    typeName = string(type);
-  }*/
   string idName(id);
   string typeName(type);
   addSymbol(idName, typeName);
@@ -440,6 +494,17 @@ void addSymbol(const string &id, const string &type) {
     symTable[id].first = address;
     symTable[id].second = type;
     ++address;
+  }
+}
+
+/* Function to fix the addresses for symbols. */
+void fixAddress(int addr) {
+  --address;
+  map<string, pair<int, string> >::iterator it;
+  for (it = symTable.begin(); it != symTable.end(); ++it) {
+    if (it->second.first > addr) {
+      it->second.first = it->second.first - 1;
+    }
   }
 }
 

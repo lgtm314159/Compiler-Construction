@@ -1,0 +1,36 @@
+type_ID
+type_definition
+type_definition
+type_ID
+type_definition
+type_definition_more
+identifier_list
+type_ID
+variable_declaration
+variable_declaration
+identifier_list
+type_ID
+variable_declaration
+variable_declaration_more
+component_selection_empty
+variable
+factor
+term
+simple_expression
+expression
+assignment_statement
+simple_statement
+statement
+statement_sequence
+simple_statement_empty
+statement
+statement_sequence_more
+compound_statement
+program
+address: 0, id:errorfree type:nil
+address: 1, id:s type:nil
+address: 2, id:string type:nil
+address: 3, id:in type:nil
+address: 4, id:integer type:nil
+address: 5, id:z type:s
+address: 6, id:m type:in
