@@ -3,15 +3,17 @@
 
 using namespace std;
 
-TypeDesc::TypeDesc(const string& t) {
-  type = t;
+//TypeDesc::TypeDesc() {}
+
+TypeDesc::TypeDesc(const string& t):
+    type(t), lower(0), upper(0), recordEnv(NULL) {
 }
 
 TypeDesc::TypeDesc(const string& t, int l, int u):
-    type(t), lower(l), upper(u) {}
+    type(t), lower(l), upper(u), recordEnv(NULL) {}
 
 TypeDesc::TypeDesc(const string& t, Env* re):
-    type(t), recordEnv(re) {
+    type(t), lower(0), upper(0), recordEnv(re) {
 }
 
 TypeDesc::TypeDesc(const TypeDesc& td):
@@ -53,3 +55,4 @@ Env* TypeDesc::getRecordEnv() {
 void TypeDesc::setRecordEnv(Env* re) {
   recordEnv = re;
 }
+

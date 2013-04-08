@@ -1,13 +1,5 @@
-{ test if/while/for/}
-program test4;
-
-var 
-    a : integer;
+program test0017;
 
 begin
-    if  (a < 0) then a := 1 else a := 2; 
-    while ( a > 0 )   do begin end;
-    for a := 0 to 10  do begin end;  
-end
-
-.
+  r1(x-1);
+end.

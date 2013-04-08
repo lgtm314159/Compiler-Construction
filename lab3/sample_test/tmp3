@@ -1,0 +1,31 @@
+identifier_list
+identifier_list_more
+type_ID
+identifier_lists
+identifier_list
+identifier_list_more
+type_ID
+identifier_lists_more
+formal_parameter_list
+result_type
+simple_statement_empty
+statement
+statement_sequence
+compound_statement
+block
+function_declaration
+sub_program_declarations
+simple_statement_empty
+statement
+statement_sequence
+compound_statement
+program
+address: 0, id:test4 type:nil
+address: 1, id:divides type:0
+address: 2, id:x type:integer
+address: 3, id:y type:integer
+address: 4, id:integer type:nil
+address: 5, id:a type:float
+address: 6, id:b type:float
+address: 7, id:float type:nil
+address: 8, id:boolean type:nil

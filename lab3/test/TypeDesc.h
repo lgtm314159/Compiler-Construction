@@ -18,6 +18,7 @@ class TypeDesc {
     Env* recordEnv;
     
   public:
+//    TypeDesc();
     TypeDesc(const string& t);
     TypeDesc(const string& t, int l, int u);
     TypeDesc(const string& t, Env* re);

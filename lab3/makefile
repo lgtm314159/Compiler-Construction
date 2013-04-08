@@ -10,17 +10,18 @@ BISON=bison
 CFLAGS=-lfl
 FLEX_SOURCES=lex.yy.c
 BISON_SOURCES=parser.tab.c
-MY_SOURCES=BasicTypeDesc.cpp ArrayTypeDesc.cpp RecordTypeDesc.cpp
+MY_SOURCES=TypeDesc.cpp Symbol.cpp Env.cpp
 FLEXFILE=lexicalAnalyzer.l
 BISONFILE=parser.y
 BISONFLAGS=-d
 EXECUTABLE=parser
 OBJECTS=$(MY_SOURCES:.cpp=.o)
 
-all: run_parser
+#all: run_parser
+all: $(EXECUTABLE)
 	
-run_parser: $(EXECUTABLE)
-	./$(EXECUTABLE) $(ARGS)
+#run_parser: $(EXECUTABLE)
+#	./$(EXECUTABLE) $(ARGS)
 
 $(EXECUTABLE): $(FLEX_SOURCES) $(BISON_SOURCES) $(OBJECTS)
 	$(CC) $(FLEX_SOURCES) $(BISON_SOURCES) $(OBJECTS) $(CFLAGS) -o $(EXECUTABLE)
@@ -35,4 +36,4 @@ $(BISON_SOURCES):
 	$(CC) $(CFLAGS) -c $< -o $@ 
 
 clean:
-	rm -rf $(EXECUTABLE) parser.tab.h $(BISON_SOURCES) $(FLEX_SOURCES) *.o
+	rm -rf $(EXECUTABLE) parser.tab.h $(BISON_SOURCES) $(FLEX_SOURCES) *.o rules.out

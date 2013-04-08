@@ -7,7 +7,12 @@
 #include <stdio.h>
 #include <map>
 #include <vector>
+#include <stack>
+#include "Symbol.h"
+#include "Env.h"
+#include "TypeDesc.h"
 #define YYDEBUG 1
+
 using namespace std;
 
 extern "C" int yylex();
@@ -18,6 +23,10 @@ extern "C" int funcSavedAddr;
 extern "C" int procSavedAddr;
 extern "C" int recSavedAddr;
 extern "C" int arrSavedAddr;
+
+// Lab3
+extern "C++" stack<Env*> envs;
+extern "C++" stack<int> offsets;
 
 void yyerror(const char *s);
 static void lookup(char *token_buffer);
@@ -38,6 +47,10 @@ char recordStr[] = "record";
 char arrayStr[] = "array";
 string rec(recordStr);
 string arr(arrayStr);
+
+// Lab3 variables
+//stack<Env*> envs;
+//stack<int> offsets;
 %}
 
 %expect 1
@@ -107,7 +120,7 @@ string arr(arrayStr);
 %right UPLUS UMINUS
 
 %type <sval> type identifierList
-%type <ival> formalParamSeq formalParameterList
+%type <ival> formalParamSeq formalParameterList constant
 %%
 
 program: TOKEN_PROGRAM TOKEN_ID TOKEN_SEMICOLON groupTypeDefinitions
@@ -117,6 +130,14 @@ program: TOKEN_PROGRAM TOKEN_ID TOKEN_SEMICOLON groupTypeDefinitions
       string id($2);
       symTable[id].first = 0;
       symTable[id].second = "nil";
+
+      // Lab3
+      /*
+      Env env(NULL);
+      Env* envPtr = &env; 
+      envs.push(envPtr);
+      offsets.push(address);
+      */
     };
 
 groupTypeDefinitions: typeDefinitions |;
@@ -142,21 +163,87 @@ subprogramDeclarationList: subprogramDeclarationList procedureDeclaration { cout
 
 typeDefinition: TOKEN_ID TOKEN_EQ type TOKEN_SEMICOLON
     { cout << "type_definition" << endl;
-      string type($3);
-      if (type.compare(rec) != 0 && type.compare(arr) !=0) {
+      vector<string> strs = split($3);
+      //if (type.compare(rec) != 0 && type.compare(arr) !=0) {
+      if (strs[0].compare(rec) != 0 && strs[0].compare(arr) !=0) {
         addSymbol($1, $3);
         addSymbol($3, nilStr);
-      } else if (type.compare(rec) == 0) {
+
+        // Lab3. Address will be fixed later.
+        if (!envs.empty()) {
+          string lexime($1);
+          if (strs[0].compare("integer") == 0 || strs[0].compare("float") == 0
+              || strs[0].compare("boolean") == 0) {
+            TypeDesc td(strs[0]);
+            Symbol sym(lexime, 0, td);
+            envs.top()->setSymbol(lexime, sym);
+          } else {
+            if (envs.top()->getSymbol(strs[0]) == NULL) {
+              Env* envPtr = envs.top()->getPrevEnv();
+              bool found = false;
+              while (envPtr != NULL) {
+                if (envPtr->getSymbol(strs[0]) != NULL) {
+                  found = true;
+                  TypeDesc td(envPtr->getSymbol(strs[0])->getTypeDesc());
+                  Symbol sym(lexime, 0, td);
+                  envs.top()->setSymbol(lexime, sym);
+                  break;
+                }
+                envPtr = envPtr->getPrevEnv();
+              }
+              if (!found) {
+                cout << "Error: type " << strs[0] << " not defined" << endl;
+              }
+            } else {
+              TypeDesc td(envs.top()->getSymbol(strs[0])->getTypeDesc());
+              Symbol sym(lexime, 0, td);
+              envs.top()->setSymbol(lexime, sym);
+            }
+          }          
+        }
+      } else if (strs[0].compare(rec) == 0) {
         string id($1);
         if (symTable.find(id) == symTable.end()) {
           symTable[id].first = recSavedAddr;
           symTable[id].second = string($3); 
+        } else {
+          if (symTable[id].first > recSavedAddr) {
+            int addr = symTable[id].first;
+            fixAddress(addr);
+            symTable[id].first = recSavedAddr;
+          } else {
+            fixAddress(recSavedAddr);
+          }
+          symTable[id].second = string($3); 
         }
+
+        
       } else {
         string id($1);
         if (symTable.find(id) == symTable.end()) {
           symTable[id].first = arrSavedAddr;
-          symTable[id].second = string($3); 
+          symTable[id].second = strs[0];
+          
+        } else {
+          if (symTable[id].first > arrSavedAddr) {
+            int addr = symTable[id].first;
+            fixAddress(addr);
+            symTable[id].first = arrSavedAddr;
+          } else {
+            fixAddress(arrSavedAddr);
+          }
+          symTable[id].second = strs[0];
+        }
+
+        // Lab3
+        //symTable[id].second = string($3); 
+        if (!envs.empty()) {
+          int lower = atoi(strs[1].c_str());
+          int upper = atoi(strs[2].c_str());
+          TypeDesc td(strs[0], lower, upper, strs[3]);
+          Symbol sym($1, 0, td);
+          string lexime($1);
+          envs.top()->setSymbol(lexime, sym);
         }
       }
     };
@@ -194,7 +281,6 @@ functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList
     TOKEN_SEMICOLON
     { cout << "function_declaration" << endl;
       string id($2);
-      // This might have flaws.
       if (symTable.find(id) != symTable.end()) {
         if (symTable[id].first > funcSavedAddr) {
           int addr = symTable[id].first;
@@ -287,8 +373,24 @@ type: TOKEN_ID { cout << "type_ID" << endl; //addSymbol($1, nilStr);
                  strcpy($$, $1);} 
     | TOKEN_ARRAY TOKEN_LBRACKET constant TOKEN_RANGE constant TOKEN_RBRACKET TOKEN_OF type
       { cout << "type_array" << endl;
-        $$ = (char*) malloc(sizeof(arrayStr));;
-        strcpy($$, arrayStr); } 
+        //$$ = (char*) malloc(sizeof(arrayStr));;
+
+        // Lab3
+        stringstream ss; 
+        ss << arrayStr;
+        ss << " ";
+        ss << $3 << " " << $5 << " " << $8;
+        $$ = (char*) malloc(ss.str().length() + 1);
+        strcpy($$, ss.str().c_str());
+        
+        string arrayType($8);
+        if (arrayType.compare(rec) != 0 &&
+            arrayType.find("array") == string::npos) {
+          if (symTable.find(arrayType) == symTable.end()) {
+            addSymbol(arrayType, nilStr);
+          }
+        }
+      } 
     | TOKEN_RECORD fieldList TOKEN_END
       { cout << "type_record" << endl;
         $$ = (char*) malloc(sizeof(recordStr));;
@@ -332,8 +434,8 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
       }
     };
 
-constant: TOKEN_INT { cout << "constant" << endl; }
-    | sign TOKEN_INT { cout << "constant" << endl; };
+constant: TOKEN_INT { cout << "constant" << endl; $$ = $1;}
+    | sign TOKEN_INT { cout << "constant" << endl; $$ = $2;};
 
 expression: simpleExpression groupRelOpSimExpr { cout << "expression" << endl; };
 
@@ -414,7 +516,7 @@ identifierList: identifierList TOKEN_COMMAS TOKEN_ID
       $$ = (char*) malloc (strlen($1) + 1);
       strcpy($$, $1);};
 
-sign: TOKEN_PLUS | TOKEN_MINUS %prec UMINUS
+sign: TOKEN_PLUS %prec UPLUS | TOKEN_MINUS %prec UMINUS
 
 %%
 main(int argc, char **argv) {

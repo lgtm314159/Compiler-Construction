@@ -18,8 +18,8 @@ NEWLINE [\n\r]
 LETTER  [A-Za-z]
 DIGIT   [0-9]
 ID      {LETTER}({LETTER}|{DIGIT}|_)*
-INTEGER [+-]?{DIGIT}+
-DECIMAL [+-]?{DIGIT}?(\.{DIGIT}+)+
+INTEGER {DIGIT}+
+DECIMAL {DIGIT}?(\.{DIGIT}+)+
 EXPNUM  ({INTEGER}|{DECIMAL})(E[+-]?{DIGIT}+)?
 STR     \"[^\"\n]*\"
 COMMENT \{[^\}]*\}

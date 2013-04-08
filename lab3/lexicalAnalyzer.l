@@ -2,6 +2,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "parser.tab.h" 
+#include "Symbol.h"
+#include "Env.h"
+#include "TypeDesc.h"
+#include <stack>
+
 #define YY_DECL extern "C" int yylex()
 #define MYNEWLINE 10;
 int line = 1;
@@ -10,6 +15,10 @@ int funcSavedAddr;
 int procSavedAddr;
 int recSavedAddr;
 int arrSavedAddr;
+
+// Lab3
+stack<Env*> envs;
+stack<int> offsets;
 %}
 
 DELIM   [ \t]
@@ -18,8 +27,8 @@ NEWLINE [\n\r]
 LETTER  [A-Za-z]
 DIGIT   [0-9]
 ID      {LETTER}({LETTER}|{DIGIT}|_)*
-INTEGER [+-]?{DIGIT}+
-DECIMAL [+-]?{DIGIT}?(\.{DIGIT}+)+
+INTEGER {DIGIT}+
+DECIMAL {DIGIT}?(\.{DIGIT}+)+
 EXPNUM  ({INTEGER}|{DECIMAL})(E[+-]?{DIGIT}+)?
 STR     \"[^\"\n]*\"
 COMMENT \{[^\}]*\}
@@ -75,6 +84,8 @@ procSavedAddr = address;
 ++address;
 return TOKEN_PROCEDURE;}
 program     {//printf("KEYWORD %s\n", yytext);
+Env* envPtr = new Env(NULL);
+envs.push(envPtr);
 return TOKEN_PROGRAM;}
 record     {//printf("KEYWORD %s\n", yytext);
 recSavedAddr = address;

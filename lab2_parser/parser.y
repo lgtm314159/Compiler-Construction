@@ -8,6 +8,7 @@
 #include <map>
 #include <vector>
 #define YYDEBUG 1
+
 using namespace std;
 
 extern "C" int yylex();
@@ -414,7 +415,7 @@ identifierList: identifierList TOKEN_COMMAS TOKEN_ID
       $$ = (char*) malloc (strlen($1) + 1);
       strcpy($$, $1);};
 
-sign: TOKEN_PLUS | TOKEN_MINUS %prec UMINUS
+sign: TOKEN_PLUS %prec UPLUS | TOKEN_MINUS %prec UMINUS
 
 %%
 main(int argc, char **argv) {

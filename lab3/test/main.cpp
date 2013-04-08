@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <vector>
 #include "Symbol.h"
+#include "Env.h"
 
 using namespace std;
 
@@ -36,12 +37,21 @@ class class1 {
 };
 
 int main() {
+/*
   TypeDesc td("integer");
   Symbol symbol("a", 0, td);
-  cout << symbol.getTypeDesc().getType() << endl;
   TypeDesc td2("float");
   symbol.setTypeDesc(td2);
-  cout << symbol.getTypeDesc().getType() << endl;
+  Env env(NULL);
+  env.setSymbol("a", symbol);
+  cout << (env.getSymbol("a"))->getLexime() << endl;
+  symbol.setLexime("b");
+  cout << (env.getSymbol("a"))->getLexime() << endl;
+  cout << env.getTableSize() << endl;
+*/
+  char arrayStr[] = "array";
+  string str(arrayStr); 
+  cout << sizeof(arrayStr) << endl;
+  cout << str.length() << endl; 
 }
-
 
