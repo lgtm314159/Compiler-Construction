@@ -49,9 +49,29 @@ int main() {
   cout << (env.getSymbol("a"))->getLexime() << endl;
   cout << env.getTableSize() << endl;
 */
+/*
   char arrayStr[] = "array";
   string str(arrayStr); 
   cout << sizeof(arrayStr) << endl;
   cout << str.length() << endl; 
+*/
+
+  Env* env = new Env(NULL);
+  TypeDesc* td = env->getSymbol("integer")->getTypeDesc(); 
+  Symbol* sym = new Symbol("int", 0, td);
+  env->setSymbol("int", sym);
+  //cout << env->getSymbol("int")->getTypeDesc()->getType() << endl;
+/*
+  env->getSymbol("integer")->getTypeDesc()->setType("whatever");
+  cout << env->getSymbol("int")->getTypeDesc()->getType() << endl;
+  cout << env->getSymbol("integer")->getTypeDesc()->getType() << endl;
+  cout << env->getTableSize() << endl;
+*/
+  TypeDesc* td2 = env->getSymbol("integer")->getTypeDesc(); 
+  Symbol* sym2 = new Symbol("a", 0, td);
+  env->setSymbol("integer", sym2);
+  //delete env;
+  //delete td;
+  delete env;
 }
 

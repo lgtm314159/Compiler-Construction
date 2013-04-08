@@ -29,6 +29,7 @@ extern "C++" stack<Env*> envs;
 extern "C++" stack<int> offsets;
 extern "C++" stack<int> recordSeqs;
 extern "C++" stack<int> arraySeqs;
+extern "C++" vector<Env*> allEnvs;
 extern "C++" stack<vector<pair<string, TypeDesc*> >* > fieldListStack;
 extern "C" int recordSeq;
 extern "C" int arraySeq;
@@ -53,9 +54,6 @@ char arrayStr[] = "array";
 string rec(recordStr);
 string arr(arrayStr);
 
-// Lab3 variables
-//stack<Env*> envs;
-//stack<int> offsets;
 %}
 
 %expect 1
@@ -136,13 +134,6 @@ program: TOKEN_PROGRAM TOKEN_ID TOKEN_SEMICOLON groupTypeDefinitions
       symTable[id].first = 0;
       symTable[id].second = "nil";
 
-      // Lab3
-      /*
-      Env env(NULL);
-      Env* envPtr = &env; 
-      envs.push(envPtr);
-      offsets.push(address);
-      */
     };
 
 groupTypeDefinitions: typeDefinitions |;
@@ -179,7 +170,7 @@ typeDefinition: TOKEN_ID TOKEN_EQ type TOKEN_SEMICOLON
           if (strs[0].compare("integer") == 0 ||
               strs[0].compare("string") == 0 ||
               strs[0].compare("boolean") == 0) {
-            TypeDesc* td = envs.top()->getSymbol(strs[0])->getTypeDesc();
+            TypeDesc* td = new TypeDesc(strs[0]);
             Symbol* sym = new Symbol(lexime, 0, td);
             envs.top()->setSymbol(lexime, sym);
           } else {
@@ -189,7 +180,9 @@ typeDefinition: TOKEN_ID TOKEN_EQ type TOKEN_SEMICOLON
               while (envPtr != NULL) {
                 if (envPtr->getSymbol(strs[0]) != NULL) {
                   found = true;
-                  TypeDesc* td = envPtr->getSymbol(strs[0])->getTypeDesc();
+                  // Copy the type descriptor.
+                  TypeDesc* tmpTd = envPtr->getSymbol(strs[0])->getTypeDesc();
+                  TypeDesc* td = new TypeDesc(*tmpTd);
                   Symbol* sym = new Symbol(lexime, 0, td);
                   envs.top()->setSymbol(lexime, sym);
                   break;
@@ -243,7 +236,7 @@ typeDefinition: TOKEN_ID TOKEN_EQ type TOKEN_SEMICOLON
           }
           symTable[id].second = strs[0];
         }
-
+        
         // Lab3
         //symTable[id].second = string($3); 
         if (!envs.empty()) {
@@ -259,8 +252,9 @@ typeDefinition: TOKEN_ID TOKEN_EQ type TOKEN_SEMICOLON
                 arrayType.compare("string") == 0  ||
                 arrayType.compare("boolean") == 0) {
               // Array's element type is primitive type. 
-              TypeDesc* td = envs.top()->getSymbol(arrayType)->getTypeDesc();
-              Symbol* sym = new Symbol($1, 0, td);
+              TypeDesc* arrayEleType = new TypeDesc(arrayType);
+              TypeDesc* td = new TypeDesc("array", lower, upper, arrayEleType);
+              Symbol* sym = new Symbol(lexime, 0, td);
               envs.top()->setSymbol(lexime, sym);
             } else {
               // Array's element type is some custom defined type.
@@ -268,9 +262,11 @@ typeDefinition: TOKEN_ID TOKEN_EQ type TOKEN_SEMICOLON
                 Env* envPtr = envs.top()->getPrevEnv();
                 bool found = false;
                 while (envPtr != NULL) {
-                  if (envPtr->getSymbol(strs[0]) != NULL) {
+                  if (envPtr->getSymbol(arrayType) != NULL) {
                     found = true;
-                    TypeDesc* td = envPtr->getSymbol(arrayType)->getTypeDesc();
+                    // Copy the type descriptor.
+                    TypeDesc* arrayEleType = new TypeDesc(*(envPtr->getSymbol(arrayType)->getTypeDesc()));
+                    TypeDesc* td = new TypeDesc("array", lower, upper, arrayEleType);
                     Symbol* sym = new Symbol(lexime, 0, td);
                     envs.top()->setSymbol(lexime, sym);
                     break;
@@ -281,7 +277,8 @@ typeDefinition: TOKEN_ID TOKEN_EQ type TOKEN_SEMICOLON
                   cout << "Error: type " << strs[0] << " not defined" << endl;
                 }
               } else {
-                TypeDesc* td = envs.top()->getSymbol(arrayType)->getTypeDesc();
+                TypeDesc* arrayEleType = new TypeDesc(*(envs.top()->getSymbol(arrayType)->getTypeDesc()));
+                TypeDesc* td = new TypeDesc("array", lower, upper, arrayEleType);
                 Symbol* sym = new Symbol(lexime, 0, td);
                 envs.top()->setSymbol(lexime, sym);
               }
@@ -292,9 +289,6 @@ typeDefinition: TOKEN_ID TOKEN_EQ type TOKEN_SEMICOLON
             // symbol table entries for anonymous array and record types. 
             
           }
-          //TypeDesc* td = new TypeDesc(strs[0], lower, upper, strs[3]);
-          //Symbol sym($1, 0, td);
-          //envs.top()->setSymbol(lexime, sym);
         }
       }
     };
@@ -487,24 +481,26 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
 
 
       // Lab3
-      Env* prevEnv = envs.top();
-      Env* envPtr = new Env(prevEnv);
-      envs.push(envPtr);
+      //Env* prevEnv = envs.top();
+      //Env* envPtr = new Env(prevEnv);
+      //envs.push(envPtr);
+      //allEnvs.push_back(envPtr);
       vector<pair<string, TypeDesc*> >* fieldList = new vector<pair<string, TypeDesc*> >;
       fieldListStack.push(fieldList);
       vector<string> strs = split($3);
       if (strs[0].compare(rec) != 0 && strs[0].compare(arr) !=0) {
-        for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
           // Lab3. Address will be fixed later.
           if (!envs.empty()) {
-            string lexime(*it);
             if (strs[0].compare("integer") == 0 ||
                 strs[0].compare("string") == 0 ||
                 strs[0].compare("boolean") == 0) {
-              TypeDesc* td = envs.top()->getSymbol(strs[0])->getTypeDesc();
-              fieldList->push_back(pair<string, TypeDesc*>(lexime, td));
-              Symbol* sym = new Symbol(lexime, 0, td);
-              envs.top()->setSymbol(lexime, sym);
+              for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                string lexime(*it);
+                TypeDesc* td = new TypeDesc(strs[0]);
+                fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
+                Symbol* sym = new Symbol(lexime, 0, td);
+                envs.top()->setSymbol(lexime, sym);
+              }
             } else {
               if (envs.top()->getSymbol(strs[0]) == NULL) {
                 Env* envPtr = envs.top()->getPrevEnv();
@@ -512,9 +508,12 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
                 while (envPtr != NULL) {
                   if (envPtr->getSymbol(strs[0]) != NULL) {
                     found = true;
-                    TypeDesc* td = envPtr->getSymbol(strs[0])->getTypeDesc();
-                    Symbol* sym = new Symbol(lexime, 0, td);
-                    envs.top()->setSymbol(lexime, sym);
+                    for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                      string lexime(*it);
+                      TypeDesc* td = new TypeDesc(*(envPtr->getSymbol(strs[0])->getTypeDesc()));
+                      Symbol* sym = new Symbol(lexime, 0, td);
+                      envs.top()->setSymbol(lexime, sym);
+                    }
                     break;
                   }
                   envPtr = envPtr->getPrevEnv();
@@ -523,15 +522,18 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
                   cout << "Error: type " << strs[0] << " not defined" << endl;
                 }
               } else {
-                TypeDesc* td = envs.top()->getSymbol(strs[0])->getTypeDesc();
-                Symbol* sym = new Symbol(lexime, 0, td);
-                envs.top()->setSymbol(lexime, sym);
+                for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                  string lexime(*it);
+                  TypeDesc* td = new TypeDesc(*(envs.top()->getSymbol(strs[0])->getTypeDesc()));
+                  Symbol* sym = new Symbol(lexime, 0, td);
+                  envs.top()->setSymbol(lexime, sym);
+                }
               }
             } 
           }
-        }
       } else if (strs[0].compare(rec) == 0) {
         // Type record.
+        /*
         string id($1);
         if (symTable.find(id) == symTable.end()) {
           symTable[id].first = recSavedAddr;
@@ -546,13 +548,12 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
           }
           symTable[id].second = string($3); 
         }
-
+        */
         
         // Lab3
         
       } else {
-        // Type array.
-        string id($1);
+        /*
         if (symTable.find(id) == symTable.end()) {
           symTable[id].first = arrSavedAddr;
           symTable[id].second = strs[0];
@@ -567,13 +568,13 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
           }
           symTable[id].second = strs[0];
         }
+        */
 
         // Lab3
-        //symTable[id].second = string($3); 
+        // Type is array.
         if (!envs.empty()) {
           int lower = atoi(strs[1].c_str());
           int upper = atoi(strs[2].c_str());
-          string lexime($1);
  
           // Check if array's element type is valid.
           string arrayType(strs[3]); 
@@ -583,9 +584,13 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
                 arrayType.compare("string") == 0  ||
                 arrayType.compare("boolean") == 0) {
               // Array's element type is primitive type. 
-              TypeDesc* td = new TypeDesc(strs[0], lower, upper, arrayType);
-              Symbol* sym = new Symbol($1, 0, td);
-              envs.top()->setSymbol(lexime, sym);
+              for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                string lexime(*it);
+                TypeDesc* arrayEleType = new TypeDesc(arrayType);
+                TypeDesc* td = new TypeDesc("array", lower, upper, arrayEleType);
+                Symbol* sym = new Symbol(lexime, 0, td);
+                envs.top()->setSymbol(lexime, sym);
+              }
             } else {
               // Array's element type is some custom defined type.
               if (envs.top()->getSymbol(arrayType) == NULL) {
@@ -594,9 +599,13 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
                 while (envPtr != NULL) {
                   if (envPtr->getSymbol(strs[0]) != NULL) {
                     found = true;
-                    TypeDesc* td = envPtr->getSymbol(arrayType)->getTypeDesc();
-                    Symbol* sym = new Symbol(lexime, 0, td);
-                    envs.top()->setSymbol(lexime, sym);
+                    for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                      string lexime(*it);
+                      TypeDesc* arrayEleType = new TypeDesc(*(envPtr->getSymbol(arrayType)->getTypeDesc()));
+                      TypeDesc* td = new TypeDesc("array", lower, upper, arrayEleType);
+                      Symbol* sym = new Symbol(lexime, 0, td);
+                      envs.top()->setSymbol(lexime, sym);
+                    }
                     break;
                   }
                   envPtr = envPtr->getPrevEnv();
@@ -605,9 +614,13 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
                   cout << "Error: type " << strs[0] << " not defined" << endl;
                 }
               } else {
-                TypeDesc* td = envs.top()->getSymbol(arrayType)->getTypeDesc();
-                Symbol* sym = new Symbol(lexime, 0, td);
-                envs.top()->setSymbol(lexime, sym);
+                for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                  string lexime(*it);
+                  TypeDesc* arrayEleType = new TypeDesc(*(envs.top()->getSymbol(arrayType)->getTypeDesc()));
+                  TypeDesc* td = new TypeDesc("array", lower, upper, arrayEleType);
+                  Symbol* sym = new Symbol(lexime, 0, td);
+                  envs.top()->setSymbol(lexime, sym);
+                }
               }
             }
           } else {
@@ -616,9 +629,6 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
             // symbol table entries for anonymous array and record types. 
             
           }
-          TypeDesc* td = new TypeDesc(strs[0], lower, upper, strs[3]);
-          Symbol* sym = new Symbol($1, 0, td);
-          envs.top()->setSymbol(lexime, sym);
         }
       }
     };
@@ -743,8 +753,15 @@ main(int argc, char **argv) {
     cout << setw(18) << std::left << ss.str();
     cout << endl;
   }
+  
+  envs.top()->displayTable();
+  for (int i = allEnvs.size() - 1; i >= 0; --i) {
+    delete allEnvs[i];
+  } 
+
   fclose(stdout);
   fclose(myfile);
+
 }
 
 void yyerror(const char *s) {

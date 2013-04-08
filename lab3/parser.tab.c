@@ -98,6 +98,7 @@ extern "C++" stack<Env*> envs;
 extern "C++" stack<int> offsets;
 extern "C++" stack<int> recordSeqs;
 extern "C++" stack<int> arraySeqs;
+extern "C++" vector<Env*> allEnvs;
 extern "C++" stack<vector<pair<string, TypeDesc*> >* > fieldListStack;
 extern "C" int recordSeq;
 extern "C" int arraySeq;
@@ -122,13 +123,10 @@ char arrayStr[] = "array";
 string rec(recordStr);
 string arr(arrayStr);
 
-// Lab3 variables
-//stack<Env*> envs;
-//stack<int> offsets;
 
 
 /* Line 268 of yacc.c  */
-#line 132 "parser.tab.c"
+#line 130 "parser.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -216,7 +214,7 @@ typedef union YYSTYPE
 {
 
 /* Line 293 of yacc.c  */
-#line 63 "parser.y"
+#line 61 "parser.y"
 
   int ival;
   float fval;
@@ -226,7 +224,7 @@ typedef union YYSTYPE
 
 
 /* Line 293 of yacc.c  */
-#line 230 "parser.tab.c"
+#line 228 "parser.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -238,7 +236,7 @@ typedef union YYSTYPE
 
 
 /* Line 343 of yacc.c  */
-#line 242 "parser.tab.c"
+#line 240 "parser.tab.c"
 
 #ifdef short
 # undef short
@@ -566,16 +564,16 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   131,   131,   148,   148,   149,   149,   150,   150,   152,
-     154,   155,   157,   159,   160,   162,   164,   165,   166,   167,
-     169,   302,   316,   330,   357,   357,   359,   360,   362,   376,
-     391,   393,   395,   396,   398,   400,   400,   402,   403,   404,
-     406,   408,   416,   417,   418,   419,   420,   422,   425,   446,
-     451,   458,   459,   461,   475,   626,   627,   629,   631,   631,
-     633,   634,   635,   636,   637,   638,   640,   641,   642,   644,
-     645,   646,   648,   649,   651,   652,   653,   654,   656,   657,
-     658,   659,   660,   661,   663,   671,   678,   678,   679,   681,
-     682,   684,   686,   688,   703,   708,   708
+       0,   129,   129,   139,   139,   140,   140,   141,   141,   143,
+     145,   146,   148,   150,   151,   153,   155,   156,   157,   158,
+     160,   296,   310,   324,   351,   351,   353,   354,   356,   370,
+     385,   387,   389,   390,   392,   394,   394,   396,   397,   398,
+     400,   402,   410,   411,   412,   413,   414,   416,   419,   440,
+     445,   452,   453,   455,   469,   636,   637,   639,   641,   641,
+     643,   644,   645,   646,   647,   648,   650,   651,   652,   654,
+     655,   656,   658,   659,   661,   662,   663,   664,   666,   667,
+     668,   669,   670,   671,   673,   681,   688,   688,   689,   691,
+     692,   694,   696,   698,   713,   718,   718
 };
 #endif
 
@@ -1639,82 +1637,75 @@ yyreduce:
         case 2:
 
 /* Line 1806 of yacc.c  */
-#line 134 "parser.y"
+#line 132 "parser.y"
     { cout << "program" << endl;
       string id((yyvsp[(2) - (8)].sval));
       symTable[id].first = 0;
       symTable[id].second = "nil";
 
-      // Lab3
-      /*
-      Env env(NULL);
-      Env* envPtr = &env; 
-      envs.push(envPtr);
-      offsets.push(address);
-      */
     }
     break;
 
   case 10:
 
 /* Line 1806 of yacc.c  */
-#line 154 "parser.y"
+#line 145 "parser.y"
     { cout << "type_definition_more" << endl; }
     break;
 
   case 11:
 
 /* Line 1806 of yacc.c  */
-#line 155 "parser.y"
+#line 146 "parser.y"
     { cout << "type_definition" << endl; }
     break;
 
   case 13:
 
 /* Line 1806 of yacc.c  */
-#line 159 "parser.y"
+#line 150 "parser.y"
     { cout << "variable_declaration_more" << endl; }
     break;
 
   case 14:
 
 /* Line 1806 of yacc.c  */
-#line 160 "parser.y"
+#line 151 "parser.y"
     {cout << "variable_declaration" << endl; }
     break;
 
   case 16:
 
 /* Line 1806 of yacc.c  */
-#line 164 "parser.y"
+#line 155 "parser.y"
     { cout << "sub_program_declarations_more" << endl; }
     break;
 
   case 17:
 
 /* Line 1806 of yacc.c  */
-#line 165 "parser.y"
+#line 156 "parser.y"
     { cout << "sub_program_declarations_more" << endl; }
     break;
 
   case 18:
 
 /* Line 1806 of yacc.c  */
-#line 166 "parser.y"
+#line 157 "parser.y"
     { cout << "sub_program_declarations" << endl; }
     break;
 
   case 19:
 
 /* Line 1806 of yacc.c  */
-#line 167 "parser.y"
+#line 158 "parser.y"
     { cout << "sub_program_declarations" << endl; }
     break;
 
   case 20:
 
 /* Line 1806 of yacc.c  */
-#line 170 "parser.y"
+#line 161 "parser.y"
     { cout << "type_definition" << endl;
       vector<string> strs = split((yyvsp[(3) - (4)].sval));
       if (strs[0].compare(rec) != 0 && strs[0].compare(arr) !=0) {
@@ -1727,7 +1718,7 @@ yyreduce:
           if (strs[0].compare("integer") == 0 ||
               strs[0].compare("string") == 0 ||
               strs[0].compare("boolean") == 0) {
-            TypeDesc* td = envs.top()->getSymbol(strs[0])->getTypeDesc();
+            TypeDesc* td = new TypeDesc(strs[0]);
             Symbol* sym = new Symbol(lexime, 0, td);
             envs.top()->setSymbol(lexime, sym);
           } else {
@@ -1737,7 +1728,9 @@ yyreduce:
               while (envPtr != NULL) {
                 if (envPtr->getSymbol(strs[0]) != NULL) {
                   found = true;
-                  TypeDesc* td = envPtr->getSymbol(strs[0])->getTypeDesc();
+                  // Copy the type descriptor.
+                  TypeDesc* tmpTd = envPtr->getSymbol(strs[0])->getTypeDesc();
+                  TypeDesc* td = new TypeDesc(*tmpTd);
                   Symbol* sym = new Symbol(lexime, 0, td);
                   envs.top()->setSymbol(lexime, sym);
                   break;
@@ -1791,7 +1784,7 @@ yyreduce:
           }
           symTable[id].second = strs[0];
         }
-
+        
         // Lab3
         //symTable[id].second = string($3); 
         if (!envs.empty()) {
@@ -1807,8 +1800,9 @@ yyreduce:
                 arrayType.compare("string") == 0  ||
                 arrayType.compare("boolean") == 0) {
               // Array's element type is primitive type. 
-              TypeDesc* td = envs.top()->getSymbol(arrayType)->getTypeDesc();
-              Symbol* sym = new Symbol((yyvsp[(1) - (4)].sval), 0, td);
+              TypeDesc* arrayEleType = new TypeDesc(arrayType);
+              TypeDesc* td = new TypeDesc("array", lower, upper, arrayEleType);
+              Symbol* sym = new Symbol(lexime, 0, td);
               envs.top()->setSymbol(lexime, sym);
             } else {
               // Array's element type is some custom defined type.
@@ -1816,9 +1810,11 @@ yyreduce:
                 Env* envPtr = envs.top()->getPrevEnv();
                 bool found = false;
                 while (envPtr != NULL) {
-                  if (envPtr->getSymbol(strs[0]) != NULL) {
+                  if (envPtr->getSymbol(arrayType) != NULL) {
                     found = true;
-                    TypeDesc* td = envPtr->getSymbol(arrayType)->getTypeDesc();
+                    // Copy the type descriptor.
+                    TypeDesc* arrayEleType = new TypeDesc(*(envPtr->getSymbol(arrayType)->getTypeDesc()));
+                    TypeDesc* td = new TypeDesc("array", lower, upper, arrayEleType);
                     Symbol* sym = new Symbol(lexime, 0, td);
                     envs.top()->setSymbol(lexime, sym);
                     break;
@@ -1829,7 +1825,8 @@ yyreduce:
                   cout << "Error: type " << strs[0] << " not defined" << endl;
                 }
               } else {
-                TypeDesc* td = envs.top()->getSymbol(arrayType)->getTypeDesc();
+                TypeDesc* arrayEleType = new TypeDesc(*(envs.top()->getSymbol(arrayType)->getTypeDesc()));
+                TypeDesc* td = new TypeDesc("array", lower, upper, arrayEleType);
                 Symbol* sym = new Symbol(lexime, 0, td);
                 envs.top()->setSymbol(lexime, sym);
               }
@@ -1840,9 +1837,6 @@ yyreduce:
             // symbol table entries for anonymous array and record types. 
             
           }
-          //TypeDesc* td = new TypeDesc(strs[0], lower, upper, strs[3]);
-          //Symbol sym($1, 0, td);
-          //envs.top()->setSymbol(lexime, sym);
         }
       }
     }
@@ -1851,7 +1845,7 @@ yyreduce:
   case 21:
 
 /* Line 1806 of yacc.c  */
-#line 303 "parser.y"
+#line 297 "parser.y"
     { cout << "variable_declaration" << endl;
       vector<string> ids = split((yyvsp[(1) - (4)].sval));
       for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
@@ -1869,7 +1863,7 @@ yyreduce:
   case 22:
 
 /* Line 1806 of yacc.c  */
-#line 318 "parser.y"
+#line 312 "parser.y"
     { cout << "procedure_declaration" << endl;
       string id((yyvsp[(2) - (8)].sval));
       if (symTable.find(id) != symTable.end()) {
@@ -1886,7 +1880,7 @@ yyreduce:
   case 23:
 
 /* Line 1806 of yacc.c  */
-#line 333 "parser.y"
+#line 327 "parser.y"
     { cout << "function_declaration" << endl;
       string id((yyvsp[(2) - (10)].sval));
       if (symTable.find(id) != symTable.end()) {
@@ -1915,21 +1909,21 @@ yyreduce:
   case 26:
 
 /* Line 1806 of yacc.c  */
-#line 359 "parser.y"
+#line 353 "parser.y"
     { cout << "formal_parameter_list" << endl; (yyval.ival) = (yyvsp[(1) - (1)].ival); }
     break;
 
   case 27:
 
 /* Line 1806 of yacc.c  */
-#line 360 "parser.y"
+#line 354 "parser.y"
     { (yyval.ival) = 0; }
     break;
 
   case 28:
 
 /* Line 1806 of yacc.c  */
-#line 363 "parser.y"
+#line 357 "parser.y"
     { cout << "identifier_lists_more" << endl;
       vector<string> ids = split((yyvsp[(3) - (5)].sval));
       for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
@@ -1948,7 +1942,7 @@ yyreduce:
   case 29:
 
 /* Line 1806 of yacc.c  */
-#line 377 "parser.y"
+#line 371 "parser.y"
     { cout << "identifier_lists" << endl;
         vector<string> ids = split((yyvsp[(1) - (3)].sval));
         for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
@@ -1967,70 +1961,70 @@ yyreduce:
   case 30:
 
 /* Line 1806 of yacc.c  */
-#line 391 "parser.y"
+#line 385 "parser.y"
     { cout << "block" << endl; }
     break;
 
   case 31:
 
 /* Line 1806 of yacc.c  */
-#line 393 "parser.y"
+#line 387 "parser.y"
     { cout << "compound_statement" << endl; }
     break;
 
   case 32:
 
 /* Line 1806 of yacc.c  */
-#line 395 "parser.y"
+#line 389 "parser.y"
     { cout << "statement_sequence_more" << endl; }
     break;
 
   case 33:
 
 /* Line 1806 of yacc.c  */
-#line 396 "parser.y"
+#line 390 "parser.y"
     { cout << "statement_sequence" << endl; }
     break;
 
   case 34:
 
 /* Line 1806 of yacc.c  */
-#line 398 "parser.y"
+#line 392 "parser.y"
     { cout << "statement" << endl; }
     break;
 
   case 37:
 
 /* Line 1806 of yacc.c  */
-#line 402 "parser.y"
+#line 396 "parser.y"
     { cout << "simple_statement" << endl; }
     break;
 
   case 38:
 
 /* Line 1806 of yacc.c  */
-#line 403 "parser.y"
+#line 397 "parser.y"
     { cout << "simple_statement" << endl; }
     break;
 
   case 39:
 
 /* Line 1806 of yacc.c  */
-#line 404 "parser.y"
+#line 398 "parser.y"
     { cout << "simple_statement_empty" << endl; }
     break;
 
   case 40:
 
 /* Line 1806 of yacc.c  */
-#line 406 "parser.y"
+#line 400 "parser.y"
     { cout << "assignment_statement" << endl; }
     break;
 
   case 41:
 
 /* Line 1806 of yacc.c  */
-#line 409 "parser.y"
+#line 403 "parser.y"
     { cout << "procedure_statement" << endl;
       string id((yyvsp[(1) - (4)].sval));
       if (symTable.find(id) == symTable.end()) {
@@ -2042,42 +2036,42 @@ yyreduce:
   case 42:
 
 /* Line 1806 of yacc.c  */
-#line 416 "parser.y"
+#line 410 "parser.y"
     { cout << "compound_statement" << endl; }
     break;
 
   case 43:
 
 /* Line 1806 of yacc.c  */
-#line 417 "parser.y"
+#line 411 "parser.y"
     { cout << "if_statement" << endl; }
     break;
 
   case 44:
 
 /* Line 1806 of yacc.c  */
-#line 418 "parser.y"
+#line 412 "parser.y"
     { cout << "ifelse_statement" << endl; }
     break;
 
   case 45:
 
 /* Line 1806 of yacc.c  */
-#line 419 "parser.y"
+#line 413 "parser.y"
     { cout << "while_statement" << endl; }
     break;
 
   case 46:
 
 /* Line 1806 of yacc.c  */
-#line 420 "parser.y"
+#line 414 "parser.y"
     { cout << "for_statement" << endl; }
     break;
 
   case 47:
 
 /* Line 1806 of yacc.c  */
-#line 422 "parser.y"
+#line 416 "parser.y"
     { cout << "type_ID" << endl; //addSymbol($1, nilStr);
                  (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
                  strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));}
@@ -2086,7 +2080,7 @@ yyreduce:
   case 48:
 
 /* Line 1806 of yacc.c  */
-#line 426 "parser.y"
+#line 420 "parser.y"
     { cout << "type_array" << endl;
         //$$ = (char*) malloc(sizeof(arrayStr));;
 
@@ -2112,7 +2106,7 @@ yyreduce:
   case 49:
 
 /* Line 1806 of yacc.c  */
-#line 447 "parser.y"
+#line 441 "parser.y"
     { cout << "type_record" << endl;
         (yyval.sval) = (char*) malloc(sizeof(recordStr));;
         strcpy((yyval.sval), recordStr); }
@@ -2121,7 +2115,7 @@ yyreduce:
   case 50:
 
 /* Line 1806 of yacc.c  */
-#line 451 "parser.y"
+#line 445 "parser.y"
     { cout << "result_type" << endl;
     string id((yyvsp[(1) - (1)].sval));
     if (symTable.find(id) == symTable.end()) {
@@ -2133,21 +2127,21 @@ yyreduce:
   case 51:
 
 /* Line 1806 of yacc.c  */
-#line 458 "parser.y"
+#line 452 "parser.y"
     { cout << "field_list" << endl; }
     break;
 
   case 52:
 
 /* Line 1806 of yacc.c  */
-#line 459 "parser.y"
+#line 453 "parser.y"
     { cout << "field_list_empty" << endl; }
     break;
 
   case 53:
 
 /* Line 1806 of yacc.c  */
-#line 462 "parser.y"
+#line 456 "parser.y"
     { cout << "identifier_lists_more" << endl;
       vector<string> ids = split((yyvsp[(3) - (5)].sval));
       for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
@@ -2166,7 +2160,7 @@ yyreduce:
   case 54:
 
 /* Line 1806 of yacc.c  */
-#line 476 "parser.y"
+#line 470 "parser.y"
     { cout << "identifier_lists" << endl;
       vector<string> ids = split((yyvsp[(1) - (3)].sval));
       for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
@@ -2181,24 +2175,26 @@ yyreduce:
 
 
       // Lab3
-      Env* prevEnv = envs.top();
-      Env* envPtr = new Env(prevEnv);
-      envs.push(envPtr);
+      //Env* prevEnv = envs.top();
+      //Env* envPtr = new Env(prevEnv);
+      //envs.push(envPtr);
+      //allEnvs.push_back(envPtr);
       vector<pair<string, TypeDesc*> >* fieldList = new vector<pair<string, TypeDesc*> >;
       fieldListStack.push(fieldList);
       vector<string> strs = split((yyvsp[(3) - (3)].sval));
       if (strs[0].compare(rec) != 0 && strs[0].compare(arr) !=0) {
-        for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
           // Lab3. Address will be fixed later.
           if (!envs.empty()) {
-            string lexime(*it);
             if (strs[0].compare("integer") == 0 ||
                 strs[0].compare("string") == 0 ||
                 strs[0].compare("boolean") == 0) {
-              TypeDesc* td = envs.top()->getSymbol(strs[0])->getTypeDesc();
-              fieldList->push_back(pair<string, TypeDesc*>(lexime, td));
-              Symbol* sym = new Symbol(lexime, 0, td);
-              envs.top()->setSymbol(lexime, sym);
+              for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                string lexime(*it);
+                TypeDesc* td = new TypeDesc(strs[0]);
+                fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
+                Symbol* sym = new Symbol(lexime, 0, td);
+                envs.top()->setSymbol(lexime, sym);
+              }
             } else {
               if (envs.top()->getSymbol(strs[0]) == NULL) {
                 Env* envPtr = envs.top()->getPrevEnv();
@@ -2206,9 +2202,12 @@ yyreduce:
                 while (envPtr != NULL) {
                   if (envPtr->getSymbol(strs[0]) != NULL) {
                     found = true;
-                    TypeDesc* td = envPtr->getSymbol(strs[0])->getTypeDesc();
-                    Symbol* sym = new Symbol(lexime, 0, td);
-                    envs.top()->setSymbol(lexime, sym);
+                    for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                      string lexime(*it);
+                      TypeDesc* td = new TypeDesc(*(envPtr->getSymbol(strs[0])->getTypeDesc()));
+                      Symbol* sym = new Symbol(lexime, 0, td);
+                      envs.top()->setSymbol(lexime, sym);
+                    }
                     break;
                   }
                   envPtr = envPtr->getPrevEnv();
@@ -2217,19 +2216,22 @@ yyreduce:
                   cout << "Error: type " << strs[0] << " not defined" << endl;
                 }
               } else {
-                TypeDesc* td = envs.top()->getSymbol(strs[0])->getTypeDesc();
-                Symbol* sym = new Symbol(lexime, 0, td);
-                envs.top()->setSymbol(lexime, sym);
+                for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                  string lexime(*it);
+                  TypeDesc* td = new TypeDesc(*(envs.top()->getSymbol(strs[0])->getTypeDesc()));
+                  Symbol* sym = new Symbol(lexime, 0, td);
+                  envs.top()->setSymbol(lexime, sym);
+                }
               }
             } 
           }
-        }
       } else if (strs[0].compare(rec) == 0) {
         // Type record.
-        string id((yyvsp[(1) - (3)].sval));
+        /*
+        string id($1);
         if (symTable.find(id) == symTable.end()) {
           symTable[id].first = recSavedAddr;
-          symTable[id].second = string((yyvsp[(3) - (3)].sval)); 
+          symTable[id].second = string($3); 
         } else {
           if (symTable[id].first > recSavedAddr) {
             int addr = symTable[id].first;
@@ -2238,15 +2240,14 @@ yyreduce:
           } else {
             fixAddress(recSavedAddr);
           }
-          symTable[id].second = string((yyvsp[(3) - (3)].sval)); 
+          symTable[id].second = string($3); 
         }
-
+        */
         
         // Lab3
         
       } else {
-        // Type array.
-        string id((yyvsp[(1) - (3)].sval));
+        /*
         if (symTable.find(id) == symTable.end()) {
           symTable[id].first = arrSavedAddr;
           symTable[id].second = strs[0];
@@ -2261,13 +2262,13 @@ yyreduce:
           }
           symTable[id].second = strs[0];
         }
+        */
 
         // Lab3
-        //symTable[id].second = string($3); 
+        // Type is array.
         if (!envs.empty()) {
           int lower = atoi(strs[1].c_str());
           int upper = atoi(strs[2].c_str());
-          string lexime((yyvsp[(1) - (3)].sval));
  
           // Check if array's element type is valid.
           string arrayType(strs[3]); 
@@ -2277,9 +2278,13 @@ yyreduce:
                 arrayType.compare("string") == 0  ||
                 arrayType.compare("boolean") == 0) {
               // Array's element type is primitive type. 
-              TypeDesc* td = new TypeDesc(strs[0], lower, upper, arrayType);
-              Symbol* sym = new Symbol((yyvsp[(1) - (3)].sval), 0, td);
-              envs.top()->setSymbol(lexime, sym);
+              for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                string lexime(*it);
+                TypeDesc* arrayEleType = new TypeDesc(arrayType);
+                TypeDesc* td = new TypeDesc("array", lower, upper, arrayEleType);
+                Symbol* sym = new Symbol(lexime, 0, td);
+                envs.top()->setSymbol(lexime, sym);
+              }
             } else {
               // Array's element type is some custom defined type.
               if (envs.top()->getSymbol(arrayType) == NULL) {
@@ -2288,9 +2293,13 @@ yyreduce:
                 while (envPtr != NULL) {
                   if (envPtr->getSymbol(strs[0]) != NULL) {
                     found = true;
-                    TypeDesc* td = envPtr->getSymbol(arrayType)->getTypeDesc();
-                    Symbol* sym = new Symbol(lexime, 0, td);
-                    envs.top()->setSymbol(lexime, sym);
+                    for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                      string lexime(*it);
+                      TypeDesc* arrayEleType = new TypeDesc(*(envPtr->getSymbol(arrayType)->getTypeDesc()));
+                      TypeDesc* td = new TypeDesc("array", lower, upper, arrayEleType);
+                      Symbol* sym = new Symbol(lexime, 0, td);
+                      envs.top()->setSymbol(lexime, sym);
+                    }
                     break;
                   }
                   envPtr = envPtr->getPrevEnv();
@@ -2299,9 +2308,13 @@ yyreduce:
                   cout << "Error: type " << strs[0] << " not defined" << endl;
                 }
               } else {
-                TypeDesc* td = envs.top()->getSymbol(arrayType)->getTypeDesc();
-                Symbol* sym = new Symbol(lexime, 0, td);
-                envs.top()->setSymbol(lexime, sym);
+                for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                  string lexime(*it);
+                  TypeDesc* arrayEleType = new TypeDesc(*(envs.top()->getSymbol(arrayType)->getTypeDesc()));
+                  TypeDesc* td = new TypeDesc("array", lower, upper, arrayEleType);
+                  Symbol* sym = new Symbol(lexime, 0, td);
+                  envs.top()->setSymbol(lexime, sym);
+                }
               }
             }
           } else {
@@ -2310,9 +2323,6 @@ yyreduce:
             // symbol table entries for anonymous array and record types. 
             
           }
-          TypeDesc* td = new TypeDesc(strs[0], lower, upper, strs[3]);
-          Symbol* sym = new Symbol((yyvsp[(1) - (3)].sval), 0, td);
-          envs.top()->setSymbol(lexime, sym);
         }
       }
     }
@@ -2321,196 +2331,196 @@ yyreduce:
   case 55:
 
 /* Line 1806 of yacc.c  */
-#line 626 "parser.y"
+#line 636 "parser.y"
     { cout << "constant" << endl; (yyval.ival) = (yyvsp[(1) - (1)].ival);}
     break;
 
   case 56:
 
 /* Line 1806 of yacc.c  */
-#line 627 "parser.y"
+#line 637 "parser.y"
     { cout << "constant" << endl; (yyval.ival) = (yyvsp[(2) - (2)].ival);}
     break;
 
   case 57:
 
 /* Line 1806 of yacc.c  */
-#line 629 "parser.y"
+#line 639 "parser.y"
     { cout << "expression" << endl; }
     break;
 
   case 60:
 
 /* Line 1806 of yacc.c  */
-#line 633 "parser.y"
+#line 643 "parser.y"
     { cout << "relational_op" << endl; }
     break;
 
   case 61:
 
 /* Line 1806 of yacc.c  */
-#line 634 "parser.y"
+#line 644 "parser.y"
     { cout << "relational_op" << endl; }
     break;
 
   case 62:
 
 /* Line 1806 of yacc.c  */
-#line 635 "parser.y"
+#line 645 "parser.y"
     { cout << "relational_op" << endl; }
     break;
 
   case 63:
 
 /* Line 1806 of yacc.c  */
-#line 636 "parser.y"
+#line 646 "parser.y"
     { cout << "relational_op" << endl; }
     break;
 
   case 64:
 
 /* Line 1806 of yacc.c  */
-#line 637 "parser.y"
+#line 647 "parser.y"
     { cout << "relational_op" << endl; }
     break;
 
   case 65:
 
 /* Line 1806 of yacc.c  */
-#line 638 "parser.y"
+#line 648 "parser.y"
     { cout << "relational_op" << endl; }
     break;
 
   case 66:
 
 /* Line 1806 of yacc.c  */
-#line 640 "parser.y"
+#line 650 "parser.y"
     { cout << "simple_expression" << endl; }
     break;
 
   case 67:
 
 /* Line 1806 of yacc.c  */
-#line 641 "parser.y"
+#line 651 "parser.y"
     { cout << "simple_expression" << endl; }
     break;
 
   case 68:
 
 /* Line 1806 of yacc.c  */
-#line 642 "parser.y"
+#line 652 "parser.y"
     { cout << "simple_expression_more" << endl; }
     break;
 
   case 69:
 
 /* Line 1806 of yacc.c  */
-#line 644 "parser.y"
+#line 654 "parser.y"
     { cout << "addop" << endl; }
     break;
 
   case 70:
 
 /* Line 1806 of yacc.c  */
-#line 645 "parser.y"
+#line 655 "parser.y"
     { cout << "addop" << endl; }
     break;
 
   case 71:
 
 /* Line 1806 of yacc.c  */
-#line 646 "parser.y"
+#line 656 "parser.y"
     { cout << "addop" << endl; }
     break;
 
   case 72:
 
 /* Line 1806 of yacc.c  */
-#line 648 "parser.y"
+#line 658 "parser.y"
     { cout << "term_more" << endl; }
     break;
 
   case 73:
 
 /* Line 1806 of yacc.c  */
-#line 649 "parser.y"
+#line 659 "parser.y"
     { cout << "term" << endl; }
     break;
 
   case 74:
 
 /* Line 1806 of yacc.c  */
-#line 651 "parser.y"
+#line 661 "parser.y"
     { cout << "mulop" << endl; }
     break;
 
   case 75:
 
 /* Line 1806 of yacc.c  */
-#line 652 "parser.y"
+#line 662 "parser.y"
     { cout << "mulop" << endl; }
     break;
 
   case 76:
 
 /* Line 1806 of yacc.c  */
-#line 653 "parser.y"
+#line 663 "parser.y"
     { cout << "mulop" << endl; }
     break;
 
   case 77:
 
 /* Line 1806 of yacc.c  */
-#line 654 "parser.y"
+#line 664 "parser.y"
     { cout << "mulop" << endl; }
     break;
 
   case 78:
 
 /* Line 1806 of yacc.c  */
-#line 656 "parser.y"
+#line 666 "parser.y"
     { cout << "factor" << endl; }
     break;
 
   case 79:
 
 /* Line 1806 of yacc.c  */
-#line 657 "parser.y"
+#line 667 "parser.y"
     { cout << "factor" << endl; }
     break;
 
   case 80:
 
 /* Line 1806 of yacc.c  */
-#line 658 "parser.y"
+#line 668 "parser.y"
     { cout << "factor" << endl; }
     break;
 
   case 81:
 
 /* Line 1806 of yacc.c  */
-#line 659 "parser.y"
+#line 669 "parser.y"
     { cout << "factor" << endl; }
     break;
 
   case 82:
 
 /* Line 1806 of yacc.c  */
-#line 660 "parser.y"
+#line 670 "parser.y"
     { cout << "factor" << endl; }
     break;
 
   case 83:
 
 /* Line 1806 of yacc.c  */
-#line 661 "parser.y"
+#line 671 "parser.y"
     { cout << "factor" << endl; }
     break;
 
   case 84:
 
 /* Line 1806 of yacc.c  */
-#line 664 "parser.y"
+#line 674 "parser.y"
     { cout << "function_reference" << endl;
       string id((yyvsp[(1) - (4)].sval));
       if (symTable.find(id) == symTable.end()) {
@@ -2522,7 +2532,7 @@ yyreduce:
   case 85:
 
 /* Line 1806 of yacc.c  */
-#line 671 "parser.y"
+#line 681 "parser.y"
     { cout << "variable" << endl;
     string id((yyvsp[(1) - (2)].sval));
     if (symTable.find(id) == symTable.end()) {
@@ -2534,42 +2544,42 @@ yyreduce:
   case 88:
 
 /* Line 1806 of yacc.c  */
-#line 679 "parser.y"
+#line 689 "parser.y"
     { cout << "component_selection_empty" << endl; }
     break;
 
   case 89:
 
 /* Line 1806 of yacc.c  */
-#line 681 "parser.y"
+#line 691 "parser.y"
     { cout << "actual_parameter_list" << endl; }
     break;
 
   case 90:
 
 /* Line 1806 of yacc.c  */
-#line 682 "parser.y"
+#line 692 "parser.y"
     { cout << "actual_parameter_list_empty" << endl; }
     break;
 
   case 91:
 
 /* Line 1806 of yacc.c  */
-#line 685 "parser.y"
+#line 695 "parser.y"
     { cout << "expressions_more" << endl; }
     break;
 
   case 92:
 
 /* Line 1806 of yacc.c  */
-#line 686 "parser.y"
+#line 696 "parser.y"
     { cout << "expressions" << endl; }
     break;
 
   case 93:
 
 /* Line 1806 of yacc.c  */
-#line 689 "parser.y"
+#line 699 "parser.y"
     { cout << "identifier_list_more" << endl;
       (yyval.sval) = (char*) malloc (strlen((yyvsp[(1) - (3)].sval)) + strlen((yyvsp[(3) - (3)].sval)) + 2);
       int i = 0;
@@ -2589,7 +2599,7 @@ yyreduce:
   case 94:
 
 /* Line 1806 of yacc.c  */
-#line 704 "parser.y"
+#line 714 "parser.y"
     { cout << "identifier_list" << endl;
       (yyval.sval) = (char*) malloc (strlen((yyvsp[(1) - (1)].sval)) + 1);
       strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));}
@@ -2598,7 +2608,7 @@ yyreduce:
 
 
 /* Line 1806 of yacc.c  */
-#line 2602 "parser.tab.c"
+#line 2612 "parser.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2829,7 +2839,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 710 "parser.y"
+#line 720 "parser.y"
 
 main(int argc, char **argv) {
   FILE *myfile = fopen(argv[1], "r");
@@ -2866,8 +2876,15 @@ main(int argc, char **argv) {
     cout << setw(18) << std::left << ss.str();
     cout << endl;
   }
+  
+  envs.top()->displayTable();
+  for (int i = allEnvs.size() - 1; i >= 0; --i) {
+    delete allEnvs[i];
+  } 
+
   fclose(stdout);
   fclose(myfile);
+
 }
 
 void yyerror(const char *s) {

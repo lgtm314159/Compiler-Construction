@@ -12,8 +12,10 @@ Symbol::Symbol(const Symbol& sb): lexime(sb.lexime), offset(sb.offset),
   typeDesc(sb.typeDesc) {}
 
 Symbol::~Symbol() {
-  delete typeDesc;
-  typeDesc = NULL;
+  if (typeDesc != NULL) {
+    delete typeDesc;
+    typeDesc = NULL;
+  }
 }
 
 string& Symbol::getLexime() {
