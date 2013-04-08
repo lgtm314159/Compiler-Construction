@@ -10,7 +10,7 @@ using namespace std;
 class Env {
   private:
     Env* prev;
-    map<string, Symbol> table;
+    map<string, Symbol*> table;
 
   public:
     Env(Env* p);
@@ -20,7 +20,7 @@ class Env {
     void setPrevEnv(Env* p);
     Symbol* getSymbol(const string& name);
     void populateKeywords();
-    void setSymbol(const string& name, Symbol& symbol);
+    void setSymbol(const string& name, Symbol* symbol);
     int getTableSize();
 };
 

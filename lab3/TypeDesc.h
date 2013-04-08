@@ -2,6 +2,7 @@
 #define TypeDesc_h
 
 #include <map>
+#include <vector>
 #include <string>
 
 using namespace std;
@@ -17,12 +18,13 @@ class TypeDesc {
     string arrayEleType;
     // This field is for record types.
     Env* recordEnv;
+    vector<pair<string, TypeDesc> >* fieldList;
     
   public:
 //    TypeDesc();
     TypeDesc(const string& t);
     TypeDesc(const string& t, int l, int u, const string& et);
-    TypeDesc(const string& t, Env* re);
+    TypeDesc(const string& t, Env* re, vector<pair<string, TypeDesc> >* fl);
     TypeDesc(const TypeDesc& td);
     ~TypeDesc();
     string& getType();
@@ -35,6 +37,7 @@ class TypeDesc {
     void setArrayEleType(const string& t);
     Env* getRecordEnv();
     void setRecordEnv(Env* re); 
+    vector<pair<string, TypeDesc> >* getFieldList();
 };
 
 #endif

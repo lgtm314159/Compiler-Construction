@@ -6,6 +6,7 @@
 #include "Env.h"
 #include "TypeDesc.h"
 #include <stack>
+#include <vector>
 
 #define YY_DECL extern "C" int yylex()
 #define MYNEWLINE 10;
@@ -21,6 +22,7 @@ stack<Env*> envs;
 stack<int> offsets;
 stack<int> recordSeqs;
 stack<int> arraySeqs;
+stack<vector<pair<string, TypeDesc> >* > fieldListStack;
 int recordSeq = 0;
 int arraySeq = 0;
 %}
