@@ -19,6 +19,10 @@ int arrSavedAddr;
 // Lab3
 stack<Env*> envs;
 stack<int> offsets;
+stack<int> recordSeqs;
+stack<int> arraySeqs;
+int recordSeq = 0;
+int arraySeq = 0;
 %}
 
 DELIM   [ \t]

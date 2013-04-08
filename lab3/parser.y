@@ -27,6 +27,10 @@ extern "C" int arrSavedAddr;
 // Lab3
 extern "C++" stack<Env*> envs;
 extern "C++" stack<int> offsets;
+extern "C++" stack<int> recordSeqs;
+extern "C++" stack<int> arraySeqs;
+extern "C" int recordSeq;
+extern "C" int arraySeq;
 
 void yyerror(const char *s);
 static void lookup(char *token_buffer);
@@ -164,7 +168,6 @@ subprogramDeclarationList: subprogramDeclarationList procedureDeclaration { cout
 typeDefinition: TOKEN_ID TOKEN_EQ type TOKEN_SEMICOLON
     { cout << "type_definition" << endl;
       vector<string> strs = split($3);
-      //if (type.compare(rec) != 0 && type.compare(arr) !=0) {
       if (strs[0].compare(rec) != 0 && strs[0].compare(arr) !=0) {
         addSymbol($1, $3);
         addSymbol($3, nilStr);
@@ -172,8 +175,9 @@ typeDefinition: TOKEN_ID TOKEN_EQ type TOKEN_SEMICOLON
         // Lab3. Address will be fixed later.
         if (!envs.empty()) {
           string lexime($1);
-          if (strs[0].compare("integer") == 0 || strs[0].compare("float") == 0
-              || strs[0].compare("boolean") == 0) {
+          if (strs[0].compare("integer") == 0 ||
+              strs[0].compare("string") == 0 ||
+              strs[0].compare("boolean") == 0) {
             TypeDesc td(strs[0]);
             Symbol sym(lexime, 0, td);
             envs.top()->setSymbol(lexime, sym);
@@ -202,6 +206,7 @@ typeDefinition: TOKEN_ID TOKEN_EQ type TOKEN_SEMICOLON
           }          
         }
       } else if (strs[0].compare(rec) == 0) {
+        // Type record.
         string id($1);
         if (symTable.find(id) == symTable.end()) {
           symTable[id].first = recSavedAddr;
@@ -218,7 +223,10 @@ typeDefinition: TOKEN_ID TOKEN_EQ type TOKEN_SEMICOLON
         }
 
         
+        // Lab3
+        
       } else {
+        // Type array.
         string id($1);
         if (symTable.find(id) == symTable.end()) {
           symTable[id].first = arrSavedAddr;
@@ -240,9 +248,51 @@ typeDefinition: TOKEN_ID TOKEN_EQ type TOKEN_SEMICOLON
         if (!envs.empty()) {
           int lower = atoi(strs[1].c_str());
           int upper = atoi(strs[2].c_str());
+          string lexime($1);
+ 
+          // Check if array's element type is valid.
+          string arrayType(strs[3]); 
+          if (arrayType.compare(rec) != 0 &&
+              arrayType.find("array") == string::npos) {
+            if (arrayType.compare("integer") == 0 ||
+                arrayType.compare("string") == 0  ||
+                arrayType.compare("boolean") == 0) {
+              // Array's element type is primitive type. 
+              TypeDesc td(strs[0], lower, upper, arrayType);
+              Symbol sym($1, 0, td);
+              envs.top()->setSymbol(lexime, sym);
+            } else {
+              // Array's element type is some custom defined type.
+              if (envs.top()->getSymbol(arrayType) == NULL) {
+                Env* envPtr = envs.top()->getPrevEnv();
+                bool found = false;
+                while (envPtr != NULL) {
+                  if (envPtr->getSymbol(strs[0]) != NULL) {
+                    found = true;
+                    TypeDesc td(envPtr->getSymbol(arrayType)->getTypeDesc());
+                    Symbol sym(lexime, 0, td);
+                    envs.top()->setSymbol(lexime, sym);
+                    break;
+                  }
+                  envPtr = envPtr->getPrevEnv();
+                }
+                if (!found) {
+                  cout << "Error: type " << strs[0] << " not defined" << endl;
+                }
+              } else {
+                TypeDesc td(envs.top()->getSymbol(arrayType)->getTypeDesc());
+                Symbol sym(lexime, 0, td);
+                envs.top()->setSymbol(lexime, sym);
+              }
+            }
+          } else {
+            // Array's element type is record or array. This is complicated
+            // and needs more careful design. A potential design is to add
+            // symbol table entries for anonymous array and record types. 
+            
+          }
           TypeDesc td(strs[0], lower, upper, strs[3]);
           Symbol sym($1, 0, td);
-          string lexime($1);
           envs.top()->setSymbol(lexime, sym);
         }
       }
@@ -384,6 +434,7 @@ type: TOKEN_ID { cout << "type_ID" << endl; //addSymbol($1, nilStr);
         strcpy($$, ss.str().c_str());
         
         string arrayType($8);
+        // The array's element type is not record or array.
         if (arrayType.compare(rec) != 0 &&
             arrayType.find("array") == string::npos) {
           if (symTable.find(arrayType) == symTable.end()) {
@@ -432,6 +483,9 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
           addSymbol($3, nilStr);
         }
       }
+
+
+      // Lab3
     };
 
 constant: TOKEN_INT { cout << "constant" << endl; $$ = $1;}
