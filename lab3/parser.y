@@ -275,9 +275,16 @@ variableDeclaration: identifierList TOKEN_COLON type TOKEN_SEMICOLON
               strs[0].compare("boolean") == 0) {
             for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
               string lexime(*it);
-              TypeDesc* td = new TypeDesc(strs[0]);
-              Symbol* sym = new Symbol(lexime, 0, td);
-              envs.top()->setSymbol(lexime, sym);
+              if (envs.top()->getSymbol(lexime) != NULL) {
+                if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+                  cout << "Invalid use of keyword " << lexime << endl;
+                else
+                  cout << "Duplicated variable declaration for " << lexime << endl;
+              } else {
+                TypeDesc* td = new TypeDesc(strs[0]);
+                Symbol* sym = new Symbol(lexime, 0, td);
+                envs.top()->setSymbol(lexime, sym);
+              }
             }
           } else {
             if (envs.top()->getSymbol(strs[0]) == NULL) {
@@ -288,9 +295,16 @@ variableDeclaration: identifierList TOKEN_COLON type TOKEN_SEMICOLON
                   found = true;
                   for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
                     string lexime(*it);
-                    TypeDesc* td = new TypeDesc(*(envPtr->getSymbol(strs[0])->getTypeDesc()));
-                    Symbol* sym = new Symbol(lexime, 0, td);
-                    envs.top()->setSymbol(lexime, sym);
+                    if (envs.top()->getSymbol(lexime) != NULL) {
+                      if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+                        cout << "Invalid use of keyword " << lexime << endl;
+                      else
+                        cout << "Duplicated variable definition for " << lexime << endl;
+                    } else {
+                      TypeDesc* td = new TypeDesc(*(envPtr->getSymbol(strs[0])->getTypeDesc()));
+                      Symbol* sym = new Symbol(lexime, 0, td);
+                      envs.top()->setSymbol(lexime, sym);
+                    }
                   }
                   break;
                 }
@@ -302,9 +316,16 @@ variableDeclaration: identifierList TOKEN_COLON type TOKEN_SEMICOLON
             } else {
               for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
                 string lexime(*it);
-                TypeDesc* td = new TypeDesc(*(envs.top()->getSymbol(strs[0])->getTypeDesc()));
-                Symbol* sym = new Symbol(lexime, 0, td);
-                envs.top()->setSymbol(lexime, sym);
+                if (envs.top()->getSymbol(lexime) != NULL) {
+                  if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+                    cout << "Invalid use of keyword " << lexime << endl;
+                  else
+                    cout << "Duplicated variable definition for " << lexime << endl;
+                } else {
+                  TypeDesc* td = new TypeDesc(*(envs.top()->getSymbol(strs[0])->getTypeDesc()));
+                  Symbol* sym = new Symbol(lexime, 0, td);
+                  envs.top()->setSymbol(lexime, sym);
+                }
               }
             }
           } 
@@ -315,9 +336,16 @@ variableDeclaration: identifierList TOKEN_COLON type TOKEN_SEMICOLON
         // Lab3
         for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
           string lexime(*it);
-          TypeDesc* td = new TypeDesc("record", fieldListStack.top());
-          Symbol* sym = new Symbol(lexime, 0, td);
-          envs.top()->setSymbol(lexime, sym);
+          if (envs.top()->getSymbol(lexime) != NULL) {
+            if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+              cout << "Invalid use of keyword " << lexime << endl;
+            else
+              cout << "Duplicated variable definition for " << lexime << endl;
+          } else {
+            TypeDesc* td = new TypeDesc("record", fieldListStack.top());
+            Symbol* sym = new Symbol(lexime, 0, td);
+            envs.top()->setSymbol(lexime, sym);
+          }
         }
         fieldListStack.pop();
       } else {
@@ -327,9 +355,16 @@ variableDeclaration: identifierList TOKEN_COLON type TOKEN_SEMICOLON
         if (!envs.empty()) {
           for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
             string lexime(*it);
-            TypeDesc* td = arrayTypeStack.top();
-            Symbol* sym = new Symbol(lexime, 0, td);
-            envs.top()->setSymbol(lexime, sym);
+            if (envs.top()->getSymbol(lexime) != NULL) {
+              if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+                cout << "Invalid use of keyword " << lexime << endl;
+              else
+                cout << "Duplicated variable definition for " << lexime << endl;
+            } else {
+              TypeDesc* td = arrayTypeStack.top();
+              Symbol* sym = new Symbol(lexime, 0, td);
+              envs.top()->setSymbol(lexime, sym);
+            }
           }
           arrayTypeStack.pop();
         }
@@ -770,10 +805,17 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
               strs[0].compare("boolean") == 0) {
             for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
               string lexime(*it);
-              TypeDesc* td = new TypeDesc(strs[0]);
-              fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
-              Symbol* sym = new Symbol(lexime, 0, td);
-              envs.top()->setSymbol(lexime, sym);
+              if (envs.top()->getSymbol(lexime) != NULL) {
+                if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+                  cout << "Invalid use of keyword " << lexime << endl;
+                else
+                  cout << "Duplicated variable declaration for " << lexime << endl;
+              } else {
+                TypeDesc* td = new TypeDesc(strs[0]);
+                fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
+                Symbol* sym = new Symbol(lexime, 0, td);
+                envs.top()->setSymbol(lexime, sym);
+              }
             }
           } else {
             if (envs.top()->getSymbol(strs[0]) == NULL) {
@@ -784,10 +826,17 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
                   found = true;
                   for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
                     string lexime(*it);
-                    TypeDesc* td = new TypeDesc(*(envPtr->getSymbol(strs[0])->getTypeDesc()));
-                    fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
-                    Symbol* sym = new Symbol(lexime, 0, td);
-                    envs.top()->setSymbol(lexime, sym);
+                    if (envs.top()->getSymbol(lexime) != NULL) {
+                      if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+                        cout << "Invalid use of keyword " << lexime << endl;
+                      else
+                        cout << "Duplicated variable declaration for " << lexime << endl;
+                    } else {
+                      TypeDesc* td = new TypeDesc(*(envPtr->getSymbol(strs[0])->getTypeDesc()));
+                      fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
+                      Symbol* sym = new Symbol(lexime, 0, td);
+                      envs.top()->setSymbol(lexime, sym);
+                    }
                   }
                   break;
                 }
@@ -799,70 +848,58 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
             } else {
               for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
                 string lexime(*it);
-                TypeDesc* td = new TypeDesc(*(envs.top()->getSymbol(strs[0])->getTypeDesc()));
-                fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
-                Symbol* sym = new Symbol(lexime, 0, td);
-                envs.top()->setSymbol(lexime, sym);
+                if (envs.top()->getSymbol(lexime) != NULL) {
+                  if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+                    cout << "Invalid use of keyword " << lexime << endl;
+                  else
+                    cout << "Duplicated variable declaration for " << lexime << endl;
+                } else {
+                  TypeDesc* td = new TypeDesc(*(envs.top()->getSymbol(strs[0])->getTypeDesc()));
+                  fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
+                  Symbol* sym = new Symbol(lexime, 0, td);
+                  envs.top()->setSymbol(lexime, sym);
+                }
               }
             }
           } 
         }
       } else if (strs[0].compare(rec) == 0) {
         // Type is record.
-        /*
-        string id($1);
-        if (symTable.find(id) == symTable.end()) {
-          symTable[id].first = recSavedAddr;
-          symTable[id].second = string($3); 
-        } else {
-          if (symTable[id].first > recSavedAddr) {
-            int addr = symTable[id].first;
-            fixAddress(addr);
-            symTable[id].first = recSavedAddr;
-          } else {
-            fixAddress(recSavedAddr);
-          }
-          symTable[id].second = string($3); 
-        }
-        */
         
         // Lab3
         for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
           string lexime(*it);
-          TypeDesc* td = new TypeDesc("record", fieldListStack.top());
-          fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
-          Symbol* sym = new Symbol(lexime, 0, td);
-          envs.top()->setSymbol(lexime, sym);
+          if (envs.top()->getSymbol(lexime) != NULL) {
+            if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+              cout << "Invalid use of keyword " << lexime << endl;
+            else
+              cout << "Duplicated variable declaration for " << lexime << endl;
+          } else {
+            TypeDesc* td = new TypeDesc("record", fieldListStack.top());
+            fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
+            Symbol* sym = new Symbol(lexime, 0, td);
+            envs.top()->setSymbol(lexime, sym);
+          }
         }
         fieldListStack.pop();
       } else {
         // Type is array.
 
-        /*
-        if (symTable.find(id) == symTable.end()) {
-          symTable[id].first = arrSavedAddr;
-          symTable[id].second = strs[0];
-          
-        } else {
-          if (symTable[id].first > arrSavedAddr) {
-            int addr = symTable[id].first;
-            fixAddress(addr);
-            symTable[id].first = arrSavedAddr;
-          } else {
-            fixAddress(arrSavedAddr);
-          }
-          symTable[id].second = strs[0];
-        }
-        */
-
         // Lab3
         if (!envs.empty()) {
           for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
             string lexime(*it);
-            TypeDesc* td = arrayTypeStack.top();
-            fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
-            Symbol* sym = new Symbol(lexime, 0, td);
-            envs.top()->setSymbol(lexime, sym);
+            if (envs.top()->getSymbol(lexime) != NULL) {
+              if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+                cout << "Invalid use of keyword " << lexime << endl;
+              else
+                cout << "Duplicated variable declaration for " << lexime << endl;
+            } else {
+              TypeDesc* td = arrayTypeStack.top();
+              fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
+              Symbol* sym = new Symbol(lexime, 0, td);
+              envs.top()->setSymbol(lexime, sym);
+            }
           }
           arrayTypeStack.pop();
         }
@@ -894,10 +931,17 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
               strs[0].compare("boolean") == 0) {
             for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
               string lexime(*it);
-              TypeDesc* td = new TypeDesc(strs[0]);
-              fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
-              Symbol* sym = new Symbol(lexime, 0, td);
-              envs.top()->setSymbol(lexime, sym);
+              if (envs.top()->getSymbol(lexime) != NULL) {
+                if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+                  cout << "Invalid use of keyword " << lexime << endl;
+                else
+                  cout << "Duplicated variable declaration for " << lexime << endl;
+              } else {
+                TypeDesc* td = new TypeDesc(strs[0]);
+                fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
+                Symbol* sym = new Symbol(lexime, 0, td);
+                envs.top()->setSymbol(lexime, sym);
+              }
             }
           } else {
             if (envs.top()->getSymbol(strs[0]) == NULL) {
@@ -908,10 +952,17 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
                   found = true;
                   for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
                     string lexime(*it);
-                    TypeDesc* td = new TypeDesc(*(envPtr->getSymbol(strs[0])->getTypeDesc()));
-                    fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
-                    Symbol* sym = new Symbol(lexime, 0, td);
-                    envs.top()->setSymbol(lexime, sym);
+                    if (envs.top()->getSymbol(lexime) != NULL) {
+                      if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+                        cout << "Invalid use of keyword " << lexime << endl;
+                      else
+                        cout << "Duplicated variable declaration for " << lexime << endl;
+                    } else {
+                      TypeDesc* td = new TypeDesc(*(envPtr->getSymbol(strs[0])->getTypeDesc()));
+                      fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
+                      Symbol* sym = new Symbol(lexime, 0, td);
+                      envs.top()->setSymbol(lexime, sym);
+                    }
                   }
                   break;
                 }
@@ -923,70 +974,58 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
             } else {
               for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
                 string lexime(*it);
-                TypeDesc* td = new TypeDesc(*(envs.top()->getSymbol(strs[0])->getTypeDesc()));
-                fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
-                Symbol* sym = new Symbol(lexime, 0, td);
-                envs.top()->setSymbol(lexime, sym);
+                if (envs.top()->getSymbol(lexime) != NULL) {
+                  if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+                    cout << "Invalid use of keyword " << lexime << endl;
+                  else
+                    cout << "Duplicated variable declaration for " << lexime << endl;
+                } else {
+                  TypeDesc* td = new TypeDesc(*(envs.top()->getSymbol(strs[0])->getTypeDesc()));
+                  fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
+                  Symbol* sym = new Symbol(lexime, 0, td);
+                  envs.top()->setSymbol(lexime, sym);
+                }
               }
             }
           } 
         }
       } else if (strs[0].compare(rec) == 0) {
         // Type record.
-        /*
-        string id($1);
-        if (symTable.find(id) == symTable.end()) {
-          symTable[id].first = recSavedAddr;
-          symTable[id].second = string($3); 
-        } else {
-          if (symTable[id].first > recSavedAddr) {
-            int addr = symTable[id].first;
-            fixAddress(addr);
-            symTable[id].first = recSavedAddr;
-          } else {
-            fixAddress(recSavedAddr);
-          }
-          symTable[id].second = string($3); 
-        }
-        */
         
         // Lab3
         for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
           string lexime(*it);
-          TypeDesc* td = new TypeDesc("record", fieldListStack.top());
-          fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
-          Symbol* sym = new Symbol(lexime, 0, td);
-          envs.top()->setSymbol(lexime, sym);
+          if (envs.top()->getSymbol(lexime) != NULL) {
+            if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+              cout << "Invalid use of keyword " << lexime << endl;
+            else
+              cout << "Duplicated variable declaration for " << lexime << endl;
+          } else {
+            TypeDesc* td = new TypeDesc("record", fieldListStack.top());
+            fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
+            Symbol* sym = new Symbol(lexime, 0, td);
+            envs.top()->setSymbol(lexime, sym);
+          }
         }
         fieldListStack.pop();
       } else {
         // Type is array.
 
-        /*
-        if (symTable.find(id) == symTable.end()) {
-          symTable[id].first = arrSavedAddr;
-          symTable[id].second = strs[0];
-          
-        } else {
-          if (symTable[id].first > arrSavedAddr) {
-            int addr = symTable[id].first;
-            fixAddress(addr);
-            symTable[id].first = arrSavedAddr;
-          } else {
-            fixAddress(arrSavedAddr);
-          }
-          symTable[id].second = strs[0];
-        }
-        */
-
         // Lab3
         if (!envs.empty()) {
           for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
             string lexime(*it);
-            TypeDesc* td = arrayTypeStack.top();
-            fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
-            Symbol* sym = new Symbol(lexime, 0, td);
-            envs.top()->setSymbol(lexime, sym);
+            if (envs.top()->getSymbol(lexime) != NULL) {
+              if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+                cout << "Invalid use of keyword " << lexime << endl;
+              else
+                cout << "Duplicated variable declaration for " << lexime << endl;
+            } else {
+              TypeDesc* td = arrayTypeStack.top();
+              fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
+              Symbol* sym = new Symbol(lexime, 0, td);
+              envs.top()->setSymbol(lexime, sym);
+            }
           }
           arrayTypeStack.pop();
         }
@@ -1117,8 +1156,8 @@ main(int argc, char **argv) {
   //envs.top()->displayTable();
   for (int i = allEnvs.size() - 1; i >= 0; --i) {
     //delete allEnvs[i];
-    cout << allEnvs[i]->getTableSize() << endl;
-    allEnvs[i]->displayTable();
+    //cout << allEnvs[i]->getTableSize() << endl;
+    //allEnvs[i]->displayTable();
   } 
   //cout << envs.size() << endl;
   for (int i = allEnvs.size() - 1; i >= 0; --i) {

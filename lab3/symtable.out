@@ -1,56 +1,13 @@
-address: 0    , identifier: errorfree      , type: nil       
-address: 1    , identifier: r              , type: record    
-address: 2    , identifier: a              , type: integer   
-address: 3    , identifier: b              , type: integer   
-address: 4    , identifier: integer        , type: nil       
-address: 5    , identifier: c              , type: string    
-address: 6    , identifier: string         , type: nil       
-address: 7    , identifier: y              , type: array     
-address: 8    , identifier: s              , type: string    
-address: 9    , identifier: z              , type: s         
-address: 10   , identifier: foo1           , type: 1         
-address: 11   , identifier: foo2           , type: 2         
-address: 12   , identifier: bar            , type: nil       
-address: 13   , identifier: foo3           , type: 2         
-7
-a integer
-b integer
-boolean nil
-false nil
-integer nil
-string nil
-true nil
-7
-a integer
-boolean nil
-c string
-false nil
-integer nil
-string nil
-true nil
-6
-a integer
-boolean nil
-false nil
-integer nil
-string nil
-true nil
-15
-a integer
-b integer
-boolean nil
-c string
-false nil
-foo1 function
-foo2 function
-foo3 function
-integer nil
-r record
-record field: a integer
-record field: b integer
-record field: c string
-s string
-string nil
-true nil
-y array
-z string
+address: 0    , identifier: lexer_test     , type: nil       
+address: 1    , identifier: int            , type: integer   
+address: 2    , identifier: integer        , type: integer   
+address: 3    , identifier: i              , type: integer   
+address: 4    , identifier: b              , type: boolean   
+address: 5    , identifier: boolean        , type: nil       
+address: 6    , identifier: f              , type: float     
+address: 7    , identifier: float          , type: nil       
+address: 8    , identifier: foo            , type: 1         
+address: 9    , identifier: x              , type: int       
+address: 10   , identifier: bar            , type: 1         
+address: 11   , identifier: false          , type: nil       
+address: 12   , identifier: true           , type: nil       
