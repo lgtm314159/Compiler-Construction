@@ -12,11 +12,38 @@ address: 10   , identifier: foo1           , type: 1
 address: 11   , identifier: foo2           , type: 2         
 address: 12   , identifier: bar            , type: nil       
 address: 13   , identifier: foo3           , type: 2         
+7
+a integer
+b integer
+boolean nil
+false nil
+integer nil
+string nil
+true nil
+7
+a integer
+boolean nil
+c string
+false nil
+integer nil
+string nil
+true nil
+6
+a integer
+boolean nil
+false nil
+integer nil
+string nil
+true nil
+15
 a integer
 b integer
 boolean nil
 c string
 false nil
+foo1 function
+foo2 function
+foo3 function
 integer nil
 r record
 record field: a integer

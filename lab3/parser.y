@@ -32,6 +32,7 @@ extern "C++" stack<vector<pair<string, TypeDesc*> >* > fieldListStack;
 extern "C++" stack<TypeDesc*> arrayTypeStack;
 extern "C" int recordSeq;
 extern "C" int arraySeq;
+vector<pair<string, TypeDesc*> >* formalParamList;
 
 void yyerror(const char *s);
 static void lookup(char *token_buffer);
@@ -121,7 +122,7 @@ string arr(arrayStr);
 %left TOKEN_MULTIPLY TOKEN_DIV TOKEN_MOD TOKEN_AND
 %right UPLUS UMINUS
 
-%type <sval> type identifierList
+%type <sval> type identifierList resultType
 %type <ival> formalParamSeq formalParameterList constant
 %%
 
@@ -267,65 +268,49 @@ variableDeclaration: identifierList TOKEN_COLON type TOKEN_SEMICOLON
       // Lab3. Address will be fixed later.
       vector<string> strs = split($3);
       if (strs[0].compare(rec) != 0 && strs[0].compare(arr) !=0) {
-          // Type is not literally named record or array.
-          if (!envs.empty()) {
-            if (strs[0].compare("integer") == 0 ||
-                strs[0].compare("string") == 0 ||
-                strs[0].compare("boolean") == 0) {
+        // Type is not literally named record or array.
+        if (!envs.empty()) {
+          if (strs[0].compare("integer") == 0 ||
+              strs[0].compare("string") == 0 ||
+              strs[0].compare("boolean") == 0) {
+            for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+              string lexime(*it);
+              TypeDesc* td = new TypeDesc(strs[0]);
+              Symbol* sym = new Symbol(lexime, 0, td);
+              envs.top()->setSymbol(lexime, sym);
+            }
+          } else {
+            if (envs.top()->getSymbol(strs[0]) == NULL) {
+              Env* envPtr = envs.top()->getPrevEnv();
+              bool found = false;
+              while (envPtr != NULL) {
+                if (envPtr->getSymbol(strs[0]) != NULL) {
+                  found = true;
+                  for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                    string lexime(*it);
+                    TypeDesc* td = new TypeDesc(*(envPtr->getSymbol(strs[0])->getTypeDesc()));
+                    Symbol* sym = new Symbol(lexime, 0, td);
+                    envs.top()->setSymbol(lexime, sym);
+                  }
+                  break;
+                }
+                envPtr = envPtr->getPrevEnv();
+              }
+              if (!found) {
+                cout << "Error: type " << strs[0] << " not defined" << endl;
+              }
+            } else {
               for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
                 string lexime(*it);
-                TypeDesc* td = new TypeDesc(strs[0]);
+                TypeDesc* td = new TypeDesc(*(envs.top()->getSymbol(strs[0])->getTypeDesc()));
                 Symbol* sym = new Symbol(lexime, 0, td);
                 envs.top()->setSymbol(lexime, sym);
               }
-            } else {
-              if (envs.top()->getSymbol(strs[0]) == NULL) {
-                Env* envPtr = envs.top()->getPrevEnv();
-                bool found = false;
-                while (envPtr != NULL) {
-                  if (envPtr->getSymbol(strs[0]) != NULL) {
-                    found = true;
-                    for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
-                      string lexime(*it);
-                      TypeDesc* td = new TypeDesc(*(envPtr->getSymbol(strs[0])->getTypeDesc()));
-                      Symbol* sym = new Symbol(lexime, 0, td);
-                      envs.top()->setSymbol(lexime, sym);
-                    }
-                    break;
-                  }
-                  envPtr = envPtr->getPrevEnv();
-                }
-                if (!found) {
-                  cout << "Error: type " << strs[0] << " not defined" << endl;
-                }
-              } else {
-                for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
-                  string lexime(*it);
-                  TypeDesc* td = new TypeDesc(*(envs.top()->getSymbol(strs[0])->getTypeDesc()));
-                  Symbol* sym = new Symbol(lexime, 0, td);
-                  envs.top()->setSymbol(lexime, sym);
-                }
-              }
-            } 
-          }
-      } else if (strs[0].compare(rec) == 0) {
-        // Type record.
-        /*
-        string id($1);
-        if (symTable.find(id) == symTable.end()) {
-          symTable[id].first = recSavedAddr;
-          symTable[id].second = string($3); 
-        } else {
-          if (symTable[id].first > recSavedAddr) {
-            int addr = symTable[id].first;
-            fixAddress(addr);
-            symTable[id].first = recSavedAddr;
-          } else {
-            fixAddress(recSavedAddr);
-          }
-          symTable[id].second = string($3); 
+            }
+          } 
         }
-        */
+      } else if (strs[0].compare(rec) == 0) {
+        // Type is record.
         
         // Lab3
         for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
@@ -337,23 +322,6 @@ variableDeclaration: identifierList TOKEN_COLON type TOKEN_SEMICOLON
         fieldListStack.pop();
       } else {
         // Type is array.
-
-        /*
-        if (symTable.find(id) == symTable.end()) {
-          symTable[id].first = arrSavedAddr;
-          symTable[id].second = strs[0];
-          
-        } else {
-          if (symTable[id].first > arrSavedAddr) {
-            int addr = symTable[id].first;
-            fixAddress(addr);
-            symTable[id].first = arrSavedAddr;
-          } else {
-            fixAddress(arrSavedAddr);
-          }
-          symTable[id].second = strs[0];
-        }
-        */
 
         // Lab3
         if (!envs.empty()) {
@@ -380,6 +348,13 @@ procedureDeclaration: TOKEN_PROCEDURE TOKEN_ID TOKEN_LPAR formalParameterList
       ostringstream convert;
       convert << $4;
       symTable[id].second = convert.str(); 
+
+      // Lab3
+      envs.pop();
+      string lexime($2);
+      TypeDesc* td = new TypeDesc("procedure", formalParamList, NULL);
+      Symbol* sym = new Symbol(lexime, 0, td);
+      envs.top()->setSymbol(lexime, sym);
     };
 
 functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList
@@ -407,12 +382,63 @@ functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList
         convert << $4;
         symTable[id].second = convert.str();
       }
+
+      // Lab3
+      envs.pop();
+      string lexime($2);
+      string resultType($7);
+
+      // Type is not literally named record or array.
+      if (!envs.empty()) {
+        if (resultType.compare("integer") == 0 ||
+            resultType.compare("string") == 0 ||
+            resultType.compare("boolean") == 0) {
+          TypeDesc* rt = new TypeDesc(resultType);
+          TypeDesc* td = new TypeDesc("function", formalParamList, rt);
+          Symbol* sym = new Symbol(lexime, 0, td);
+          envs.top()->setSymbol(lexime, sym);
+        } else {
+          if (envs.top()->getSymbol(resultType) == NULL) {
+            Env* envPtr = envs.top()->getPrevEnv();
+            bool found = false;
+            while (envPtr != NULL) {
+              if (envPtr->getSymbol(resultType) != NULL) {
+                found = true;
+                TypeDesc* rt = new TypeDesc(*(envPtr->getSymbol(resultType)->getTypeDesc()));
+                TypeDesc* td = new TypeDesc("function", formalParamList, rt);
+                Symbol* sym = new Symbol(lexime, 0, td);
+                envs.top()->setSymbol(lexime, sym);
+                break;
+              }
+              envPtr = envPtr->getPrevEnv();
+            }
+            if (!found) {
+              cout << "Error: type " << resultType << " not defined" << endl;
+            }
+          } else {
+            TypeDesc* rt = new TypeDesc(*(envs.top()->getSymbol(resultType)->getTypeDesc()));
+            TypeDesc* td = new TypeDesc("function", formalParamList, rt);
+            Symbol* sym = new Symbol(lexime, 0, td);
+            envs.top()->setSymbol(lexime, sym);
+          }
+        } 
+      }
     };
 
 groupBlockForward: block | TOKEN_FORWARD;
 
-formalParameterList: formalParamSeq { cout << "formal_parameter_list" << endl; $$ = $1; }
-    | { $$ = 0; };
+formalParameterList: formalParamSeq { cout << "formal_parameter_list" << endl; $$ = $1;}
+    |
+
+    { cout << "formal_parameter_list_empty" << endl; 
+      $$ = 0; 
+
+      // Lab3
+      Env* prevEnv = envs.top();
+      Env* env = new Env(prevEnv);
+      envs.push(env);
+      allEnvs.push_back(env);
+    };
 
 formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
     { cout << "identifier_lists_more" << endl;
@@ -427,6 +453,79 @@ formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
         }
       }
       $$ = $1 + ids.size();
+
+      vector<string> strs = split($5);
+      if (strs[0].compare(rec) != 0 && strs[0].compare(arr) !=0) {
+        // Type is not literally named record or array.
+        if (!envs.empty()) {
+          if (strs[0].compare("integer") == 0 ||
+              strs[0].compare("string") == 0 ||
+              strs[0].compare("boolean") == 0) {
+            for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+              string lexime(*it);
+              TypeDesc* td = new TypeDesc(strs[0]);
+              formalParamList->push_back(pair<string, TypeDesc*>(lexime, td));
+              Symbol* sym = new Symbol(lexime, 0, td);
+              envs.top()->setSymbol(lexime, sym);
+            }
+          } else {
+            if (envs.top()->getSymbol(strs[0]) == NULL) {
+              Env* envPtr = envs.top()->getPrevEnv();
+              bool found = false;
+              while (envPtr != NULL) {
+                if (envPtr->getSymbol(strs[0]) != NULL) {
+                  found = true;
+                  for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                    string lexime(*it);
+                    TypeDesc* td = new TypeDesc(*(envPtr->getSymbol(strs[0])->getTypeDesc()));
+                    formalParamList->push_back(pair<string, TypeDesc*>(lexime, td));
+                    Symbol* sym = new Symbol(lexime, 0, td);
+                    envs.top()->setSymbol(lexime, sym);
+                  }
+                  break;
+                }
+                envPtr = envPtr->getPrevEnv();
+              }
+              if (!found) {
+                cout << "Error: type " << strs[0] << " not defined" << endl;
+              }
+            } else {
+              for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                string lexime(*it);
+                TypeDesc* td = new TypeDesc(*(envs.top()->getSymbol(strs[0])->getTypeDesc()));
+                formalParamList->push_back(pair<string, TypeDesc*>(lexime, td));
+                Symbol* sym = new Symbol(lexime, 0, td);
+                envs.top()->setSymbol(lexime, sym);
+              }
+            }
+          } 
+        }
+      } else if (strs[0].compare(rec) == 0) {
+        // Type is record.
+        
+        // Lab3
+        for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+          string lexime(*it);
+          TypeDesc* td = new TypeDesc("record", fieldListStack.top());
+          formalParamList->push_back(pair<string, TypeDesc*>(lexime, td));
+          Symbol* sym = new Symbol(lexime, 0, td);
+          envs.top()->setSymbol(lexime, sym);
+        }
+        fieldListStack.pop();
+      } else {
+        // Type is array.
+
+        // Lab3
+        if (!envs.empty()) {
+          for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+            string lexime(*it);
+            TypeDesc* td = arrayTypeStack.top();
+            Symbol* sym = new Symbol(lexime, 0, td);
+            envs.top()->setSymbol(lexime, sym);
+          }
+          arrayTypeStack.pop();
+        }
+      }
     }
     | identifierList TOKEN_COLON type
       { cout << "identifier_lists" << endl;
@@ -441,6 +540,87 @@ formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
           }
         }
         $$ = ids.size();
+
+        // Lab3. Address will be fixed later.
+        Env* prevEnv = envs.top();
+        Env* env = new Env(prevEnv);
+        envs.push(env);
+        allEnvs.push_back(env);
+        formalParamList = new vector<pair<string, TypeDesc*> >;
+
+        vector<string> strs = split($3);
+        if (strs[0].compare(rec) != 0 && strs[0].compare(arr) !=0) {
+          // Type is not literally named record or array.
+          if (!envs.empty()) {
+            if (strs[0].compare("integer") == 0 ||
+                strs[0].compare("string") == 0 ||
+                strs[0].compare("boolean") == 0) {
+              for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                string lexime(*it);
+                TypeDesc* td = new TypeDesc(strs[0]);
+                formalParamList->push_back(pair<string, TypeDesc*>(lexime, td));
+                Symbol* sym = new Symbol(lexime, 0, td);
+                envs.top()->setSymbol(lexime, sym);
+              }
+            } else {
+              if (envs.top()->getSymbol(strs[0]) == NULL) {
+                Env* envPtr = envs.top()->getPrevEnv();
+                bool found = false;
+                while (envPtr != NULL) {
+                  if (envPtr->getSymbol(strs[0]) != NULL) {
+                    found = true;
+                    for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                      string lexime(*it);
+                      TypeDesc* td = new TypeDesc(*(envPtr->getSymbol(strs[0])->getTypeDesc()));
+                      formalParamList->push_back(pair<string, TypeDesc*>(lexime, td));
+                      Symbol* sym = new Symbol(lexime, 0, td);
+                      envs.top()->setSymbol(lexime, sym);
+                    }
+                    break;
+                  }
+                  envPtr = envPtr->getPrevEnv();
+                }
+                if (!found) {
+                  cout << "Error: type " << strs[0] << " not defined" << endl;
+                }
+              } else {
+                for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                  string lexime(*it);
+                  TypeDesc* td = new TypeDesc(*(envs.top()->getSymbol(strs[0])->getTypeDesc()));
+                  formalParamList->push_back(pair<string, TypeDesc*>(lexime, td));
+                  Symbol* sym = new Symbol(lexime, 0, td);
+                  envs.top()->setSymbol(lexime, sym);
+                }
+              }
+            } 
+          }
+        } else if (strs[0].compare(rec) == 0) {
+          // Type is record.
+          
+          // Lab3
+          for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+            string lexime(*it);
+            TypeDesc* td = new TypeDesc("record", fieldListStack.top());
+            formalParamList->push_back(pair<string, TypeDesc*>(lexime, td));
+            Symbol* sym = new Symbol(lexime, 0, td);
+            envs.top()->setSymbol(lexime, sym);
+          }
+          fieldListStack.pop();
+        } else {
+          // Type is array.
+
+          // Lab3
+          if (!envs.empty()) {
+            for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+              string lexime(*it);
+              TypeDesc* td = arrayTypeStack.top();
+              formalParamList->push_back(pair<string, TypeDesc*>(lexime, td));
+              Symbol* sym = new Symbol(lexime, 0, td);
+              envs.top()->setSymbol(lexime, sym);
+            }
+            arrayTypeStack.pop();
+          }
+        }
       };
 
 block: groupVariableDeclarations compoundStatement { cout << "block" << endl; };
@@ -554,6 +734,7 @@ type: TOKEN_ID { cout << "type_ID" << endl; //addSymbol($1, nilStr);
         strcpy($$, recordStr); }; 
 
 resultType: TOKEN_ID { cout << "result_type" << endl;
+    $$ = $1;
     string id($1);
     if (symTable.find(id) == symTable.end()) {
       addSymbol($1, nilStr);
@@ -582,52 +763,52 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
       // Lab3
       vector<string> strs = split($5);
       if (strs[0].compare(rec) != 0 && strs[0].compare(arr) !=0) {
-          // Lab3. Address will be fixed later.
-          if (!envs.empty()) {
-            if (strs[0].compare("integer") == 0 ||
-                strs[0].compare("string") == 0 ||
-                strs[0].compare("boolean") == 0) {
+        // Lab3. Address will be fixed later.
+        if (!envs.empty()) {
+          if (strs[0].compare("integer") == 0 ||
+              strs[0].compare("string") == 0 ||
+              strs[0].compare("boolean") == 0) {
+            for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+              string lexime(*it);
+              TypeDesc* td = new TypeDesc(strs[0]);
+              fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
+              Symbol* sym = new Symbol(lexime, 0, td);
+              envs.top()->setSymbol(lexime, sym);
+            }
+          } else {
+            if (envs.top()->getSymbol(strs[0]) == NULL) {
+              Env* envPtr = envs.top()->getPrevEnv();
+              bool found = false;
+              while (envPtr != NULL) {
+                if (envPtr->getSymbol(strs[0]) != NULL) {
+                  found = true;
+                  for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                    string lexime(*it);
+                    TypeDesc* td = new TypeDesc(*(envPtr->getSymbol(strs[0])->getTypeDesc()));
+                    fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
+                    Symbol* sym = new Symbol(lexime, 0, td);
+                    envs.top()->setSymbol(lexime, sym);
+                  }
+                  break;
+                }
+                envPtr = envPtr->getPrevEnv();
+              }
+              if (!found) {
+                cout << "Error: type " << strs[0] << " not defined" << endl;
+              }
+            } else {
               for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
                 string lexime(*it);
-                TypeDesc* td = new TypeDesc(strs[0]);
+                TypeDesc* td = new TypeDesc(*(envs.top()->getSymbol(strs[0])->getTypeDesc()));
                 fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
                 Symbol* sym = new Symbol(lexime, 0, td);
                 envs.top()->setSymbol(lexime, sym);
               }
-            } else {
-              if (envs.top()->getSymbol(strs[0]) == NULL) {
-                Env* envPtr = envs.top()->getPrevEnv();
-                bool found = false;
-                while (envPtr != NULL) {
-                  if (envPtr->getSymbol(strs[0]) != NULL) {
-                    found = true;
-                    for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
-                      string lexime(*it);
-                      TypeDesc* td = new TypeDesc(*(envPtr->getSymbol(strs[0])->getTypeDesc()));
-                      fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
-                      Symbol* sym = new Symbol(lexime, 0, td);
-                      envs.top()->setSymbol(lexime, sym);
-                    }
-                    break;
-                  }
-                  envPtr = envPtr->getPrevEnv();
-                }
-                if (!found) {
-                  cout << "Error: type " << strs[0] << " not defined" << endl;
-                }
-              } else {
-                for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
-                  string lexime(*it);
-                  TypeDesc* td = new TypeDesc(*(envs.top()->getSymbol(strs[0])->getTypeDesc()));
-                  fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
-                  Symbol* sym = new Symbol(lexime, 0, td);
-                  envs.top()->setSymbol(lexime, sym);
-                }
-              }
-            } 
-          }
+            }
+          } 
+        }
       } else if (strs[0].compare(rec) == 0) {
-        // Type record.
+        // Type is record.
         /*
         string id($1);
         if (symTable.find(id) == symTable.end()) {
@@ -706,50 +887,50 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
       fieldListStack.push(fieldList);
       vector<string> strs = split($3);
       if (strs[0].compare(rec) != 0 && strs[0].compare(arr) !=0) {
-          // Lab3. Address will be fixed later.
-          if (!envs.empty()) {
-            if (strs[0].compare("integer") == 0 ||
-                strs[0].compare("string") == 0 ||
-                strs[0].compare("boolean") == 0) {
+        // Lab3. Address will be fixed later.
+        if (!envs.empty()) {
+          if (strs[0].compare("integer") == 0 ||
+              strs[0].compare("string") == 0 ||
+              strs[0].compare("boolean") == 0) {
+            for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+              string lexime(*it);
+              TypeDesc* td = new TypeDesc(strs[0]);
+              fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
+              Symbol* sym = new Symbol(lexime, 0, td);
+              envs.top()->setSymbol(lexime, sym);
+            }
+          } else {
+            if (envs.top()->getSymbol(strs[0]) == NULL) {
+              Env* envPtr = envs.top()->getPrevEnv();
+              bool found = false;
+              while (envPtr != NULL) {
+                if (envPtr->getSymbol(strs[0]) != NULL) {
+                  found = true;
+                  for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                    string lexime(*it);
+                    TypeDesc* td = new TypeDesc(*(envPtr->getSymbol(strs[0])->getTypeDesc()));
+                    fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
+                    Symbol* sym = new Symbol(lexime, 0, td);
+                    envs.top()->setSymbol(lexime, sym);
+                  }
+                  break;
+                }
+                envPtr = envPtr->getPrevEnv();
+              }
+              if (!found) {
+                cout << "Error: type " << strs[0] << " not defined" << endl;
+              }
+            } else {
               for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
                 string lexime(*it);
-                TypeDesc* td = new TypeDesc(strs[0]);
+                TypeDesc* td = new TypeDesc(*(envs.top()->getSymbol(strs[0])->getTypeDesc()));
                 fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
                 Symbol* sym = new Symbol(lexime, 0, td);
                 envs.top()->setSymbol(lexime, sym);
               }
-            } else {
-              if (envs.top()->getSymbol(strs[0]) == NULL) {
-                Env* envPtr = envs.top()->getPrevEnv();
-                bool found = false;
-                while (envPtr != NULL) {
-                  if (envPtr->getSymbol(strs[0]) != NULL) {
-                    found = true;
-                    for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
-                      string lexime(*it);
-                      TypeDesc* td = new TypeDesc(*(envPtr->getSymbol(strs[0])->getTypeDesc()));
-                      fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
-                      Symbol* sym = new Symbol(lexime, 0, td);
-                      envs.top()->setSymbol(lexime, sym);
-                    }
-                    break;
-                  }
-                  envPtr = envPtr->getPrevEnv();
-                }
-                if (!found) {
-                  cout << "Error: type " << strs[0] << " not defined" << endl;
-                }
-              } else {
-                for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
-                  string lexime(*it);
-                  TypeDesc* td = new TypeDesc(*(envs.top()->getSymbol(strs[0])->getTypeDesc()));
-                  fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
-                  Symbol* sym = new Symbol(lexime, 0, td);
-                  envs.top()->setSymbol(lexime, sym);
-                }
-              }
-            } 
-          }
+            }
+          } 
+        }
       } else if (strs[0].compare(rec) == 0) {
         // Type record.
         /*
@@ -933,7 +1114,12 @@ main(int argc, char **argv) {
     cout << endl;
   }
   
-  envs.top()->displayTable();
+  //envs.top()->displayTable();
+  for (int i = allEnvs.size() - 1; i >= 0; --i) {
+    //delete allEnvs[i];
+    cout << allEnvs[i]->getTableSize() << endl;
+    allEnvs[i]->displayTable();
+  } 
   //cout << envs.size() << endl;
   for (int i = allEnvs.size() - 1; i >= 0; --i) {
     delete allEnvs[i];
