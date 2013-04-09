@@ -1,6 +1,13 @@
 type_ID
 type_definition
 type_definition
+constant
+constant
+type_ID
+type_array
+type_definition
+Duplicated type definition for int
+type_definition_more
 identifier_list
 type_ID
 variable_declaration
@@ -13,11 +20,6 @@ identifier_list
 type_ID
 variable_declaration
 Error: type float not defined
-variable_declaration_more
-identifier_list
-type_ID
-variable_declaration
-Invalid use of keyword integer
 variable_declaration_more
 identifier_list
 type_ID

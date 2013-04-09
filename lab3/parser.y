@@ -166,39 +166,46 @@ typeDefinition: TOKEN_ID TOKEN_EQ type TOKEN_SEMICOLON
         addSymbol($3, nilStr);
 
         // Lab3. Address will be fixed later.
-        if (!envs.empty()) {
-          string lexime($1);
-          if (strs[0].compare("integer") == 0 ||
-              strs[0].compare("string") == 0 ||
-              strs[0].compare("boolean") == 0) {
-            TypeDesc* td = new TypeDesc(strs[0]);
-            Symbol* sym = new Symbol(lexime, 0, td);
-            envs.top()->setSymbol(lexime, sym);
-          } else {
-            if (envs.top()->getSymbol(strs[0]) == NULL) {
-              Env* envPtr = envs.top()->getPrevEnv();
-              bool found = false;
-              while (envPtr != NULL) {
-                if (envPtr->getSymbol(strs[0]) != NULL) {
-                  found = true;
-                  // Copy the type descriptor.
-                  TypeDesc* tmpTd = envPtr->getSymbol(strs[0])->getTypeDesc();
-                  TypeDesc* td = new TypeDesc(*tmpTd);
-                  Symbol* sym = new Symbol(lexime, 0, td);
-                  envs.top()->setSymbol(lexime, sym);
-                  break;
-                }
-                envPtr = envPtr->getPrevEnv();
-              }
-              if (!found) {
-                cout << "Error: type " << strs[0] << " not defined" << endl;
-              }
-            } else {
-              TypeDesc* td = envs.top()->getSymbol(strs[0])->getTypeDesc();
+        string lexime($1);
+        if (envs.top()->getSymbol(lexime) != NULL) {
+          if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+            cout << "Invalid use of keyword " << lexime << endl;
+          else
+            cout << "Duplicated type definition for " << lexime << endl;
+        } else {
+          if (!envs.empty()) {
+            if (strs[0].compare("integer") == 0 ||
+                strs[0].compare("string") == 0 ||
+                strs[0].compare("boolean") == 0) {
+              TypeDesc* td = new TypeDesc(strs[0]);
               Symbol* sym = new Symbol(lexime, 0, td);
               envs.top()->setSymbol(lexime, sym);
-            }
-          }          
+            } else {
+              if (envs.top()->getSymbol(strs[0]) == NULL) {
+                Env* envPtr = envs.top()->getPrevEnv();
+                bool found = false;
+                while (envPtr != NULL) {
+                  if (envPtr->getSymbol(strs[0]) != NULL) {
+                    found = true;
+                    // Copy the type descriptor.
+                    TypeDesc* tmpTd = envPtr->getSymbol(strs[0])->getTypeDesc();
+                    TypeDesc* td = new TypeDesc(*tmpTd);
+                    Symbol* sym = new Symbol(lexime, 0, td);
+                    envs.top()->setSymbol(lexime, sym);
+                    break;
+                  }
+                  envPtr = envPtr->getPrevEnv();
+                }
+                if (!found) {
+                  cout << "Error: type " << strs[0] << " not defined" << endl;
+                }
+              } else {
+                TypeDesc* td = envs.top()->getSymbol(strs[0])->getTypeDesc();
+                Symbol* sym = new Symbol(lexime, 0, td);
+                envs.top()->setSymbol(lexime, sym);
+              }
+            }          
+          }
         }
       } else if (strs[0].compare(rec) == 0) {
         // Type is record.
@@ -219,10 +226,17 @@ typeDefinition: TOKEN_ID TOKEN_EQ type TOKEN_SEMICOLON
         
         // Lab3
         string lexime($1);
-        TypeDesc* td = new TypeDesc("record", fieldListStack.top());
-        Symbol* sym = new Symbol(lexime, 0, td);
-        envs.top()->setSymbol(lexime, sym);
-        fieldListStack.pop();
+        if (envs.top()->getSymbol(lexime) != NULL) {
+          if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+            cout << "Invalid use of keyword " << lexime << endl;
+          else
+            cout << "Duplicated type definition for " << lexime << endl;
+        } else {
+          TypeDesc* td = new TypeDesc("record", fieldListStack.top());
+          Symbol* sym = new Symbol(lexime, 0, td);
+          envs.top()->setSymbol(lexime, sym);
+          fieldListStack.pop();
+        }
       } else {
         // Type is array.
         string id($1);
@@ -244,10 +258,17 @@ typeDefinition: TOKEN_ID TOKEN_EQ type TOKEN_SEMICOLON
         // Lab3
         if (!envs.empty()) {
           string lexime($1);
-          TypeDesc* td = arrayTypeStack.top();
-          Symbol* sym = new Symbol(lexime, 0, td);
-          envs.top()->setSymbol(lexime, sym);
-          arrayTypeStack.pop();
+          if (envs.top()->getSymbol(lexime) != NULL) {
+            if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+              cout << "Invalid use of keyword " << lexime << endl;
+            else
+              cout << "Duplicated type definition for " << lexime << endl;
+          } else {
+            TypeDesc* td = arrayTypeStack.top();
+            Symbol* sym = new Symbol(lexime, 0, td);
+            envs.top()->setSymbol(lexime, sym);
+            arrayTypeStack.pop();
+          }
         }
       }
     };

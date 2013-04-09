@@ -1,6 +1,6 @@
 address: 0    , identifier: lexer_test     , type: nil       
-address: 1    , identifier: int            , type: integer   
-address: 2    , identifier: integer        , type: integer   
+address: 1    , identifier: int            , type: array     
+address: 2    , identifier: integer        , type: nil       
 address: 3    , identifier: i              , type: integer   
 address: 4    , identifier: b              , type: boolean   
 address: 5    , identifier: boolean        , type: nil       
