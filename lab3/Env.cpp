@@ -65,6 +65,8 @@ void Env::displayTable() {
   map<string, Symbol*>::iterator it;
   for (it = table.begin(); it != table.end(); ++it) {
     cout << (*it).first << " " << (*it).second->getTypeDesc()->getType() << endl;
+    if ((*it).second->getTypeDesc()->getType().compare("record") == 0)
+      (*it).second->getTypeDesc()->displayFieldList();
   }
 }
 

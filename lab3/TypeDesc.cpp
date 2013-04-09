@@ -1,5 +1,6 @@
 #include "TypeDesc.h"
 #include "Env.h"
+#include <iostream>
 
 using namespace std;
 
@@ -37,15 +38,20 @@ TypeDesc::TypeDesc(const TypeDesc& td):
 }
 
 TypeDesc::~TypeDesc() {
+  
   if (fieldList != NULL) {
+    /*
     for(int i = 0; i < fieldList->size(); ++i) {
       delete fieldList->at(i).second;
       fieldList->at(i).second = NULL;
-    }
+    }*/
 
     delete fieldList;
     fieldList = NULL;
+  }
 
+
+  if (arrayEleType != NULL) {
     delete arrayEleType;
     arrayEleType = NULL;
   }
@@ -85,5 +91,12 @@ void TypeDesc::setArrayEleType(TypeDesc* t) {
 
 vector<pair<string, TypeDesc*> >* TypeDesc::getFieldList() {
   return fieldList;
+}
+
+void TypeDesc::displayFieldList() {
+  for(int i = 0; i < fieldList->size(); ++i) {
+    cout << "record field: " << fieldList->at(i).first << " " <<
+        fieldList->at(i).second->getType() << endl;
+  }
 }
 

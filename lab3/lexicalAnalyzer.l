@@ -20,10 +20,9 @@ int arrSavedAddr;
 // Lab3
 stack<Env*> envs;
 stack<int> offsets;
-stack<int> recordSeqs;
-stack<int> arraySeqs;
 vector<Env*> allEnvs;
 stack<vector<pair<string, TypeDesc> >* > fieldListStack;
+stack<TypeDesc*> arrayTypeStack;
 int recordSeq = 0;
 int arraySeq = 0;
 %}
