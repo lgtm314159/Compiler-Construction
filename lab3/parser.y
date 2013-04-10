@@ -43,6 +43,7 @@ void addSymbol(const char* id, const int type);
 void addSymbol(const string &id, const string &type);
 vector<string> split(char *ids);
 void fixAddress(int addr);
+void freeFieldList(vector<pair<string, TypeDesc*> >* fl); 
 
 #define YYPRINT
 
@@ -243,6 +244,10 @@ typeDefinition: TOKEN_ID TOKEN_EQ type TOKEN_SEMICOLON
         } else {
           TypeDesc* td = new TypeDesc("record", fieldListStack.top());
           Symbol* sym = new Symbol(lexime, 0, td);
+
+          //delete fieldListStack.top();
+          freeFieldList(fieldListStack.top());
+
           envs.top()->setSymbol(lexime, sym);
           fieldListStack.pop();
         }
@@ -397,6 +402,8 @@ variableDeclaration: identifierList TOKEN_COLON type TOKEN_SEMICOLON
             envs.top()->setSymbol(lexime, sym);
           }
         }
+        //delete fieldListStack.top();
+        freeFieldList(fieldListStack.top());
         fieldListStack.pop();
       } else {
         // Type is array.
@@ -719,6 +726,8 @@ formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
           Symbol* sym = new Symbol(lexime, 0, td);
           envs.top()->setSymbol(lexime, sym);
         }
+        //delete fieldListStack.top();
+        freeFieldList(fieldListStack.top());
         fieldListStack.pop();
       } else {
         // Type is array.
@@ -827,6 +836,8 @@ formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
             Symbol* sym = new Symbol(lexime, 0, td);
             envs.top()->setSymbol(lexime, sym);
           }
+          //delete fieldListStack.top();
+          freeFieldList(fieldListStack.top());
           fieldListStack.pop();
         } else {
           // Type is array.
@@ -941,6 +952,8 @@ type: TOKEN_ID { cout << "type_ID" << endl; //addSymbol($1, nilStr);
           TypeDesc* arrayEleType = new TypeDesc("record", fieldListStack.top());
           TypeDesc* td = new TypeDesc("array", lower, upper, arrayEleType);
           arrayTypeStack.push(td);
+          //delete fieldListStack.top();
+          freeFieldList(fieldListStack.top());
           fieldListStack.pop();
         } else {
           // Array's element type is array.
@@ -950,9 +963,14 @@ type: TOKEN_ID { cout << "type_ID" << endl; //addSymbol($1, nilStr);
           arrayTypeStack.push(td);
         }
       } 
-    | TOKEN_RECORD fieldList TOKEN_END
+    | TOKEN_RECORD 
+      {
+        vector<pair<string, TypeDesc*> >* fieldList = new vector<pair<string, TypeDesc*> >;
+        fieldListStack.push(fieldList);
+      }
+      fieldList TOKEN_END
       { cout << "type_record" << endl;
-        $$ = (char*) malloc(sizeof(recordStr));;
+        $$ = (char*) malloc(strlen(recordStr) + 1);;
         strcpy($$, recordStr); }; 
 
 resultType: TOKEN_ID { cout << "result_type" << endl;
@@ -1083,6 +1101,10 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
         // Type is record.
         
         // Lab3
+        vector<pair<string, TypeDesc*> >* recFl = fieldListStack.top();
+        //cout << "fl stack size: " << fieldListStack.size() << endl;
+        fieldListStack.pop();
+        //cout << "fl stack size: " << fieldListStack.size() << endl;
         for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
           string lexime(*it);
           if (envs.top()->getSymbol(lexime) != NULL) {
@@ -1091,13 +1113,16 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
             else
               cout << "Duplicated variable declaration for " << lexime << endl;
           } else {
-            TypeDesc* td = new TypeDesc("record", fieldListStack.top());
+            //TypeDesc* td = new TypeDesc("record", fieldListStack.top());
+            TypeDesc* td = new TypeDesc("record", recFl);
             fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
             //Symbol* sym = new Symbol(lexime, 0, td);
             //envs.top()->setSymbol(lexime, sym);
           }
         }
-        fieldListStack.pop();
+        //delete recFl;
+        freeFieldList(recFl);
+        //fieldListStack.pop();
       } else {
         // Type is array.
 
@@ -1136,8 +1161,6 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
 
 
       // Lab3
-      vector<pair<string, TypeDesc*> >* fieldList = new vector<pair<string, TypeDesc*> >;
-      fieldListStack.push(fieldList);
       vector<string> strs = split($3);
       if (strs[0].compare(rec) != 0 && strs[0].compare(arr) !=0) {
         // Lab3. Address will be fixed later.
@@ -1227,9 +1250,11 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
           } 
         }
       } else if (strs[0].compare(rec) == 0) {
-        // Type record.
+        // Type is record.
         
         // Lab3
+        vector<pair<string, TypeDesc*> >* recFl = fieldListStack.top();
+        fieldListStack.pop();
         for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
           string lexime(*it);
           if (envs.top()->getSymbol(lexime) != NULL) {
@@ -1238,13 +1263,15 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
             else
               cout << "Duplicated variable declaration for " << lexime << endl;
           } else {
-            TypeDesc* td = new TypeDesc("record", fieldListStack.top());
+            TypeDesc* td = new TypeDesc("record", recFl);
             fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
             //Symbol* sym = new Symbol(lexime, 0, td);
             //envs.top()->setSymbol(lexime, sym);
           }
         }
-        fieldListStack.pop();
+        //delete recFl;
+        freeFieldList(recFl);
+        //fieldListStack.pop();
       } else {
         // Type is array.
 
@@ -1350,8 +1377,85 @@ variable: TOKEN_ID
       addSymbol($1, nilStr);
     }
 
+    // Lab3
+    // Validate component selection.
     if ($3 != NULL) {
       vector<string> components = split($3);
+
+      string lexime($1);
+      TypeDesc* outterMostTd = NULL;
+      if (envs.top()->getSymbol(lexime) == NULL) {
+        Env* envPtr = envs.top()->getPrevEnv();
+        while (envPtr != NULL) {
+          if (envPtr->getSymbol(lexime) != NULL) {
+            outterMostTd = envPtr->getSymbol(lexime)->getTypeDesc();
+            break;
+          }
+          envPtr = envPtr->getPrevEnv();
+        }
+      } else {
+        outterMostTd = envs.top()->getSymbol(lexime)->getTypeDesc();
+      }
+
+      if (outterMostTd != NULL) {
+        TypeDesc* currentTd = outterMostTd;
+        TypeDesc* prevTd = currentTd;
+        for (int i = 0; i < components.size(); ++i) {
+          if (prevTd->getType().compare(rec) == 0) {
+            currentTd = prevTd->getTypeDescFromFieldList(components[i]);
+            if (currentTd == NULL) {
+              string name;
+              if (i == 0) {
+                name = lexime;
+              } else {
+                name = components[i - 1];
+              }
+              cout << "Variable " << components[i] << " hasn't been defined in record "
+                  << name << endl;
+              break;
+            } else {
+              prevTd = currentTd;
+            }
+          } else {
+            string name;
+            if (i == 0) {
+              name = lexime;
+            } else {
+              name = components[i - 1];
+            }
+            cout << "Variable " << name << " is not a record" << endl;
+            break;
+          }
+        }
+      } else {
+        // Variable should have invalid type.
+      }
+
+      /*
+      if (outterMostTd != NULL) {
+        if (outterMostTd->getType().compare(rec) == 0) {
+          TypeDesc* currentTd = outterMostTd->getTypeDescFromFieldList(components[0]);
+          if (currentTd != NULL) {
+            if (currentTd.getType().compare(rec) == 0) {
+              for (int i = 1; i < components.size(); ++i) {
+                currentTd = currentTd->getTypeDescFromFieldList(components[i]);
+                if (currentTd == NULL) {
+                  cout << "Variable " << components[i] << " doesn't exist within record " << lexime << endl;
+                  break;
+                }
+              }
+            } else {
+              cout << "Variable " << component[1] << " is not a record" << endl;
+            }
+          } else {
+            cout << "Variable " << components[0] << " doesn't exist within record " << lexime << endl;
+          }
+        } else {
+          cout << "Variable " << lexime << " is not a record" << endl;
+        }
+      }
+      */
+      
     }
     
     };
@@ -1360,17 +1464,23 @@ componentSelection: TOKEN_DOT TOKEN_ID componentSelection
     {
       // Lab3
       stringstream ss;
-      ss << $2 << " " << $3;
-      $$ = (char*) malloc(sizeof(ss.str().c_str()));
-      strcpy($$, ss.str().c_str());
+      if ($3 != NULL) {
+        ss << $2 << " " << $3;
+        $$ = (char*) malloc(ss.str().length() + 1);
+        strcpy($$, ss.str().c_str());
+      } else {
+        $$ = (char*) malloc(strlen($2) + 1);
+        strcpy($$, $2);
+      }
     }
     | TOKEN_LBRACKET expression TOKEN_RBRACKET componentSelection
       {
         // Lab3
-        if ($4 == NULL)
+        if ($4 == NULL) {
           $$ = NULL;
+        }
         else {
-          $$ = (char*) malloc(sizeof($4));
+          $$ = (char*) malloc(strlen($4) + 1);
           strcpy($$, $4);
         }
       }
@@ -1549,5 +1659,17 @@ vector<string> split(char* ids) {
     ++j;
   }
   return result;
+}
+
+void freeFieldList(vector<pair<string, TypeDesc*> >* fl) {
+  if (fl != NULL) {
+    for(int i = 0; i < fl->size(); ++i) {
+      delete fl->at(i).second;
+      fl->at(i).second = NULL;
+    }
+  }
+
+    delete fl;
+    fl = NULL;
 }
 

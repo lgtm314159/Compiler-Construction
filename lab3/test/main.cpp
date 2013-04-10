@@ -73,5 +73,11 @@ int main() {
   //delete env;
   //delete td;
   delete env;
+
+
+  char str[] = "cccccawegawegwaegw";
+  //char* newStr = (char*) malloc(sizeof(str));
+  //cout << newStr << endl;
+  cout << sizeof(str) << endl;
 }
 

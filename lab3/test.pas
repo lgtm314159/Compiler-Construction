@@ -2,15 +2,18 @@ program whatever;
 
 type
 	r = record
-		c: record d: integer end
+		c,e: record d: integer end
 	end;
-  type1 = nulltype;
+{
+var
+  var1: r;
 
 function foo1(a : integer) : r;  
 var foo1: boolean; 
 begin
    a := 0
 end;
-
+}
 begin
+  r.c.d := false 
 end.

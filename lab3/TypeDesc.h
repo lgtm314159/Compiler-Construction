@@ -44,6 +44,7 @@ class TypeDesc {
     Env* getRecordEnv();
     void setRecordEnv(Env* re); 
     vector<pair<string, TypeDesc*> >* getFieldList();
+    TypeDesc* getTypeDescFromFieldList(const string& name);
     void displayFieldList();
 };
 

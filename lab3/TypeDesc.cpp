@@ -13,10 +13,15 @@ TypeDesc::TypeDesc(const string& t):
 TypeDesc::TypeDesc(const string& t, int l, int u, TypeDesc* et):
     type(t), lower(l), upper(u), arrayEleType(et), fieldList(NULL),
     formalParamList(NULL), resultType(NULL) {}
-
 TypeDesc::TypeDesc(const string& t, vector<pair<string, TypeDesc*> >* fl):
-    type(t), lower(0), upper(0), arrayEleType(NULL), fieldList(fl),
-    formalParamList(NULL), resultType(NULL) {}
+    type(t), lower(0), upper(0), arrayEleType(NULL),
+    formalParamList(NULL), resultType(NULL) {
+  fieldList = new vector<pair<string, TypeDesc*> >();
+  for (int i = 0; i < fl->size(); ++i) {
+    TypeDesc* td = new TypeDesc(*(fl->at(i).second));
+    fieldList->push_back(pair<string, TypeDesc*>(fl->at(i).first, td));
+  }
+}
 
 TypeDesc::TypeDesc(const string& t, vector<TypeDesc*>* fpl,
     TypeDesc* rt):
@@ -59,11 +64,10 @@ TypeDesc::TypeDesc(const TypeDesc& td):
 
 TypeDesc::~TypeDesc() {
   if (fieldList != NULL) {
-    /*
     for(int i = 0; i < fieldList->size(); ++i) {
       delete fieldList->at(i).second;
       fieldList->at(i).second = NULL;
-    }*/
+    }
 
     delete fieldList;
     fieldList = NULL;
@@ -122,10 +126,24 @@ vector<pair<string, TypeDesc*> >* TypeDesc::getFieldList() {
   return fieldList;
 }
 
+TypeDesc* TypeDesc::getTypeDescFromFieldList(const string& name) {
+  for (int i = 0; i < fieldList->size(); ++i) {
+    if (fieldList->at(i).first.compare(name) == 0) {
+      return fieldList->at(i).second;
+    }
+  }
+  return NULL;
+}
+
 void TypeDesc::displayFieldList() {
+  cout << "field list size: " << fieldList->size() << endl;
   for(int i = 0; i < fieldList->size(); ++i) {
     cout << "record field: " << fieldList->at(i).first << " " <<
         fieldList->at(i).second->getType() << endl;
+
+    if (fieldList->at(i).second->getType().compare("record") == 0) {
+      fieldList->at(i).second->displayFieldList();
+    }
   }
 }
 
