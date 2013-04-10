@@ -1,17 +1,23 @@
-address: 0    , identifier: whatever       , type: nil       
-address: 1    , identifier: foo1           , type: boolean   
-address: 2    , identifier: a              , type: integer   
-address: 3    , identifier: integer        , type: nil       
-address: 4    , identifier: r              , type: nil       
-address: 5    , identifier: boolean        , type: nil       
-2
-a integer
-foo1 function
-7
+address: 0    , identifier: test4          , type: nil       
+address: 1    , identifier: divides        , type: 4         
+address: 2    , identifier: x              , type: integer   
+address: 3    , identifier: y              , type: integer   
+address: 4    , identifier: integer        , type: nil       
+address: 5    , identifier: a              , type: float     
+address: 6    , identifier: b              , type: float     
+address: 7    , identifier: float          , type: nil       
+address: 8    , identifier: boolean        , type: nil       
+6
+a invalid
+b invalid
+divides function
+float invalid
+x integer
+y integer
+6
 boolean boolean
+divides function
 false boolean
-foo1 function
 integer integer
-r invalid
 string string
 true boolean

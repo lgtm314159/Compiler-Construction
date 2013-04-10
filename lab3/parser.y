@@ -122,7 +122,7 @@ string arr(arrayStr);
 %left TOKEN_MULTIPLY TOKEN_DIV TOKEN_MOD TOKEN_AND
 %right UPLUS UMINUS
 
-%type <sval> type identifierList resultType
+%type <sval> type identifierList resultType componentSelection
 %type <ival> formalParamSeq formalParameterList constant
 %%
 
@@ -198,6 +198,15 @@ typeDefinition: TOKEN_ID TOKEN_EQ type TOKEN_SEMICOLON
                 }
                 if (!found) {
                   cout << "Error: type " << strs[0] << " not defined" << endl;
+                  
+                  // Add this invalid type to the symbol table.
+                  TypeDesc* invalidTd = new TypeDesc("invalid");
+                  Symbol* sym = new Symbol(strs[0], 0, invalidTd);
+                  envs.top()->setSymbol(strs[0], sym);
+                  // Add the defined type to the symbol table with invalid type. 
+                  TypeDesc* td = new TypeDesc(*invalidTd);
+                  sym = new Symbol(lexime, 0, td);
+                  envs.top()->setSymbol(lexime, sym);
                 }
               } else {
                 TypeDesc* td = envs.top()->getSymbol(strs[0])->getTypeDesc();
@@ -333,6 +342,26 @@ variableDeclaration: identifierList TOKEN_COLON type TOKEN_SEMICOLON
               }
               if (!found) {
                 cout << "Error: type " << strs[0] << " not defined" << endl;
+
+                // Add this invalid type to the symbol table.
+                TypeDesc* invalidTd = new TypeDesc("invalid");
+                Symbol* sym = new Symbol(strs[0], 0, invalidTd);
+                envs.top()->setSymbol(strs[0], sym);
+
+                // Add the declared variables to the symbol table with invalid type. 
+                for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                  string lexime(*it);
+                  if (envs.top()->getSymbol(lexime) != NULL) {
+                    if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+                      cout << "Invalid use of keyword " << lexime << endl;
+                    else
+                      cout << "Duplicated variable definition for " << lexime << endl;
+                  } else {
+                    TypeDesc* td = new TypeDesc(*invalidTd);
+                    Symbol* sym = new Symbol(lexime, 0, td);
+                    envs.top()->setSymbol(lexime, sym);
+                  }
+                }
               }
             } else {
               for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
@@ -653,6 +682,20 @@ formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
               }
               if (!found) {
                 cout << "Error: type " << strs[0] << " not defined" << endl;
+
+                // Add this invalid type to the symbol table.
+                TypeDesc* invalidTd = new TypeDesc("invalid");
+                Symbol* sym = new Symbol(strs[0], 0, invalidTd);
+                envs.top()->setSymbol(strs[0], sym);
+
+                // Add the defined parameters to the symbol table with invalid type. 
+                for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                  string lexime(*it);
+                  TypeDesc* td = new TypeDesc(*invalidTd);
+                  formalParamList->push_back(td);
+                  Symbol* sym = new Symbol(lexime, 0, td);
+                  envs.top()->setSymbol(lexime, sym);
+                }
               }
             } else {
               for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
@@ -747,6 +790,20 @@ formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
                 }
                 if (!found) {
                   cout << "Error: type " << strs[0] << " not defined" << endl;
+
+                  // Add this invalid type to the symbol table.
+                  TypeDesc* invalidTd = new TypeDesc("invalid");
+                  Symbol* sym = new Symbol(strs[0], 0, invalidTd);
+                  envs.top()->setSymbol(strs[0], sym);
+
+                  // Add the defined parameters to the symbol table with invalid type. 
+                  for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                    string lexime(*it);
+                    TypeDesc* td = new TypeDesc(*invalidTd);
+                    formalParamList->push_back(td);
+                    Symbol* sym = new Symbol(lexime, 0, td);
+                    envs.top()->setSymbol(lexime, sym);
+                  }
                 }
               } else {
                 for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
@@ -810,7 +867,7 @@ procedureStatement: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
       string id($1);
       if (symTable.find(id) == symTable.end()) {
         addSymbol($1, nilStr);
-      };
+      }
     };
 
 structuredStatement: compoundStatement { cout << "compound_statement" << endl; }
@@ -951,8 +1008,8 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
               } else {
                 TypeDesc* td = new TypeDesc(strs[0]);
                 fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
-                Symbol* sym = new Symbol(lexime, 0, td);
-                envs.top()->setSymbol(lexime, sym);
+                //Symbol* sym = new Symbol(lexime, 0, td);
+                //envs.top()->setSymbol(lexime, sym);
               }
             }
           } else {
@@ -972,8 +1029,8 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
                     } else {
                       TypeDesc* td = new TypeDesc(*(envPtr->getSymbol(strs[0])->getTypeDesc()));
                       fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
-                      Symbol* sym = new Symbol(lexime, 0, td);
-                      envs.top()->setSymbol(lexime, sym);
+                      //Symbol* sym = new Symbol(lexime, 0, td);
+                      //envs.top()->setSymbol(lexime, sym);
                     }
                   }
                   break;
@@ -982,6 +1039,27 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
               }
               if (!found) {
                 cout << "Error: type " << strs[0] << " not defined" << endl;
+
+                // Add this invalid type to the symbol table? Or not?
+                //TypeDesc* invalidTd = new TypeDesc("invalid");
+                //Symbol* sym = new Symbol(strs[0], 0, invalidTd);
+                //envs.top()->setSymbol(strs[0], sym);
+
+                // Add the defined identifier of invalid type to the fieldList of the record. 
+                for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                  string lexime(*it);
+                  if (envs.top()->getSymbol(lexime) != NULL) {
+                    if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+                      cout << "Invalid use of keyword " << lexime << endl;
+                    else
+                      cout << "Duplicated variable declaration for " << lexime << endl;
+                  } else {
+                    TypeDesc* td = new TypeDesc("invalid");
+                    fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
+                    //Symbol* sym = new Symbol(lexime, 0, td);
+                    //envs.top()->setSymbol(lexime, sym);
+                  }
+                }
               }
             } else {
               for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
@@ -994,8 +1072,8 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
                 } else {
                   TypeDesc* td = new TypeDesc(*(envs.top()->getSymbol(strs[0])->getTypeDesc()));
                   fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
-                  Symbol* sym = new Symbol(lexime, 0, td);
-                  envs.top()->setSymbol(lexime, sym);
+                  //Symbol* sym = new Symbol(lexime, 0, td);
+                  //envs.top()->setSymbol(lexime, sym);
                 }
               }
             }
@@ -1015,8 +1093,8 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
           } else {
             TypeDesc* td = new TypeDesc("record", fieldListStack.top());
             fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
-            Symbol* sym = new Symbol(lexime, 0, td);
-            envs.top()->setSymbol(lexime, sym);
+            //Symbol* sym = new Symbol(lexime, 0, td);
+            //envs.top()->setSymbol(lexime, sym);
           }
         }
         fieldListStack.pop();
@@ -1035,8 +1113,8 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
             } else {
               TypeDesc* td = arrayTypeStack.top();
               fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
-              Symbol* sym = new Symbol(lexime, 0, td);
-              envs.top()->setSymbol(lexime, sym);
+              //Symbol* sym = new Symbol(lexime, 0, td);
+              //envs.top()->setSymbol(lexime, sym);
             }
           }
           arrayTypeStack.pop();
@@ -1077,8 +1155,8 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
               } else {
                 TypeDesc* td = new TypeDesc(strs[0]);
                 fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
-                Symbol* sym = new Symbol(lexime, 0, td);
-                envs.top()->setSymbol(lexime, sym);
+                //Symbol* sym = new Symbol(lexime, 0, td);
+                //envs.top()->setSymbol(lexime, sym);
               }
             }
           } else {
@@ -1098,8 +1176,8 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
                     } else {
                       TypeDesc* td = new TypeDesc(*(envPtr->getSymbol(strs[0])->getTypeDesc()));
                       fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
-                      Symbol* sym = new Symbol(lexime, 0, td);
-                      envs.top()->setSymbol(lexime, sym);
+                      //Symbol* sym = new Symbol(lexime, 0, td);
+                      //envs.top()->setSymbol(lexime, sym);
                     }
                   }
                   break;
@@ -1108,6 +1186,27 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
               }
               if (!found) {
                 cout << "Error: type " << strs[0] << " not defined" << endl;
+
+                // Add this invalid type to the symbol table? Or not?
+                //TypeDesc* invalidTd = new TypeDesc("invalid");
+                //Symbol* sym = new Symbol(strs[0], 0, invalidTd);
+                //envs.top()->setSymbol(strs[0], sym);
+
+                // Add the defined identifiers of invalid type to the fieldList of the record. 
+                for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                  string lexime(*it);
+                  if (envs.top()->getSymbol(lexime) != NULL) {
+                    if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+                      cout << "Invalid use of keyword " << lexime << endl;
+                    else
+                      cout << "Duplicated variable declaration for " << lexime << endl;
+                  } else {
+                    TypeDesc* td = new TypeDesc("invalid");
+                    fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
+                    //Symbol* sym = new Symbol(lexime, 0, td);
+                    //envs.top()->setSymbol(lexime, sym);
+                  }
+                }
               }
             } else {
               for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
@@ -1120,8 +1219,8 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
                 } else {
                   TypeDesc* td = new TypeDesc(*(envs.top()->getSymbol(strs[0])->getTypeDesc()));
                   fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
-                  Symbol* sym = new Symbol(lexime, 0, td);
-                  envs.top()->setSymbol(lexime, sym);
+                  //Symbol* sym = new Symbol(lexime, 0, td);
+                  //envs.top()->setSymbol(lexime, sym);
                 }
               }
             }
@@ -1141,8 +1240,8 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
           } else {
             TypeDesc* td = new TypeDesc("record", fieldListStack.top());
             fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
-            Symbol* sym = new Symbol(lexime, 0, td);
-            envs.top()->setSymbol(lexime, sym);
+            //Symbol* sym = new Symbol(lexime, 0, td);
+            //envs.top()->setSymbol(lexime, sym);
           }
         }
         fieldListStack.pop();
@@ -1161,8 +1260,8 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
             } else {
               TypeDesc* td = arrayTypeStack.top();
               fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
-              Symbol* sym = new Symbol(lexime, 0, td);
-              envs.top()->setSymbol(lexime, sym);
+              //Symbol* sym = new Symbol(lexime, 0, td);
+              //envs.top()->setSymbol(lexime, sym);
             }
           }
           arrayTypeStack.pop();
@@ -1215,15 +1314,69 @@ functionReference: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
       }
     };
 
-variable: TOKEN_ID componentSelection { cout << "variable" << endl;
+variable: TOKEN_ID 
+    {
+      // Lab3
+      string lexime($1);
+      bool found = false;
+      if (envs.top()->getSymbol(lexime) == NULL) {
+        Env* envPtr = envs.top()->getPrevEnv();
+        while (envPtr != NULL) {
+          if (envPtr->getSymbol(lexime) != NULL) {
+            found = true;
+            break;
+          }
+          envPtr = envPtr->getPrevEnv();
+        }
+      } else {
+        found = true;
+      }
+
+      if (!found) {
+        cout << "Error: variable " << lexime << " hasn't been declared" << endl;
+
+        // Assign an invalid type to this undeclared variable.
+        /*
+        TypeDesc* td = new TypeDesc("invalid");
+        Symbol* sym = new Symbol(lexime, 0, td);
+        envs.top()->setSymbol(lexime, sym);
+        */
+      }
+
+    }
+ componentSelection { cout << "variable" << endl;
     string id($1);
     if (symTable.find(id) == symTable.end()) {
       addSymbol($1, nilStr);
     }
+
+    if ($3 != NULL) {
+      vector<string> components = split($3);
+    }
+    
     };
 
-componentSelection: TOKEN_DOT TOKEN_ID componentSelection | TOKEN_LBRACKET expression TOKEN_RBRACKET componentSelection
-    | { cout << "component_selection_empty" << endl; };
+componentSelection: TOKEN_DOT TOKEN_ID componentSelection
+    {
+      // Lab3
+      stringstream ss;
+      ss << $2 << " " << $3;
+      $$ = (char*) malloc(sizeof(ss.str().c_str()));
+      strcpy($$, ss.str().c_str());
+    }
+    | TOKEN_LBRACKET expression TOKEN_RBRACKET componentSelection
+      {
+        // Lab3
+        if ($4 == NULL)
+          $$ = NULL;
+        else {
+          $$ = (char*) malloc(sizeof($4));
+          strcpy($$, $4);
+        }
+      }
+    | { cout << "component_selection_empty" << endl;
+        // Lab3
+        $$ = NULL;};
 
 actualParameterList: expressionList { cout << "actual_parameter_list" << endl; }
     | { cout << "actual_parameter_list_empty" << endl; };

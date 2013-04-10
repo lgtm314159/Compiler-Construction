@@ -1,22 +1,15 @@
 identifier_list
+identifier_list_more
 type_ID
 identifier_lists
+identifier_list
+identifier_list_more
+type_ID
+identifier_lists_more
+Error: type float not defined
 formal_parameter_list
 result_type
-Error: type r not defined
-identifier_list
-type_ID
-variable_declaration
-Duplicated variable declaration for foo1
-variable_declaration
-component_selection_empty
-variable
-factor
-term
-simple_expression
-expression
-assignment_statement
-simple_statement
+simple_statement_empty
 statement
 statement_sequence
 compound_statement
