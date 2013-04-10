@@ -1,13 +1,17 @@
-address: 0    , identifier: lexer_test     , type: nil       
-address: 1    , identifier: int            , type: array     
-address: 2    , identifier: integer        , type: nil       
-address: 3    , identifier: i              , type: integer   
-address: 4    , identifier: b              , type: boolean   
+address: 0    , identifier: whatever       , type: nil       
+address: 1    , identifier: foo1           , type: boolean   
+address: 2    , identifier: a              , type: integer   
+address: 3    , identifier: integer        , type: nil       
+address: 4    , identifier: r              , type: nil       
 address: 5    , identifier: boolean        , type: nil       
-address: 6    , identifier: f              , type: float     
-address: 7    , identifier: float          , type: nil       
-address: 8    , identifier: foo            , type: 1         
-address: 9    , identifier: x              , type: int       
-address: 10   , identifier: bar            , type: 1         
-address: 11   , identifier: false          , type: nil       
-address: 12   , identifier: true           , type: nil       
+2
+a integer
+foo1 function
+7
+boolean boolean
+false boolean
+foo1 function
+integer integer
+r invalid
+string string
+true boolean

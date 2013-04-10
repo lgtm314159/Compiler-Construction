@@ -7,7 +7,6 @@ program lexer_test;
 
 type
   int = integer;
-  int = array [1 .. 10] of integer;
 
 var
   i : integer;

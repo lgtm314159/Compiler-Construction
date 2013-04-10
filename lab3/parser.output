@@ -45,114 +45,118 @@ Grammar
 
    20 variableDeclaration: identifierList TOKEN_COLON type TOKEN_SEMICOLON
 
-   21 procedureDeclaration: TOKEN_PROCEDURE TOKEN_ID TOKEN_LPAR formalParameterList TOKEN_RPAR TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
+   21 $@1: /* empty */
 
-   22 functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList TOKEN_RPAR TOKEN_COLON resultType TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
+   22 procedureDeclaration: TOKEN_PROCEDURE TOKEN_ID TOKEN_LPAR formalParameterList $@1 TOKEN_RPAR TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
 
-   23 groupBlockForward: block
-   24                  | TOKEN_FORWARD
+   23 $@2: /* empty */
 
-   25 formalParameterList: formalParamSeq
-   26                    | /* empty */
+   24 functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList TOKEN_RPAR TOKEN_COLON resultType $@2 TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
 
-   27 formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
-   28               | identifierList TOKEN_COLON type
+   25 groupBlockForward: block
+   26                  | TOKEN_FORWARD
 
-   29 block: groupVariableDeclarations compoundStatement
+   27 formalParameterList: formalParamSeq
+   28                    | /* empty */
 
-   30 compoundStatement: TOKEN_BEGIN statementSequence TOKEN_END
+   29 formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
+   30               | identifierList TOKEN_COLON type
 
-   31 statementSequence: statementSequence TOKEN_SEMICOLON statement
-   32                  | statement
+   31 block: groupVariableDeclarations compoundStatement
 
-   33 statement: groupSimStruStatement
+   32 compoundStatement: TOKEN_BEGIN statementSequence TOKEN_END
 
-   34 groupSimStruStatement: simpleStatement
-   35                      | structuredStatement
+   33 statementSequence: statementSequence TOKEN_SEMICOLON statement
+   34                  | statement
 
-   36 simpleStatement: assignmentStatement
-   37                | procedureStatement
-   38                | /* empty */
+   35 statement: groupSimStruStatement
 
-   39 assignmentStatement: variable TOKEN_ASSIGN expression
+   36 groupSimStruStatement: simpleStatement
+   37                      | structuredStatement
 
-   40 procedureStatement: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
+   38 simpleStatement: assignmentStatement
+   39                | procedureStatement
+   40                | /* empty */
 
-   41 structuredStatement: compoundStatement
-   42                    | TOKEN_IF expression TOKEN_THEN statement
-   43                    | TOKEN_IF expression TOKEN_THEN statement TOKEN_ELSE statement
-   44                    | TOKEN_WHILE expression TOKEN_DO statement
-   45                    | TOKEN_FOR TOKEN_ID TOKEN_ASSIGN expression TOKEN_TO expression TOKEN_DO statement
+   41 assignmentStatement: variable TOKEN_ASSIGN expression
 
-   46 type: TOKEN_ID
-   47     | TOKEN_ARRAY TOKEN_LBRACKET constant TOKEN_RANGE constant TOKEN_RBRACKET TOKEN_OF type
-   48     | TOKEN_RECORD fieldList TOKEN_END
+   42 procedureStatement: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
 
-   49 resultType: TOKEN_ID
+   43 structuredStatement: compoundStatement
+   44                    | TOKEN_IF expression TOKEN_THEN statement
+   45                    | TOKEN_IF expression TOKEN_THEN statement TOKEN_ELSE statement
+   46                    | TOKEN_WHILE expression TOKEN_DO statement
+   47                    | TOKEN_FOR TOKEN_ID TOKEN_ASSIGN expression TOKEN_TO expression TOKEN_DO statement
 
-   50 fieldList: fieldListSeq
-   51          | /* empty */
+   48 type: TOKEN_ID
+   49     | TOKEN_ARRAY TOKEN_LBRACKET constant TOKEN_RANGE constant TOKEN_RBRACKET TOKEN_OF type
+   50     | TOKEN_RECORD fieldList TOKEN_END
 
-   52 fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
-   53             | identifierList TOKEN_COLON type
+   51 resultType: TOKEN_ID
 
-   54 constant: TOKEN_INT
-   55         | sign TOKEN_INT
+   52 fieldList: fieldListSeq
+   53          | /* empty */
 
-   56 expression: simpleExpression groupRelOpSimExpr
+   54 fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
+   55             | identifierList TOKEN_COLON type
 
-   57 groupRelOpSimExpr: relationalOp simpleExpression
-   58                  | /* empty */
+   56 constant: TOKEN_INT
+   57         | sign TOKEN_INT
 
-   59 relationalOp: TOKEN_LT
-   60             | TOKEN_LE
-   61             | TOKEN_GT
-   62             | TOKEN_GE
-   63             | TOKEN_NOTEQ
-   64             | TOKEN_EQ
+   58 expression: simpleExpression groupRelOpSimExpr
 
-   65 simpleExpression: sign term
-   66                 | term
-   67                 | simpleExpression addOp term
+   59 groupRelOpSimExpr: relationalOp simpleExpression
+   60                  | /* empty */
 
-   68 addOp: TOKEN_PLUS
-   69      | TOKEN_MINUS
-   70      | TOKEN_OR
+   61 relationalOp: TOKEN_LT
+   62             | TOKEN_LE
+   63             | TOKEN_GT
+   64             | TOKEN_GE
+   65             | TOKEN_NOTEQ
+   66             | TOKEN_EQ
 
-   71 term: term mulOp factor
-   72     | factor
+   67 simpleExpression: sign term
+   68                 | term
+   69                 | simpleExpression addOp term
 
-   73 mulOp: TOKEN_MULTIPLY
-   74      | TOKEN_DIV
-   75      | TOKEN_MOD
-   76      | TOKEN_AND
+   70 addOp: TOKEN_PLUS
+   71      | TOKEN_MINUS
+   72      | TOKEN_OR
 
-   77 factor: TOKEN_INT
-   78       | TOKEN_STR
-   79       | variable
-   80       | functionReference
-   81       | TOKEN_NOT factor
-   82       | TOKEN_LPAR expression TOKEN_RPAR
+   73 term: term mulOp factor
+   74     | factor
 
-   83 functionReference: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
+   75 mulOp: TOKEN_MULTIPLY
+   76      | TOKEN_DIV
+   77      | TOKEN_MOD
+   78      | TOKEN_AND
 
-   84 variable: TOKEN_ID componentSelection
+   79 factor: TOKEN_INT
+   80       | TOKEN_STR
+   81       | variable
+   82       | functionReference
+   83       | TOKEN_NOT factor
+   84       | TOKEN_LPAR expression TOKEN_RPAR
 
-   85 componentSelection: TOKEN_DOT TOKEN_ID componentSelection
-   86                   | TOKEN_LBRACKET expression TOKEN_RBRACKET componentSelection
-   87                   | /* empty */
+   85 functionReference: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
 
-   88 actualParameterList: expressionList
-   89                    | /* empty */
+   86 variable: TOKEN_ID componentSelection
 
-   90 expressionList: expressionList TOKEN_COMMAS expression
-   91               | expression
+   87 componentSelection: TOKEN_DOT TOKEN_ID componentSelection
+   88                   | TOKEN_LBRACKET expression TOKEN_RBRACKET componentSelection
+   89                   | /* empty */
 
-   92 identifierList: identifierList TOKEN_COMMAS TOKEN_ID
-   93               | TOKEN_ID
+   90 actualParameterList: expressionList
+   91                    | /* empty */
 
-   94 sign: TOKEN_PLUS
-   95     | TOKEN_MINUS
+   92 expressionList: expressionList TOKEN_COMMAS expression
+   93               | expression
+
+   94 identifierList: identifierList TOKEN_COMMAS TOKEN_ID
+   95               | TOKEN_ID
+
+   96 sign: TOKEN_PLUS
+   97     | TOKEN_MINUS
 
 
 Terminals, with rules where they appear
@@ -160,54 +164,54 @@ Terminals, with rules where they appear
 $end (0) 0
 error (256)
 TOKEN_COMMENT (258)
-TOKEN_STR (259) 78
-TOKEN_AND (260) 76
-TOKEN_BEGIN (261) 30
-TOKEN_FORWARD (262) 24
-TOKEN_DIV (263) 74
-TOKEN_DO (264) 44 45
-TOKEN_ELSE (265) 43
-TOKEN_END (266) 30 48
-TOKEN_FOR (267) 45
-TOKEN_FUNCTION (268) 22
-TOKEN_IF (269) 42 43
-TOKEN_ARRAY (270) 47
-TOKEN_MOD (271) 75
-TOKEN_NOT (272) 81
-TOKEN_OF (273) 47
-TOKEN_OR (274) 70
-TOKEN_PROCEDURE (275) 21
+TOKEN_STR (259) 80
+TOKEN_AND (260) 78
+TOKEN_BEGIN (261) 32
+TOKEN_FORWARD (262) 26
+TOKEN_DIV (263) 76
+TOKEN_DO (264) 46 47
+TOKEN_ELSE (265) 45
+TOKEN_END (266) 32 50
+TOKEN_FOR (267) 47
+TOKEN_FUNCTION (268) 24
+TOKEN_IF (269) 44 45
+TOKEN_ARRAY (270) 49
+TOKEN_MOD (271) 77
+TOKEN_NOT (272) 83
+TOKEN_OF (273) 49
+TOKEN_OR (274) 72
+TOKEN_PROCEDURE (275) 22
 TOKEN_PROGRAM (276) 1
-TOKEN_RECORD (277) 48
-TOKEN_THEN (278) 42 43
-TOKEN_TO (279) 45
+TOKEN_RECORD (277) 50
+TOKEN_THEN (278) 44 45
+TOKEN_TO (279) 47
 TOKEN_TYPE (280) 8
 TOKEN_VAR (281) 11
-TOKEN_WHILE (282) 44
-TOKEN_PLUS (283) 68 94
-TOKEN_MINUS (284) 69 95
-TOKEN_MULTIPLY (285) 73
+TOKEN_WHILE (282) 46
+TOKEN_PLUS (283) 70 96
+TOKEN_MINUS (284) 71 97
+TOKEN_MULTIPLY (285) 75
 TOKEN_DIVIDE (286)
-TOKEN_EQ (287) 19 64
-TOKEN_LT (288) 59
-TOKEN_LE (289) 60
-TOKEN_GT (290) 61
-TOKEN_GE (291) 62
-TOKEN_NOTEQ (292) 63
-TOKEN_ID (293) 1 19 21 22 40 45 46 49 83 84 85 92 93
-TOKEN_INT (294) 54 55 77
+TOKEN_EQ (287) 19 66
+TOKEN_LT (288) 61
+TOKEN_LE (289) 62
+TOKEN_GT (290) 63
+TOKEN_GE (291) 64
+TOKEN_NOTEQ (292) 65
+TOKEN_ID (293) 1 19 22 24 42 47 48 51 85 86 87 94 95
+TOKEN_INT (294) 56 57 79
 TOKEN_DECIMAL (295)
 TOKEN_EXPNUM (296)
-TOKEN_DOT (297) 1 85
-TOKEN_COMMAS (298) 90 92
-TOKEN_COLON (299) 20 22 27 28 52 53
-TOKEN_SEMICOLON (300) 1 19 20 21 22 27 31 52
-TOKEN_ASSIGN (301) 39 45
-TOKEN_RANGE (302) 47
-TOKEN_LPAR (303) 21 22 40 82 83
-TOKEN_RPAR (304) 21 22 40 82 83
-TOKEN_LBRACKET (305) 47 86
-TOKEN_RBRACKET (306) 47 86
+TOKEN_DOT (297) 1 87
+TOKEN_COMMAS (298) 92 94
+TOKEN_COLON (299) 20 24 29 30 54 55
+TOKEN_SEMICOLON (300) 1 19 20 22 24 29 33 54
+TOKEN_ASSIGN (301) 41 47
+TOKEN_RANGE (302) 49
+TOKEN_LPAR (303) 22 24 42 84 85
+TOKEN_RPAR (304) 22 24 42 84 85
+TOKEN_LBRACKET (305) 49 88
+TOKEN_RBRACKET (306) 49 88
 UMINUS (307)
 UPLUS (308)
 
@@ -221,7 +225,7 @@ program (55)
 groupTypeDefinitions (56)
     on left: 2 3, on right: 1
 groupVariableDeclarations (57)
-    on left: 4 5, on right: 1 29
+    on left: 4 5, on right: 1 31
 groupSubprogramDeclarations (58)
     on left: 6 7, on right: 1
 typeDefinitions (59)
@@ -241,73 +245,77 @@ typeDefinition (65)
 variableDeclaration (66)
     on left: 20, on right: 12 13
 procedureDeclaration (67)
-    on left: 21, on right: 15 17
-functionDeclaration (68)
-    on left: 22, on right: 16 18
-groupBlockForward (69)
-    on left: 23 24, on right: 21 22
-formalParameterList (70)
-    on left: 25 26, on right: 21 22
-formalParamSeq (71)
-    on left: 27 28, on right: 25 27
-block (72)
-    on left: 29, on right: 23
-compoundStatement (73)
-    on left: 30, on right: 1 29 41
-statementSequence (74)
-    on left: 31 32, on right: 30 31
-statement (75)
-    on left: 33, on right: 31 32 42 43 44 45
-groupSimStruStatement (76)
-    on left: 34 35, on right: 33
-simpleStatement (77)
-    on left: 36 37 38, on right: 34
-assignmentStatement (78)
-    on left: 39, on right: 36
-procedureStatement (79)
-    on left: 40, on right: 37
-structuredStatement (80)
-    on left: 41 42 43 44 45, on right: 35
-type (81)
-    on left: 46 47 48, on right: 19 20 27 28 47 52 53
-resultType (82)
-    on left: 49, on right: 22
-fieldList (83)
-    on left: 50 51, on right: 48
-fieldListSeq (84)
-    on left: 52 53, on right: 50 52
-constant (85)
-    on left: 54 55, on right: 47
-expression (86)
-    on left: 56, on right: 39 42 43 44 45 82 86 90 91
-groupRelOpSimExpr (87)
-    on left: 57 58, on right: 56
-relationalOp (88)
-    on left: 59 60 61 62 63 64, on right: 57
-simpleExpression (89)
-    on left: 65 66 67, on right: 56 57 67
-addOp (90)
-    on left: 68 69 70, on right: 67
-term (91)
-    on left: 71 72, on right: 65 66 67 71
-mulOp (92)
-    on left: 73 74 75 76, on right: 71
-factor (93)
-    on left: 77 78 79 80 81 82, on right: 71 72 81
-functionReference (94)
-    on left: 83, on right: 80
-variable (95)
-    on left: 84, on right: 39 79
-componentSelection (96)
-    on left: 85 86 87, on right: 84 85 86
-actualParameterList (97)
-    on left: 88 89, on right: 40 83
-expressionList (98)
-    on left: 90 91, on right: 88 90
-identifierList (99)
-    on left: 92 93, on right: 20 27 28 52 53 92
-sign (100)
-    on left: 94 95, on right: 55 65
+    on left: 22, on right: 15 17
+$@1 (68)
+    on left: 21, on right: 22
+functionDeclaration (69)
+    on left: 24, on right: 16 18
+$@2 (70)
+    on left: 23, on right: 24
+groupBlockForward (71)
+    on left: 25 26, on right: 22 24
+formalParameterList (72)
+    on left: 27 28, on right: 22 24
+formalParamSeq (73)
+    on left: 29 30, on right: 27 29
+block (74)
+    on left: 31, on right: 25
+compoundStatement (75)
+    on left: 32, on right: 1 31 43
+statementSequence (76)
+    on left: 33 34, on right: 32 33
+statement (77)
+    on left: 35, on right: 33 34 44 45 46 47
+groupSimStruStatement (78)
+    on left: 36 37, on right: 35
+simpleStatement (79)
+    on left: 38 39 40, on right: 36
+assignmentStatement (80)
+    on left: 41, on right: 38
+procedureStatement (81)
+    on left: 42, on right: 39
+structuredStatement (82)
+    on left: 43 44 45 46 47, on right: 37
+type (83)
+    on left: 48 49 50, on right: 19 20 29 30 49 54 55
+resultType (84)
+    on left: 51, on right: 24
+fieldList (85)
+    on left: 52 53, on right: 50
+fieldListSeq (86)
+    on left: 54 55, on right: 52 54
+constant (87)
+    on left: 56 57, on right: 49
+expression (88)
+    on left: 58, on right: 41 44 45 46 47 84 88 92 93
+groupRelOpSimExpr (89)
+    on left: 59 60, on right: 58
+relationalOp (90)
+    on left: 61 62 63 64 65 66, on right: 59
+simpleExpression (91)
+    on left: 67 68 69, on right: 58 59 69
+addOp (92)
+    on left: 70 71 72, on right: 69
+term (93)
+    on left: 73 74, on right: 67 68 69 73
+mulOp (94)
+    on left: 75 76 77 78, on right: 73
+factor (95)
+    on left: 79 80 81 82 83 84, on right: 73 74 83
+functionReference (96)
+    on left: 85, on right: 82
+variable (97)
+    on left: 86, on right: 41 81
+componentSelection (98)
+    on left: 87 88 89, on right: 86 87 88
+actualParameterList (99)
+    on left: 90 91, on right: 42 85
+expressionList (100)
+    on left: 92 93, on right: 90 92
+identifierList (101)
+    on left: 94 95, on right: 20 29 30 54 55 94
+sign (102)
+    on left: 96 97, on right: 57 67
 
 
 state 0
@@ -468,9 +476,9 @@ state 16
 
 state 17
 
-   93 identifierList: TOKEN_ID .
+   95 identifierList: TOKEN_ID .
 
-    $default  reduce using rule 93 (identifierList)
+    $default  reduce using rule 95 (identifierList)
 
 
 state 18
@@ -496,7 +504,7 @@ state 19
 state 20
 
    20 variableDeclaration: identifierList . TOKEN_COLON type TOKEN_SEMICOLON
-   92 identifierList: identifierList . TOKEN_COMMAS TOKEN_ID
+   94 identifierList: identifierList . TOKEN_COMMAS TOKEN_ID
 
     TOKEN_COMMAS  shift, and go to state 33
     TOKEN_COLON   shift, and go to state 34
@@ -504,14 +512,14 @@ state 20
 
 state 21
 
-   22 functionDeclaration: TOKEN_FUNCTION . TOKEN_ID TOKEN_LPAR formalParameterList TOKEN_RPAR TOKEN_COLON resultType TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
+   24 functionDeclaration: TOKEN_FUNCTION . TOKEN_ID TOKEN_LPAR formalParameterList TOKEN_RPAR TOKEN_COLON resultType $@2 TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
 
     TOKEN_ID  shift, and go to state 35
 
 
 state 22
 
-   21 procedureDeclaration: TOKEN_PROCEDURE . TOKEN_ID TOKEN_LPAR formalParameterList TOKEN_RPAR TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
+   22 procedureDeclaration: TOKEN_PROCEDURE . TOKEN_ID TOKEN_LPAR formalParameterList $@1 TOKEN_RPAR TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
 
     TOKEN_ID  shift, and go to state 36
 
@@ -563,18 +571,18 @@ state 27
 
 state 28
 
-   47 type: TOKEN_ARRAY . TOKEN_LBRACKET constant TOKEN_RANGE constant TOKEN_RBRACKET TOKEN_OF type
+   49 type: TOKEN_ARRAY . TOKEN_LBRACKET constant TOKEN_RANGE constant TOKEN_RBRACKET TOKEN_OF type
 
     TOKEN_LBRACKET  shift, and go to state 41
 
 
 state 29
 
-   48 type: TOKEN_RECORD . fieldList TOKEN_END
+   50 type: TOKEN_RECORD . fieldList TOKEN_END
 
     TOKEN_ID  shift, and go to state 17
 
-    $default  reduce using rule 51 (fieldList)
+    $default  reduce using rule 53 (fieldList)
 
     fieldList       go to state 42
     fieldListSeq    go to state 43
@@ -583,9 +591,9 @@ state 29
 
 state 30
 
-   46 type: TOKEN_ID .
+   48 type: TOKEN_ID .
 
-    $default  reduce using rule 46 (type)
+    $default  reduce using rule 48 (type)
 
 
 state 31
@@ -604,7 +612,7 @@ state 32
 
 state 33
 
-   92 identifierList: identifierList TOKEN_COMMAS . TOKEN_ID
+   94 identifierList: identifierList TOKEN_COMMAS . TOKEN_ID
 
     TOKEN_ID  shift, and go to state 46
 
@@ -622,21 +630,21 @@ state 34
 
 state 35
 
-   22 functionDeclaration: TOKEN_FUNCTION TOKEN_ID . TOKEN_LPAR formalParameterList TOKEN_RPAR TOKEN_COLON resultType TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
+   24 functionDeclaration: TOKEN_FUNCTION TOKEN_ID . TOKEN_LPAR formalParameterList TOKEN_RPAR TOKEN_COLON resultType $@2 TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
 
     TOKEN_LPAR  shift, and go to state 48
 
 
 state 36
 
-   21 procedureDeclaration: TOKEN_PROCEDURE TOKEN_ID . TOKEN_LPAR formalParameterList TOKEN_RPAR TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
+   22 procedureDeclaration: TOKEN_PROCEDURE TOKEN_ID . TOKEN_LPAR formalParameterList $@1 TOKEN_RPAR TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
 
     TOKEN_LPAR  shift, and go to state 49
 
 
 state 37
 
-   30 compoundStatement: TOKEN_BEGIN . statementSequence TOKEN_END
+   32 compoundStatement: TOKEN_BEGIN . statementSequence TOKEN_END
 
     TOKEN_BEGIN  shift, and go to state 37
     TOKEN_FOR    shift, and go to state 50
@@ -644,7 +652,7 @@ state 37
     TOKEN_WHILE  shift, and go to state 52
     TOKEN_ID     shift, and go to state 53
 
-    $default  reduce using rule 38 (simpleStatement)
+    $default  reduce using rule 40 (simpleStatement)
 
     compoundStatement      go to state 54
     statementSequence      go to state 55
@@ -680,7 +688,7 @@ state 40
 
 state 41
 
-   47 type: TOKEN_ARRAY TOKEN_LBRACKET . constant TOKEN_RANGE constant TOKEN_RBRACKET TOKEN_OF type
+   49 type: TOKEN_ARRAY TOKEN_LBRACKET . constant TOKEN_RANGE constant TOKEN_RBRACKET TOKEN_OF type
 
     TOKEN_PLUS   shift, and go to state 64
     TOKEN_MINUS  shift, and go to state 65
@@ -692,25 +700,25 @@ state 41
 
 state 42
 
-   48 type: TOKEN_RECORD fieldList . TOKEN_END
+   50 type: TOKEN_RECORD fieldList . TOKEN_END
 
     TOKEN_END  shift, and go to state 69
 
 
 state 43
 
-   50 fieldList: fieldListSeq .
-   52 fieldListSeq: fieldListSeq . TOKEN_SEMICOLON identifierList TOKEN_COLON type
+   52 fieldList: fieldListSeq .
+   54 fieldListSeq: fieldListSeq . TOKEN_SEMICOLON identifierList TOKEN_COLON type
 
     TOKEN_SEMICOLON  shift, and go to state 70
 
-    $default  reduce using rule 50 (fieldList)
+    $default  reduce using rule 52 (fieldList)
 
 
 state 44
 
-   53 fieldListSeq: identifierList . TOKEN_COLON type
-   92 identifierList: identifierList . TOKEN_COMMAS TOKEN_ID
+   55 fieldListSeq: identifierList . TOKEN_COLON type
+   94 identifierList: identifierList . TOKEN_COMMAS TOKEN_ID
 
     TOKEN_COMMAS  shift, and go to state 33
     TOKEN_COLON   shift, and go to state 71
@@ -725,9 +733,9 @@ state 45
 
 state 46
 
-   92 identifierList: identifierList TOKEN_COMMAS TOKEN_ID .
+   94 identifierList: identifierList TOKEN_COMMAS TOKEN_ID .
 
-    $default  reduce using rule 92 (identifierList)
+    $default  reduce using rule 94 (identifierList)
 
 
 state 47
@@ -739,11 +747,11 @@ state 47
 
 state 48
 
-   22 functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR . formalParameterList TOKEN_RPAR TOKEN_COLON resultType TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
+   24 functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR . formalParameterList TOKEN_RPAR TOKEN_COLON resultType $@2 TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
 
     TOKEN_ID  shift, and go to state 17
 
-    $default  reduce using rule 26 (formalParameterList)
+    $default  reduce using rule 28 (formalParameterList)
 
     formalParameterList  go to state 73
     formalParamSeq       go to state 74
@@ -752,11 +760,11 @@ state 48
 
 state 49
 
-   21 procedureDeclaration: TOKEN_PROCEDURE TOKEN_ID TOKEN_LPAR . formalParameterList TOKEN_RPAR TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
+   22 procedureDeclaration: TOKEN_PROCEDURE TOKEN_ID TOKEN_LPAR . formalParameterList $@1 TOKEN_RPAR TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
 
     TOKEN_ID  shift, and go to state 17
 
-    $default  reduce using rule 26 (formalParameterList)
+    $default  reduce using rule 28 (formalParameterList)
 
     formalParameterList  go to state 76
     formalParamSeq       go to state 74
@@ -765,15 +773,15 @@ state 49
 
 state 50
 
-   45 structuredStatement: TOKEN_FOR . TOKEN_ID TOKEN_ASSIGN expression TOKEN_TO expression TOKEN_DO statement
+   47 structuredStatement: TOKEN_FOR . TOKEN_ID TOKEN_ASSIGN expression TOKEN_TO expression TOKEN_DO statement
 
     TOKEN_ID  shift, and go to state 77
 
 
 state 51
 
-   42 structuredStatement: TOKEN_IF . expression TOKEN_THEN statement
-   43                    | TOKEN_IF . expression TOKEN_THEN statement TOKEN_ELSE statement
+   44 structuredStatement: TOKEN_IF . expression TOKEN_THEN statement
+   45                    | TOKEN_IF . expression TOKEN_THEN statement TOKEN_ELSE statement
 
     TOKEN_STR    shift, and go to state 78
     TOKEN_NOT    shift, and go to state 79
@@ -794,7 +802,7 @@ state 51
 
 state 52
 
-   44 structuredStatement: TOKEN_WHILE . expression TOKEN_DO statement
+   46 structuredStatement: TOKEN_WHILE . expression TOKEN_DO statement
 
     TOKEN_STR    shift, and go to state 78
     TOKEN_NOT    shift, and go to state 79
@@ -815,29 +823,29 @@ state 52
 
 state 53
 
-   40 procedureStatement: TOKEN_ID . TOKEN_LPAR actualParameterList TOKEN_RPAR
-   84 variable: TOKEN_ID . componentSelection
+   42 procedureStatement: TOKEN_ID . TOKEN_LPAR actualParameterList TOKEN_RPAR
+   86 variable: TOKEN_ID . componentSelection
 
     TOKEN_DOT       shift, and go to state 91
     TOKEN_LPAR      shift, and go to state 92
     TOKEN_LBRACKET  shift, and go to state 93
 
-    $default  reduce using rule 87 (componentSelection)
+    $default  reduce using rule 89 (componentSelection)
 
     componentSelection  go to state 94
 
 
 state 54
 
-   41 structuredStatement: compoundStatement .
+   43 structuredStatement: compoundStatement .
 
-    $default  reduce using rule 41 (structuredStatement)
+    $default  reduce using rule 43 (structuredStatement)
 
 
 state 55
 
-   30 compoundStatement: TOKEN_BEGIN statementSequence . TOKEN_END
-   31 statementSequence: statementSequence . TOKEN_SEMICOLON statement
+   32 compoundStatement: TOKEN_BEGIN statementSequence . TOKEN_END
+   33 statementSequence: statementSequence . TOKEN_SEMICOLON statement
 
     TOKEN_END        shift, and go to state 95
     TOKEN_SEMICOLON  shift, and go to state 96
@@ -845,49 +853,49 @@ state 55
 
 state 56
 
-   32 statementSequence: statement .
+   34 statementSequence: statement .
 
-    $default  reduce using rule 32 (statementSequence)
+    $default  reduce using rule 34 (statementSequence)
 
 
 state 57
 
-   33 statement: groupSimStruStatement .
+   35 statement: groupSimStruStatement .
 
-    $default  reduce using rule 33 (statement)
+    $default  reduce using rule 35 (statement)
 
 
 state 58
 
-   34 groupSimStruStatement: simpleStatement .
+   36 groupSimStruStatement: simpleStatement .
 
-    $default  reduce using rule 34 (groupSimStruStatement)
+    $default  reduce using rule 36 (groupSimStruStatement)
 
 
 state 59
 
-   36 simpleStatement: assignmentStatement .
+   38 simpleStatement: assignmentStatement .
 
-    $default  reduce using rule 36 (simpleStatement)
+    $default  reduce using rule 38 (simpleStatement)
 
 
 state 60
 
-   37 simpleStatement: procedureStatement .
+   39 simpleStatement: procedureStatement .
 
-    $default  reduce using rule 37 (simpleStatement)
+    $default  reduce using rule 39 (simpleStatement)
 
 
 state 61
 
-   35 groupSimStruStatement: structuredStatement .
+   37 groupSimStruStatement: structuredStatement .
 
-    $default  reduce using rule 35 (groupSimStruStatement)
+    $default  reduce using rule 37 (groupSimStruStatement)
 
 
 state 62
 
-   39 assignmentStatement: variable . TOKEN_ASSIGN expression
+   41 assignmentStatement: variable . TOKEN_ASSIGN expression
 
     TOKEN_ASSIGN  shift, and go to state 97
 
@@ -901,49 +909,49 @@ state 63
 
 state 64
 
-   94 sign: TOKEN_PLUS .
+   96 sign: TOKEN_PLUS .
 
-    $default  reduce using rule 94 (sign)
+    $default  reduce using rule 96 (sign)
 
 
 state 65
 
-   95 sign: TOKEN_MINUS .
+   97 sign: TOKEN_MINUS .
 
-    $default  reduce using rule 95 (sign)
+    $default  reduce using rule 97 (sign)
 
 
 state 66
 
-   54 constant: TOKEN_INT .
+   56 constant: TOKEN_INT .
 
-    $default  reduce using rule 54 (constant)
+    $default  reduce using rule 56 (constant)
 
 
 state 67
 
-   47 type: TOKEN_ARRAY TOKEN_LBRACKET constant . TOKEN_RANGE constant TOKEN_RBRACKET TOKEN_OF type
+   49 type: TOKEN_ARRAY TOKEN_LBRACKET constant . TOKEN_RANGE constant TOKEN_RBRACKET TOKEN_OF type
 
     TOKEN_RANGE  shift, and go to state 98
 
 
 state 68
 
-   55 constant: sign . TOKEN_INT
+   57 constant: sign . TOKEN_INT
 
     TOKEN_INT  shift, and go to state 99
 
 
 state 69
 
-   48 type: TOKEN_RECORD fieldList TOKEN_END .
+   50 type: TOKEN_RECORD fieldList TOKEN_END .
 
-    $default  reduce using rule 48 (type)
+    $default  reduce using rule 50 (type)
 
 
 state 70
 
-   52 fieldListSeq: fieldListSeq TOKEN_SEMICOLON . identifierList TOKEN_COLON type
+   54 fieldListSeq: fieldListSeq TOKEN_SEMICOLON . identifierList TOKEN_COLON type
 
     TOKEN_ID  shift, and go to state 17
 
@@ -952,7 +960,7 @@ state 70
 
 state 71
 
-   53 fieldListSeq: identifierList TOKEN_COLON . type
+   55 fieldListSeq: identifierList TOKEN_COLON . type
 
     TOKEN_ARRAY   shift, and go to state 28
     TOKEN_RECORD  shift, and go to state 29
@@ -970,25 +978,25 @@ state 72
 
 state 73
 
-   22 functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList . TOKEN_RPAR TOKEN_COLON resultType TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
+   24 functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList . TOKEN_RPAR TOKEN_COLON resultType $@2 TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
 
     TOKEN_RPAR  shift, and go to state 102
 
 
 state 74
 
-   25 formalParameterList: formalParamSeq .
-   27 formalParamSeq: formalParamSeq . TOKEN_SEMICOLON identifierList TOKEN_COLON type
+   27 formalParameterList: formalParamSeq .
+   29 formalParamSeq: formalParamSeq . TOKEN_SEMICOLON identifierList TOKEN_COLON type
 
     TOKEN_SEMICOLON  shift, and go to state 103
 
-    $default  reduce using rule 25 (formalParameterList)
+    $default  reduce using rule 27 (formalParameterList)
 
 
 state 75
 
-   28 formalParamSeq: identifierList . TOKEN_COLON type
-   92 identifierList: identifierList . TOKEN_COMMAS TOKEN_ID
+   30 formalParamSeq: identifierList . TOKEN_COLON type
+   94 identifierList: identifierList . TOKEN_COMMAS TOKEN_ID
 
     TOKEN_COMMAS  shift, and go to state 33
     TOKEN_COLON   shift, and go to state 104
@@ -996,28 +1004,30 @@ state 75
 
 state 76
 
-   21 procedureDeclaration: TOKEN_PROCEDURE TOKEN_ID TOKEN_LPAR formalParameterList . TOKEN_RPAR TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
+   22 procedureDeclaration: TOKEN_PROCEDURE TOKEN_ID TOKEN_LPAR formalParameterList . $@1 TOKEN_RPAR TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
 
-    TOKEN_RPAR  shift, and go to state 105
+    $default  reduce using rule 21 ($@1)
+
+    $@1  go to state 105
 
 
 state 77
 
-   45 structuredStatement: TOKEN_FOR TOKEN_ID . TOKEN_ASSIGN expression TOKEN_TO expression TOKEN_DO statement
+   47 structuredStatement: TOKEN_FOR TOKEN_ID . TOKEN_ASSIGN expression TOKEN_TO expression TOKEN_DO statement
 
     TOKEN_ASSIGN  shift, and go to state 106
 
 
 state 78
 
-   78 factor: TOKEN_STR .
+   80 factor: TOKEN_STR .
 
-    $default  reduce using rule 78 (factor)
+    $default  reduce using rule 80 (factor)
 
 
 state 79
 
-   81 factor: TOKEN_NOT . factor
+   83 factor: TOKEN_NOT . factor
 
     TOKEN_STR   shift, and go to state 78
     TOKEN_NOT   shift, and go to state 79
@@ -1032,28 +1042,28 @@ state 79
 
 state 80
 
-   83 functionReference: TOKEN_ID . TOKEN_LPAR actualParameterList TOKEN_RPAR
-   84 variable: TOKEN_ID . componentSelection
+   85 functionReference: TOKEN_ID . TOKEN_LPAR actualParameterList TOKEN_RPAR
+   86 variable: TOKEN_ID . componentSelection
 
     TOKEN_DOT       shift, and go to state 91
     TOKEN_LPAR      shift, and go to state 108
     TOKEN_LBRACKET  shift, and go to state 93
 
-    $default  reduce using rule 87 (componentSelection)
+    $default  reduce using rule 89 (componentSelection)
 
     componentSelection  go to state 94
 
 
 state 81
 
-   77 factor: TOKEN_INT .
+   79 factor: TOKEN_INT .
 
-    $default  reduce using rule 77 (factor)
+    $default  reduce using rule 79 (factor)
 
 
 state 82
 
-   82 factor: TOKEN_LPAR . expression TOKEN_RPAR
+   84 factor: TOKEN_LPAR . expression TOKEN_RPAR
 
     TOKEN_STR    shift, and go to state 78
     TOKEN_NOT    shift, and go to state 79
@@ -1074,16 +1084,16 @@ state 82
 
 state 83
 
-   42 structuredStatement: TOKEN_IF expression . TOKEN_THEN statement
-   43                    | TOKEN_IF expression . TOKEN_THEN statement TOKEN_ELSE statement
+   44 structuredStatement: TOKEN_IF expression . TOKEN_THEN statement
+   45                    | TOKEN_IF expression . TOKEN_THEN statement TOKEN_ELSE statement
 
     TOKEN_THEN  shift, and go to state 110
 
 
 state 84
 
-   56 expression: simpleExpression . groupRelOpSimExpr
-   67 simpleExpression: simpleExpression . addOp term
+   58 expression: simpleExpression . groupRelOpSimExpr
+   69 simpleExpression: simpleExpression . addOp term
 
     TOKEN_OR     shift, and go to state 111
     TOKEN_PLUS   shift, and go to state 112
@@ -1095,7 +1105,7 @@ state 84
     TOKEN_GE     shift, and go to state 118
     TOKEN_NOTEQ  shift, and go to state 119
 
-    $default  reduce using rule 58 (groupRelOpSimExpr)
+    $default  reduce using rule 60 (groupRelOpSimExpr)
 
     groupRelOpSimExpr  go to state 120
     relationalOp       go to state 121
@@ -1104,43 +1114,43 @@ state 84
 
 state 85
 
-   66 simpleExpression: term .
-   71 term: term . mulOp factor
+   68 simpleExpression: term .
+   73 term: term . mulOp factor
 
     TOKEN_AND       shift, and go to state 123
     TOKEN_DIV       shift, and go to state 124
     TOKEN_MOD       shift, and go to state 125
     TOKEN_MULTIPLY  shift, and go to state 126
 
-    $default  reduce using rule 66 (simpleExpression)
+    $default  reduce using rule 68 (simpleExpression)
 
     mulOp  go to state 127
 
 
 state 86
 
-   72 term: factor .
+   74 term: factor .
 
-    $default  reduce using rule 72 (term)
+    $default  reduce using rule 74 (term)
 
 
 state 87
 
-   80 factor: functionReference .
+   82 factor: functionReference .
 
-    $default  reduce using rule 80 (factor)
+    $default  reduce using rule 82 (factor)
 
 
 state 88
 
-   79 factor: variable .
+   81 factor: variable .
 
-    $default  reduce using rule 79 (factor)
+    $default  reduce using rule 81 (factor)
 
 
 state 89
 
-   65 simpleExpression: sign . term
+   67 simpleExpression: sign . term
 
     TOKEN_STR   shift, and go to state 78
     TOKEN_NOT   shift, and go to state 79
@@ -1156,21 +1166,21 @@ state 89
 
 state 90
 
-   44 structuredStatement: TOKEN_WHILE expression . TOKEN_DO statement
+   46 structuredStatement: TOKEN_WHILE expression . TOKEN_DO statement
 
     TOKEN_DO  shift, and go to state 129
 
 
 state 91
 
-   85 componentSelection: TOKEN_DOT . TOKEN_ID componentSelection
+   87 componentSelection: TOKEN_DOT . TOKEN_ID componentSelection
 
     TOKEN_ID  shift, and go to state 130
 
 
 state 92
 
-   40 procedureStatement: TOKEN_ID TOKEN_LPAR . actualParameterList TOKEN_RPAR
+   42 procedureStatement: TOKEN_ID TOKEN_LPAR . actualParameterList TOKEN_RPAR
 
     TOKEN_STR    shift, and go to state 78
     TOKEN_NOT    shift, and go to state 79
@@ -1180,7 +1190,7 @@ state 92
     TOKEN_INT    shift, and go to state 81
     TOKEN_LPAR   shift, and go to state 82
 
-    $default  reduce using rule 89 (actualParameterList)
+    $default  reduce using rule 91 (actualParameterList)
 
     expression           go to state 131
     simpleExpression     go to state 84
@@ -1195,7 +1205,7 @@ state 92
 
 state 93
 
-   86 componentSelection: TOKEN_LBRACKET . expression TOKEN_RBRACKET componentSelection
+   88 componentSelection: TOKEN_LBRACKET . expression TOKEN_RBRACKET componentSelection
 
     TOKEN_STR    shift, and go to state 78
     TOKEN_NOT    shift, and go to state 79
@@ -1216,21 +1226,21 @@ state 93
 
 state 94
 
-   84 variable: TOKEN_ID componentSelection .
+   86 variable: TOKEN_ID componentSelection .
 
-    $default  reduce using rule 84 (variable)
+    $default  reduce using rule 86 (variable)
 
 
 state 95
 
-   30 compoundStatement: TOKEN_BEGIN statementSequence TOKEN_END .
+   32 compoundStatement: TOKEN_BEGIN statementSequence TOKEN_END .
 
-    $default  reduce using rule 30 (compoundStatement)
+    $default  reduce using rule 32 (compoundStatement)
 
 
 state 96
 
-   31 statementSequence: statementSequence TOKEN_SEMICOLON . statement
+   33 statementSequence: statementSequence TOKEN_SEMICOLON . statement
 
     TOKEN_BEGIN  shift, and go to state 37
     TOKEN_FOR    shift, and go to state 50
@@ -1238,7 +1248,7 @@ state 96
     TOKEN_WHILE  shift, and go to state 52
     TOKEN_ID     shift, and go to state 53
 
-    $default  reduce using rule 38 (simpleStatement)
+    $default  reduce using rule 40 (simpleStatement)
 
     compoundStatement      go to state 54
     statement              go to state 135
@@ -1252,7 +1262,7 @@ state 96
 
 state 97
 
-   39 assignmentStatement: variable TOKEN_ASSIGN . expression
+   41 assignmentStatement: variable TOKEN_ASSIGN . expression
 
     TOKEN_STR    shift, and go to state 78
     TOKEN_NOT    shift, and go to state 79
@@ -1273,7 +1283,7 @@ state 97
 
 state 98
 
-   47 type: TOKEN_ARRAY TOKEN_LBRACKET constant TOKEN_RANGE . constant TOKEN_RBRACKET TOKEN_OF type
+   49 type: TOKEN_ARRAY TOKEN_LBRACKET constant TOKEN_RANGE . constant TOKEN_RBRACKET TOKEN_OF type
 
     TOKEN_PLUS   shift, and go to state 64
     TOKEN_MINUS  shift, and go to state 65
@@ -1285,15 +1295,15 @@ state 98
 
 state 99
 
-   55 constant: sign TOKEN_INT .
+   57 constant: sign TOKEN_INT .
 
-    $default  reduce using rule 55 (constant)
+    $default  reduce using rule 57 (constant)
 
 
 state 100
 
-   52 fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList . TOKEN_COLON type
-   92 identifierList: identifierList . TOKEN_COMMAS TOKEN_ID
+   54 fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList . TOKEN_COLON type
+   94 identifierList: identifierList . TOKEN_COMMAS TOKEN_ID
 
     TOKEN_COMMAS  shift, and go to state 33
     TOKEN_COLON   shift, and go to state 138
@@ -1301,21 +1311,21 @@ state 100
 
 state 101
 
-   53 fieldListSeq: identifierList TOKEN_COLON type .
+   55 fieldListSeq: identifierList TOKEN_COLON type .
 
-    $default  reduce using rule 53 (fieldListSeq)
+    $default  reduce using rule 55 (fieldListSeq)
 
 
 state 102
 
-   22 functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList TOKEN_RPAR . TOKEN_COLON resultType TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
+   24 functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList TOKEN_RPAR . TOKEN_COLON resultType $@2 TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
 
     TOKEN_COLON  shift, and go to state 139
 
 
 state 103
 
-   27 formalParamSeq: formalParamSeq TOKEN_SEMICOLON . identifierList TOKEN_COLON type
+   29 formalParamSeq: formalParamSeq TOKEN_SEMICOLON . identifierList TOKEN_COLON type
 
     TOKEN_ID  shift, and go to state 17
 
@@ -1324,7 +1334,7 @@ state 103
 
 state 104
 
-   28 formalParamSeq: identifierList TOKEN_COLON . type
+   30 formalParamSeq: identifierList TOKEN_COLON . type
 
     TOKEN_ARRAY   shift, and go to state 28
     TOKEN_RECORD  shift, and go to state 29
@@ -1335,14 +1345,14 @@ state 104
 
 state 105
 
-   21 procedureDeclaration: TOKEN_PROCEDURE TOKEN_ID TOKEN_LPAR formalParameterList TOKEN_RPAR . TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
+   22 procedureDeclaration: TOKEN_PROCEDURE TOKEN_ID TOKEN_LPAR formalParameterList $@1 . TOKEN_RPAR TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
 
-    TOKEN_SEMICOLON  shift, and go to state 142
+    TOKEN_RPAR  shift, and go to state 142
 
 
 state 106
 
-   45 structuredStatement: TOKEN_FOR TOKEN_ID TOKEN_ASSIGN . expression TOKEN_TO expression TOKEN_DO statement
+   47 structuredStatement: TOKEN_FOR TOKEN_ID TOKEN_ASSIGN . expression TOKEN_TO expression TOKEN_DO statement
 
     TOKEN_STR    shift, and go to state 78
     TOKEN_NOT    shift, and go to state 79
@@ -1363,14 +1373,14 @@ state 106
 
 state 107
 
-   81 factor: TOKEN_NOT factor .
+   83 factor: TOKEN_NOT factor .
 
-    $default  reduce using rule 81 (factor)
+    $default  reduce using rule 83 (factor)
 
 
 state 108
 
-   83 functionReference: TOKEN_ID TOKEN_LPAR . actualParameterList TOKEN_RPAR
+   85 functionReference: TOKEN_ID TOKEN_LPAR . actualParameterList TOKEN_RPAR
 
     TOKEN_STR    shift, and go to state 78
     TOKEN_NOT    shift, and go to state 79
@@ -1380,7 +1390,7 @@ state 108
     TOKEN_INT    shift, and go to state 81
     TOKEN_LPAR   shift, and go to state 82
 
-    $default  reduce using rule 89 (actualParameterList)
+    $default  reduce using rule 91 (actualParameterList)
 
     expression           go to state 131
     simpleExpression     go to state 84
@@ -1395,15 +1405,15 @@ state 108
 
 state 109
 
-   82 factor: TOKEN_LPAR expression . TOKEN_RPAR
+   84 factor: TOKEN_LPAR expression . TOKEN_RPAR
 
     TOKEN_RPAR  shift, and go to state 145
 
 
 state 110
 
-   42 structuredStatement: TOKEN_IF expression TOKEN_THEN . statement
-   43                    | TOKEN_IF expression TOKEN_THEN . statement TOKEN_ELSE statement
+   44 structuredStatement: TOKEN_IF expression TOKEN_THEN . statement
+   45                    | TOKEN_IF expression TOKEN_THEN . statement TOKEN_ELSE statement
 
     TOKEN_BEGIN  shift, and go to state 37
     TOKEN_FOR    shift, and go to state 50
@@ -1411,7 +1421,7 @@ state 110
     TOKEN_WHILE  shift, and go to state 52
     TOKEN_ID     shift, and go to state 53
 
-    $default  reduce using rule 38 (simpleStatement)
+    $default  reduce using rule 40 (simpleStatement)
 
     compoundStatement      go to state 54
     statement              go to state 146
@@ -1425,77 +1435,77 @@ state 110
 
 state 111
 
-   70 addOp: TOKEN_OR .
+   72 addOp: TOKEN_OR .
 
-    $default  reduce using rule 70 (addOp)
+    $default  reduce using rule 72 (addOp)
 
 
 state 112
 
-   68 addOp: TOKEN_PLUS .
+   70 addOp: TOKEN_PLUS .
 
-    $default  reduce using rule 68 (addOp)
+    $default  reduce using rule 70 (addOp)
 
 
 state 113
 
-   69 addOp: TOKEN_MINUS .
+   71 addOp: TOKEN_MINUS .
 
-    $default  reduce using rule 69 (addOp)
+    $default  reduce using rule 71 (addOp)
 
 
 state 114
 
-   64 relationalOp: TOKEN_EQ .
+   66 relationalOp: TOKEN_EQ .
 
-    $default  reduce using rule 64 (relationalOp)
+    $default  reduce using rule 66 (relationalOp)
 
 
 state 115
 
-   59 relationalOp: TOKEN_LT .
-
-    $default  reduce using rule 59 (relationalOp)
-
-
-state 116
-
-   60 relationalOp: TOKEN_LE .
-
-    $default  reduce using rule 60 (relationalOp)
-
-
-state 117
-
-   61 relationalOp: TOKEN_GT .
+   61 relationalOp: TOKEN_LT .
 
     $default  reduce using rule 61 (relationalOp)
 
 
-state 118
+state 116
 
-   62 relationalOp: TOKEN_GE .
+   62 relationalOp: TOKEN_LE .
 
     $default  reduce using rule 62 (relationalOp)
 
 
-state 119
+state 117
 
-   63 relationalOp: TOKEN_NOTEQ .
+   63 relationalOp: TOKEN_GT .
 
     $default  reduce using rule 63 (relationalOp)
 
 
+state 118
+
+   64 relationalOp: TOKEN_GE .
+
+    $default  reduce using rule 64 (relationalOp)
+
+
+state 119
+
+   65 relationalOp: TOKEN_NOTEQ .
+
+    $default  reduce using rule 65 (relationalOp)
+
+
 state 120
 
-   56 expression: simpleExpression groupRelOpSimExpr .
+   58 expression: simpleExpression groupRelOpSimExpr .
 
-    $default  reduce using rule 56 (expression)
+    $default  reduce using rule 58 (expression)
 
 
 state 121
 
-   57 groupRelOpSimExpr: relationalOp . simpleExpression
+   59 groupRelOpSimExpr: relationalOp . simpleExpression
 
     TOKEN_STR    shift, and go to state 78
     TOKEN_NOT    shift, and go to state 79
@@ -1515,7 +1525,7 @@ state 121
 
 state 122
 
-   67 simpleExpression: simpleExpression addOp . term
+   69 simpleExpression: simpleExpression addOp . term
 
     TOKEN_STR   shift, and go to state 78
     TOKEN_NOT   shift, and go to state 79
@@ -1531,35 +1541,35 @@ state 122
 
 state 123
 
-   76 mulOp: TOKEN_AND .
+   78 mulOp: TOKEN_AND .
 
-    $default  reduce using rule 76 (mulOp)
+    $default  reduce using rule 78 (mulOp)
 
 
 state 124
 
-   74 mulOp: TOKEN_DIV .
+   76 mulOp: TOKEN_DIV .
 
-    $default  reduce using rule 74 (mulOp)
+    $default  reduce using rule 76 (mulOp)
 
 
 state 125
 
-   75 mulOp: TOKEN_MOD .
+   77 mulOp: TOKEN_MOD .
 
-    $default  reduce using rule 75 (mulOp)
+    $default  reduce using rule 77 (mulOp)
 
 
 state 126
 
-   73 mulOp: TOKEN_MULTIPLY .
+   75 mulOp: TOKEN_MULTIPLY .
 
-    $default  reduce using rule 73 (mulOp)
+    $default  reduce using rule 75 (mulOp)
 
 
 state 127
 
-   71 term: term mulOp . factor
+   73 term: term mulOp . factor
 
     TOKEN_STR   shift, and go to state 78
     TOKEN_NOT   shift, and go to state 79
@@ -1574,22 +1584,22 @@ state 127
 
 state 128
 
-   65 simpleExpression: sign term .
-   71 term: term . mulOp factor
+   67 simpleExpression: sign term .
+   73 term: term . mulOp factor
 
     TOKEN_AND       shift, and go to state 123
     TOKEN_DIV       shift, and go to state 124
     TOKEN_MOD       shift, and go to state 125
     TOKEN_MULTIPLY  shift, and go to state 126
 
-    $default  reduce using rule 65 (simpleExpression)
+    $default  reduce using rule 67 (simpleExpression)
 
     mulOp  go to state 127
 
 
 state 129
 
-   44 structuredStatement: TOKEN_WHILE expression TOKEN_DO . statement
+   46 structuredStatement: TOKEN_WHILE expression TOKEN_DO . statement
 
     TOKEN_BEGIN  shift, and go to state 37
     TOKEN_FOR    shift, and go to state 50
@@ -1597,7 +1607,7 @@ state 129
     TOKEN_WHILE  shift, and go to state 52
     TOKEN_ID     shift, and go to state 53
 
-    $default  reduce using rule 38 (simpleStatement)
+    $default  reduce using rule 40 (simpleStatement)
 
     compoundStatement      go to state 54
     statement              go to state 150
@@ -1611,71 +1621,71 @@ state 129
 
 state 130
 
-   85 componentSelection: TOKEN_DOT TOKEN_ID . componentSelection
+   87 componentSelection: TOKEN_DOT TOKEN_ID . componentSelection
 
     TOKEN_DOT       shift, and go to state 91
     TOKEN_LBRACKET  shift, and go to state 93
 
-    $default  reduce using rule 87 (componentSelection)
+    $default  reduce using rule 89 (componentSelection)
 
     componentSelection  go to state 151
 
 
 state 131
 
-   91 expressionList: expression .
+   93 expressionList: expression .
 
-    $default  reduce using rule 91 (expressionList)
+    $default  reduce using rule 93 (expressionList)
 
 
 state 132
 
-   40 procedureStatement: TOKEN_ID TOKEN_LPAR actualParameterList . TOKEN_RPAR
+   42 procedureStatement: TOKEN_ID TOKEN_LPAR actualParameterList . TOKEN_RPAR
 
     TOKEN_RPAR  shift, and go to state 152
 
 
 state 133
 
-   88 actualParameterList: expressionList .
-   90 expressionList: expressionList . TOKEN_COMMAS expression
+   90 actualParameterList: expressionList .
+   92 expressionList: expressionList . TOKEN_COMMAS expression
 
     TOKEN_COMMAS  shift, and go to state 153
 
-    $default  reduce using rule 88 (actualParameterList)
+    $default  reduce using rule 90 (actualParameterList)
 
 
 state 134
 
-   86 componentSelection: TOKEN_LBRACKET expression . TOKEN_RBRACKET componentSelection
+   88 componentSelection: TOKEN_LBRACKET expression . TOKEN_RBRACKET componentSelection
 
     TOKEN_RBRACKET  shift, and go to state 154
 
 
 state 135
 
-   31 statementSequence: statementSequence TOKEN_SEMICOLON statement .
+   33 statementSequence: statementSequence TOKEN_SEMICOLON statement .
 
-    $default  reduce using rule 31 (statementSequence)
+    $default  reduce using rule 33 (statementSequence)
 
 
 state 136
 
-   39 assignmentStatement: variable TOKEN_ASSIGN expression .
+   41 assignmentStatement: variable TOKEN_ASSIGN expression .
 
-    $default  reduce using rule 39 (assignmentStatement)
+    $default  reduce using rule 41 (assignmentStatement)
 
 
 state 137
 
-   47 type: TOKEN_ARRAY TOKEN_LBRACKET constant TOKEN_RANGE constant . TOKEN_RBRACKET TOKEN_OF type
+   49 type: TOKEN_ARRAY TOKEN_LBRACKET constant TOKEN_RANGE constant . TOKEN_RBRACKET TOKEN_OF type
 
     TOKEN_RBRACKET  shift, and go to state 155
 
 
 state 138
 
-   52 fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON . type
+   54 fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON . type
 
     TOKEN_ARRAY   shift, and go to state 28
     TOKEN_RECORD  shift, and go to state 29
@@ -1686,7 +1696,7 @@ state 138
 
 state 139
 
-   22 functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList TOKEN_RPAR TOKEN_COLON . resultType TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
+   24 functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList TOKEN_RPAR TOKEN_COLON . resultType $@2 TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
 
     TOKEN_ID  shift, and go to state 157
 
@@ -1695,8 +1705,8 @@ state 139
 
 state 140
 
-   27 formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList . TOKEN_COLON type
-   92 identifierList: identifierList . TOKEN_COMMAS TOKEN_ID
+   29 formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList . TOKEN_COLON type
+   94 identifierList: identifierList . TOKEN_COMMAS TOKEN_ID
 
     TOKEN_COMMAS  shift, and go to state 33
     TOKEN_COLON   shift, and go to state 159
@@ -1704,118 +1714,110 @@ state 140
 
 state 141
 
-   28 formalParamSeq: identifierList TOKEN_COLON type .
+   30 formalParamSeq: identifierList TOKEN_COLON type .
 
-    $default  reduce using rule 28 (formalParamSeq)
+    $default  reduce using rule 30 (formalParamSeq)
 
 
 state 142
 
-   21 procedureDeclaration: TOKEN_PROCEDURE TOKEN_ID TOKEN_LPAR formalParameterList TOKEN_RPAR TOKEN_SEMICOLON . groupBlockForward TOKEN_SEMICOLON
+   22 procedureDeclaration: TOKEN_PROCEDURE TOKEN_ID TOKEN_LPAR formalParameterList $@1 TOKEN_RPAR . TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
 
-    TOKEN_FORWARD  shift, and go to state 160
-    TOKEN_VAR      shift, and go to state 12
-
-    $default  reduce using rule 5 (groupVariableDeclarations)
-
-    groupVariableDeclarations  go to state 161
-    variableDeclarations       go to state 14
-    groupBlockForward          go to state 162
-    block                      go to state 163
+    TOKEN_SEMICOLON  shift, and go to state 160
 
 
 state 143
 
-   45 structuredStatement: TOKEN_FOR TOKEN_ID TOKEN_ASSIGN expression . TOKEN_TO expression TOKEN_DO statement
+   47 structuredStatement: TOKEN_FOR TOKEN_ID TOKEN_ASSIGN expression . TOKEN_TO expression TOKEN_DO statement
 
-    TOKEN_TO  shift, and go to state 164
+    TOKEN_TO  shift, and go to state 161
 
 
 state 144
 
-   83 functionReference: TOKEN_ID TOKEN_LPAR actualParameterList . TOKEN_RPAR
+   85 functionReference: TOKEN_ID TOKEN_LPAR actualParameterList . TOKEN_RPAR
 
-    TOKEN_RPAR  shift, and go to state 165
+    TOKEN_RPAR  shift, and go to state 162
 
 
 state 145
 
-   82 factor: TOKEN_LPAR expression TOKEN_RPAR .
+   84 factor: TOKEN_LPAR expression TOKEN_RPAR .
 
-    $default  reduce using rule 82 (factor)
+    $default  reduce using rule 84 (factor)
 
 
 state 146
 
-   42 structuredStatement: TOKEN_IF expression TOKEN_THEN statement .
-   43                    | TOKEN_IF expression TOKEN_THEN statement . TOKEN_ELSE statement
+   44 structuredStatement: TOKEN_IF expression TOKEN_THEN statement .
+   45                    | TOKEN_IF expression TOKEN_THEN statement . TOKEN_ELSE statement
 
-    TOKEN_ELSE  shift, and go to state 166
+    TOKEN_ELSE  shift, and go to state 163
 
-    TOKEN_ELSE  [reduce using rule 42 (structuredStatement)]
-    $default    reduce using rule 42 (structuredStatement)
+    TOKEN_ELSE  [reduce using rule 44 (structuredStatement)]
+    $default    reduce using rule 44 (structuredStatement)
 
 
 state 147
 
-   57 groupRelOpSimExpr: relationalOp simpleExpression .
-   67 simpleExpression: simpleExpression . addOp term
+   59 groupRelOpSimExpr: relationalOp simpleExpression .
+   69 simpleExpression: simpleExpression . addOp term
 
     TOKEN_OR     shift, and go to state 111
     TOKEN_PLUS   shift, and go to state 112
     TOKEN_MINUS  shift, and go to state 113
 
-    $default  reduce using rule 57 (groupRelOpSimExpr)
+    $default  reduce using rule 59 (groupRelOpSimExpr)
 
     addOp  go to state 122
 
 
 state 148
 
-   67 simpleExpression: simpleExpression addOp term .
-   71 term: term . mulOp factor
+   69 simpleExpression: simpleExpression addOp term .
+   73 term: term . mulOp factor
 
     TOKEN_AND       shift, and go to state 123
     TOKEN_DIV       shift, and go to state 124
     TOKEN_MOD       shift, and go to state 125
     TOKEN_MULTIPLY  shift, and go to state 126
 
-    $default  reduce using rule 67 (simpleExpression)
+    $default  reduce using rule 69 (simpleExpression)
 
     mulOp  go to state 127
 
 
 state 149
 
-   71 term: term mulOp factor .
+   73 term: term mulOp factor .
 
-    $default  reduce using rule 71 (term)
+    $default  reduce using rule 73 (term)
 
 
 state 150
 
-   44 structuredStatement: TOKEN_WHILE expression TOKEN_DO statement .
+   46 structuredStatement: TOKEN_WHILE expression TOKEN_DO statement .
 
-    $default  reduce using rule 44 (structuredStatement)
+    $default  reduce using rule 46 (structuredStatement)
 
 
 state 151
 
-   85 componentSelection: TOKEN_DOT TOKEN_ID componentSelection .
+   87 componentSelection: TOKEN_DOT TOKEN_ID componentSelection .
 
-    $default  reduce using rule 85 (componentSelection)
+    $default  reduce using rule 87 (componentSelection)
 
 
 state 152
 
-   40 procedureStatement: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR .
+   42 procedureStatement: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR .
 
-    $default  reduce using rule 40 (procedureStatement)
+    $default  reduce using rule 42 (procedureStatement)
 
 
 state 153
 
-   90 expressionList: expressionList TOKEN_COMMAS . expression
+   92 expressionList: expressionList TOKEN_COMMAS . expression
 
     TOKEN_STR    shift, and go to state 78
     TOKEN_NOT    shift, and go to state 79
@@ -1825,7 +1827,7 @@ state 153
     TOKEN_INT    shift, and go to state 81
     TOKEN_LPAR   shift, and go to state 82
 
-    expression         go to state 167
+    expression         go to state 164
     simpleExpression   go to state 84
     term               go to state 85
     factor             go to state 86
@@ -1836,88 +1838,75 @@ state 153
 
 state 154
 
-   86 componentSelection: TOKEN_LBRACKET expression TOKEN_RBRACKET . componentSelection
+   88 componentSelection: TOKEN_LBRACKET expression TOKEN_RBRACKET . componentSelection
 
     TOKEN_DOT       shift, and go to state 91
     TOKEN_LBRACKET  shift, and go to state 93
 
-    $default  reduce using rule 87 (componentSelection)
+    $default  reduce using rule 89 (componentSelection)
 
-    componentSelection  go to state 168
+    componentSelection  go to state 165
 
 
 state 155
 
-   47 type: TOKEN_ARRAY TOKEN_LBRACKET constant TOKEN_RANGE constant TOKEN_RBRACKET . TOKEN_OF type
+   49 type: TOKEN_ARRAY TOKEN_LBRACKET constant TOKEN_RANGE constant TOKEN_RBRACKET . TOKEN_OF type
 
-    TOKEN_OF  shift, and go to state 169
+    TOKEN_OF  shift, and go to state 166
 
 
 state 156
 
-   52 fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type .
+   54 fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type .
 
-    $default  reduce using rule 52 (fieldListSeq)
+    $default  reduce using rule 54 (fieldListSeq)
 
 
 state 157
 
-   49 resultType: TOKEN_ID .
+   51 resultType: TOKEN_ID .
 
-    $default  reduce using rule 49 (resultType)
+    $default  reduce using rule 51 (resultType)
 
 
 state 158
 
-   22 functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList TOKEN_RPAR TOKEN_COLON resultType . TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
+   24 functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList TOKEN_RPAR TOKEN_COLON resultType . $@2 TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
 
-    TOKEN_SEMICOLON  shift, and go to state 170
+    $default  reduce using rule 23 ($@2)
+
+    $@2  go to state 167
 
 
 state 159
 
-   27 formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON . type
+   29 formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON . type
 
     TOKEN_ARRAY   shift, and go to state 28
     TOKEN_RECORD  shift, and go to state 29
     TOKEN_ID      shift, and go to state 30
 
-    type  go to state 171
+    type  go to state 168
 
 
 state 160
 
-   24 groupBlockForward: TOKEN_FORWARD .
+   22 procedureDeclaration: TOKEN_PROCEDURE TOKEN_ID TOKEN_LPAR formalParameterList $@1 TOKEN_RPAR TOKEN_SEMICOLON . groupBlockForward TOKEN_SEMICOLON
 
-    $default  reduce using rule 24 (groupBlockForward)
+    TOKEN_FORWARD  shift, and go to state 169
+    TOKEN_VAR      shift, and go to state 12
+
+    $default  reduce using rule 5 (groupVariableDeclarations)
+
+    groupVariableDeclarations  go to state 170
+    variableDeclarations       go to state 14
+    groupBlockForward          go to state 171
+    block                      go to state 172
 
 
 state 161
 
-   29 block: groupVariableDeclarations . compoundStatement
-
-    TOKEN_BEGIN  shift, and go to state 37
-
-    compoundStatement  go to state 172
-
-
-state 162
-
-   21 procedureDeclaration: TOKEN_PROCEDURE TOKEN_ID TOKEN_LPAR formalParameterList TOKEN_RPAR TOKEN_SEMICOLON groupBlockForward . TOKEN_SEMICOLON
-
-    TOKEN_SEMICOLON  shift, and go to state 173
-
-
-state 163
-
-   23 groupBlockForward: block .
-
-    $default  reduce using rule 23 (groupBlockForward)
-
-
-state 164
-
-   45 structuredStatement: TOKEN_FOR TOKEN_ID TOKEN_ASSIGN expression TOKEN_TO . expression TOKEN_DO statement
+   47 structuredStatement: TOKEN_FOR TOKEN_ID TOKEN_ASSIGN expression TOKEN_TO . expression TOKEN_DO statement
 
     TOKEN_STR    shift, and go to state 78
     TOKEN_NOT    shift, and go to state 79
@@ -1927,7 +1916,7 @@ state 164
     TOKEN_INT    shift, and go to state 81
     TOKEN_LPAR   shift, and go to state 82
 
-    expression         go to state 174
+    expression         go to state 173
     simpleExpression   go to state 84
     term               go to state 85
     factor             go to state 86
@@ -1936,16 +1925,16 @@ state 164
     sign               go to state 89
 
 
-state 165
+state 162
 
-   83 functionReference: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR .
+   85 functionReference: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR .
 
-    $default  reduce using rule 83 (functionReference)
+    $default  reduce using rule 85 (functionReference)
 
 
-state 166
+state 163
 
-   43 structuredStatement: TOKEN_IF expression TOKEN_THEN statement TOKEN_ELSE . statement
+   45 structuredStatement: TOKEN_IF expression TOKEN_THEN statement TOKEN_ELSE . statement
 
     TOKEN_BEGIN  shift, and go to state 37
     TOKEN_FOR    shift, and go to state 50
@@ -1953,10 +1942,10 @@ state 166
     TOKEN_WHILE  shift, and go to state 52
     TOKEN_ID     shift, and go to state 53
 
-    $default  reduce using rule 38 (simpleStatement)
+    $default  reduce using rule 40 (simpleStatement)
 
     compoundStatement      go to state 54
-    statement              go to state 175
+    statement              go to state 174
     groupSimStruStatement  go to state 57
     simpleStatement        go to state 58
     assignmentStatement    go to state 59
@@ -1965,98 +1954,128 @@ state 166
     variable               go to state 62
 
 
-state 167
+state 164
 
-   90 expressionList: expressionList TOKEN_COMMAS expression .
+   92 expressionList: expressionList TOKEN_COMMAS expression .
 
-    $default  reduce using rule 90 (expressionList)
-
-
-state 168
-
-   86 componentSelection: TOKEN_LBRACKET expression TOKEN_RBRACKET componentSelection .
-
-    $default  reduce using rule 86 (componentSelection)
+    $default  reduce using rule 92 (expressionList)
 
 
-state 169
+state 165
 
-   47 type: TOKEN_ARRAY TOKEN_LBRACKET constant TOKEN_RANGE constant TOKEN_RBRACKET TOKEN_OF . type
+   88 componentSelection: TOKEN_LBRACKET expression TOKEN_RBRACKET componentSelection .
+
+    $default  reduce using rule 88 (componentSelection)
+
+
+state 166
+
+   49 type: TOKEN_ARRAY TOKEN_LBRACKET constant TOKEN_RANGE constant TOKEN_RBRACKET TOKEN_OF . type
 
     TOKEN_ARRAY   shift, and go to state 28
     TOKEN_RECORD  shift, and go to state 29
     TOKEN_ID      shift, and go to state 30
 
-    type  go to state 176
+    type  go to state 175
+
+
+state 167
+
+   24 functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList TOKEN_RPAR TOKEN_COLON resultType $@2 . TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
+
+    TOKEN_SEMICOLON  shift, and go to state 176
+
+
+state 168
+
+   29 formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type .
+
+    $default  reduce using rule 29 (formalParamSeq)
+
+
+state 169
+
+   26 groupBlockForward: TOKEN_FORWARD .
+
+    $default  reduce using rule 26 (groupBlockForward)
 
 
 state 170
 
-   22 functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList TOKEN_RPAR TOKEN_COLON resultType TOKEN_SEMICOLON . groupBlockForward TOKEN_SEMICOLON
+   31 block: groupVariableDeclarations . compoundStatement
 
-    TOKEN_FORWARD  shift, and go to state 160
-    TOKEN_VAR      shift, and go to state 12
+    TOKEN_BEGIN  shift, and go to state 37
 
-    $default  reduce using rule 5 (groupVariableDeclarations)
-
-    groupVariableDeclarations  go to state 161
-    variableDeclarations       go to state 14
-    groupBlockForward          go to state 177
-    block                      go to state 163
+    compoundStatement  go to state 177
 
 
 state 171
 
-   27 formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type .
+   22 procedureDeclaration: TOKEN_PROCEDURE TOKEN_ID TOKEN_LPAR formalParameterList $@1 TOKEN_RPAR TOKEN_SEMICOLON groupBlockForward . TOKEN_SEMICOLON
 
-    $default  reduce using rule 27 (formalParamSeq)
+    TOKEN_SEMICOLON  shift, and go to state 178
 
 
 state 172
 
-   29 block: groupVariableDeclarations compoundStatement .
+   25 groupBlockForward: block .
 
-    $default  reduce using rule 29 (block)
+    $default  reduce using rule 25 (groupBlockForward)
 
 
 state 173
 
-   21 procedureDeclaration: TOKEN_PROCEDURE TOKEN_ID TOKEN_LPAR formalParameterList TOKEN_RPAR TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON .
+   47 structuredStatement: TOKEN_FOR TOKEN_ID TOKEN_ASSIGN expression TOKEN_TO expression . TOKEN_DO statement
 
-    $default  reduce using rule 21 (procedureDeclaration)
+    TOKEN_DO  shift, and go to state 179
 
 
 state 174
 
-   45 structuredStatement: TOKEN_FOR TOKEN_ID TOKEN_ASSIGN expression TOKEN_TO expression . TOKEN_DO statement
+   45 structuredStatement: TOKEN_IF expression TOKEN_THEN statement TOKEN_ELSE statement .
 
-    TOKEN_DO  shift, and go to state 178
+    $default  reduce using rule 45 (structuredStatement)
 
 
 state 175
 
-   43 structuredStatement: TOKEN_IF expression TOKEN_THEN statement TOKEN_ELSE statement .
+   49 type: TOKEN_ARRAY TOKEN_LBRACKET constant TOKEN_RANGE constant TOKEN_RBRACKET TOKEN_OF type .
 
-    $default  reduce using rule 43 (structuredStatement)
+    $default  reduce using rule 49 (type)
 
 
 state 176
 
-   47 type: TOKEN_ARRAY TOKEN_LBRACKET constant TOKEN_RANGE constant TOKEN_RBRACKET TOKEN_OF type .
+   24 functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList TOKEN_RPAR TOKEN_COLON resultType $@2 TOKEN_SEMICOLON . groupBlockForward TOKEN_SEMICOLON
 
-    $default  reduce using rule 47 (type)
+    TOKEN_FORWARD  shift, and go to state 169
+    TOKEN_VAR      shift, and go to state 12
+
+    $default  reduce using rule 5 (groupVariableDeclarations)
+
+    groupVariableDeclarations  go to state 170
+    variableDeclarations       go to state 14
+    groupBlockForward          go to state 180
+    block                      go to state 172
 
 
 state 177
 
-   22 functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList TOKEN_RPAR TOKEN_COLON resultType TOKEN_SEMICOLON groupBlockForward . TOKEN_SEMICOLON
+   31 block: groupVariableDeclarations compoundStatement .
 
-    TOKEN_SEMICOLON  shift, and go to state 179
+    $default  reduce using rule 31 (block)
 
 
 state 178
 
-   45 structuredStatement: TOKEN_FOR TOKEN_ID TOKEN_ASSIGN expression TOKEN_TO expression TOKEN_DO . statement
+   22 procedureDeclaration: TOKEN_PROCEDURE TOKEN_ID TOKEN_LPAR formalParameterList $@1 TOKEN_RPAR TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON .
+
+    $default  reduce using rule 22 (procedureDeclaration)
+
+
+state 179
+
+   47 structuredStatement: TOKEN_FOR TOKEN_ID TOKEN_ASSIGN expression TOKEN_TO expression TOKEN_DO . statement
 
     TOKEN_BEGIN  shift, and go to state 37
     TOKEN_FOR    shift, and go to state 50
@@ -2064,10 +2083,10 @@ state 178
     TOKEN_WHILE  shift, and go to state 52
     TOKEN_ID     shift, and go to state 53
 
-    $default  reduce using rule 38 (simpleStatement)
+    $default  reduce using rule 40 (simpleStatement)
 
     compoundStatement      go to state 54
-    statement              go to state 180
+    statement              go to state 181
     groupSimStruStatement  go to state 57
     simpleStatement        go to state 58
     assignmentStatement    go to state 59
@@ -2076,15 +2095,22 @@ state 178
     variable               go to state 62
 
 
-state 179
-
-   22 functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList TOKEN_RPAR TOKEN_COLON resultType TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON .
-
-    $default  reduce using rule 22 (functionDeclaration)
-
-
 state 180
 
-   45 structuredStatement: TOKEN_FOR TOKEN_ID TOKEN_ASSIGN expression TOKEN_TO expression TOKEN_DO statement .
+   24 functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList TOKEN_RPAR TOKEN_COLON resultType $@2 TOKEN_SEMICOLON groupBlockForward . TOKEN_SEMICOLON
 
-    $default  reduce using rule 45 (structuredStatement)
+    TOKEN_SEMICOLON  shift, and go to state 182
+
+
+state 181
+
+   47 structuredStatement: TOKEN_FOR TOKEN_ID TOKEN_ASSIGN expression TOKEN_TO expression TOKEN_DO statement .
+
+    $default  reduce using rule 47 (structuredStatement)
+
+
+state 182
+
+   24 functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList TOKEN_RPAR TOKEN_COLON resultType $@2 TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON .
+
+    $default  reduce using rule 24 (functionDeclaration)

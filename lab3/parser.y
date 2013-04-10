@@ -32,7 +32,7 @@ extern "C++" stack<vector<pair<string, TypeDesc*> >* > fieldListStack;
 extern "C++" stack<TypeDesc*> arrayTypeStack;
 extern "C" int recordSeq;
 extern "C" int arraySeq;
-vector<pair<string, TypeDesc*> >* formalParamList;
+vector<TypeDesc*>* formalParamList;
 
 void yyerror(const char *s);
 static void lookup(char *token_buffer);
@@ -393,8 +393,7 @@ variableDeclaration: identifierList TOKEN_COLON type TOKEN_SEMICOLON
     };
 
 procedureDeclaration: TOKEN_PROCEDURE TOKEN_ID TOKEN_LPAR formalParameterList
-    TOKEN_RPAR TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
-    { cout << "procedure_declaration" << endl;
+    { 
       string id($2);
       if (symTable.find(id) != symTable.end()) {
         int addr = symTable[id].first;
@@ -406,17 +405,32 @@ procedureDeclaration: TOKEN_PROCEDURE TOKEN_ID TOKEN_LPAR formalParameterList
       symTable[id].second = convert.str(); 
 
       // Lab3
-      envs.pop();
       string lexime($2);
+      // Add to the local symbol table.
       TypeDesc* td = new TypeDesc("procedure", formalParamList, NULL);
       Symbol* sym = new Symbol(lexime, 0, td);
       envs.top()->setSymbol(lexime, sym);
-    };
+
+      // Add to the global symbol table.
+      Env* globalEnv = envs.top()->getPrevEnv();
+      vector<TypeDesc*>* copyOfFormalParamList =
+          new vector<TypeDesc*>();
+      for (int i = 0; i < formalParamList->size(); ++i) {
+        TypeDesc* oneTd = new TypeDesc(*(formalParamList->at(i)));
+        copyOfFormalParamList->push_back(oneTd);
+      }
+      td = new TypeDesc("procedure", copyOfFormalParamList, NULL);
+      sym = new Symbol(lexime, 0, td);
+      globalEnv->setSymbol(lexime, sym);
+      
+    }
+    TOKEN_RPAR TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
+    { cout << "procedure_declaration" << endl; envs.pop(); }
+;
 
 functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList
-    TOKEN_RPAR TOKEN_COLON resultType TOKEN_SEMICOLON groupBlockForward 
-    TOKEN_SEMICOLON
-    { cout << "function_declaration" << endl;
+    TOKEN_RPAR TOKEN_COLON resultType
+    { 
       string id($2);
       if (symTable.find(id) != symTable.end()) {
         if (symTable[id].first > funcSavedAddr) {
@@ -440,7 +454,6 @@ functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList
       }
 
       // Lab3
-      envs.pop();
       string lexime($2);
       string resultType($7);
 
@@ -449,37 +462,133 @@ functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList
         if (resultType.compare("integer") == 0 ||
             resultType.compare("string") == 0 ||
             resultType.compare("boolean") == 0) {
+          // Add to the local symbol table.
           TypeDesc* rt = new TypeDesc(resultType);
           TypeDesc* td = new TypeDesc("function", formalParamList, rt);
           Symbol* sym = new Symbol(lexime, 0, td);
           envs.top()->setSymbol(lexime, sym);
+
+          // Add to the global symbol table.
+          Env* globalEnv = envs.top()->getPrevEnv();
+          vector<TypeDesc*>* copyOfFormalParamList =
+              new vector<TypeDesc*>();
+          for (int i = 0; i < formalParamList->size(); ++i) {
+            TypeDesc* oneTd = new TypeDesc(*(formalParamList->at(i)));
+            copyOfFormalParamList->push_back(oneTd);
+          }
+          rt = new TypeDesc(resultType);
+          td = new TypeDesc("function", copyOfFormalParamList, rt);
+          sym = new Symbol(lexime, 0, td);
+          globalEnv->setSymbol(lexime, sym);
         } else {
-          if (envs.top()->getSymbol(resultType) == NULL) {
-            Env* envPtr = envs.top()->getPrevEnv();
+          if (envs.top()->getPrevEnv()->getSymbol(resultType) == NULL) {
+            cout << "Error: type " << resultType << " not defined" << endl;
+            // Add the invalid result type to the global symbol table.
+            Env* globalEnv = envs.top()->getPrevEnv();
+            TypeDesc* invalidTd = new TypeDesc("invalid");
+            Symbol* sym = new Symbol(resultType, 0, invalidTd); 
+            globalEnv->setSymbol(resultType, sym);
+
+            // Add to the local symbol table.
+            TypeDesc* rt = new TypeDesc(*invalidTd);
+            TypeDesc* td = new TypeDesc("function", formalParamList, rt);
+            sym = new Symbol(lexime, 0, td);
+            envs.top()->setSymbol(lexime, sym);
+
+            // Add to the global symbol table.
+            vector<TypeDesc*>* copyOfFormalParamList =
+                new vector<TypeDesc*>();
+            for (int i = 0; i < formalParamList->size(); ++i) {
+              TypeDesc* oneTd = new TypeDesc(*(formalParamList->at(i)));
+              copyOfFormalParamList->push_back(oneTd);
+            }
+            rt = new TypeDesc(*invalidTd);
+            td = new TypeDesc("function", copyOfFormalParamList, rt);
+            sym = new Symbol(lexime, 0, td);
+            globalEnv->setSymbol(lexime, sym);
+
+            /*
+            Env* envPtr = envs.top()->getPrevEnv()->getPrevEnv();
             bool found = false;
+            
             while (envPtr != NULL) {
               if (envPtr->getSymbol(resultType) != NULL) {
                 found = true;
+                // Add to the local symbol table.
                 TypeDesc* rt = new TypeDesc(*(envPtr->getSymbol(resultType)->getTypeDesc()));
                 TypeDesc* td = new TypeDesc("function", formalParamList, rt);
                 Symbol* sym = new Symbol(lexime, 0, td);
                 envs.top()->setSymbol(lexime, sym);
+
+                // Add to the global symbol table.
+                Env* globalEnv = envs.top()->getPrevEnv();
+                vector<TypeDesc*>* copyOfFormalParamList =
+                    new vector<TypeDesc*>();
+                for (int i = 0; i < formalParamList->size(); ++i) {
+                  TypeDesc* oneTd = new TypeDesc(*(formalParamList->at(i)));
+                  copyOfFormalParamList->push_back(oneTd);
+                }
+                rt = new TypeDesc(*(envPtr->getSymbol(resultType)->getTypeDesc()));
+                td = new TypeDesc("function", copyOfFormalParamList, rt);
+                sym = new Symbol(lexime, 0, td);
+                globalEnv->setSymbol(lexime, sym);
                 break;
               }
               envPtr = envPtr->getPrevEnv();
             }
+            */
+            /*
             if (!found) {
               cout << "Error: type " << resultType << " not defined" << endl;
-            }
+              // Add the invalid result type to the global symbol table.
+              Env* globalEnv = envs.top()->getPrevEnv();
+              TypeDesc invalidTd = new TypeDesc("invalid");
+              Symbol 
+
+              // Add to the local symbol table.
+              TypeDesc* rt = new TypeDesc(*(envPtr->getSymbol(resultType)->getTypeDesc()));
+              TypeDesc* td = new TypeDesc("function", formalParamList, rt);
+              Symbol* sym = new Symbol(lexime, 0, td);
+              envs.top()->setSymbol(lexime, sym);
+
+              // Add to the global symbol table.
+              Env* globalEnv = envs.top()->getPrevEnv();
+              vector<TypeDesc*>* copyOfFormalParamList =
+                  new vector<TypeDesc*>();
+              for (int i = 0; i < formalParamList->size(); ++i) {
+                TypeDesc* oneTd = new TypeDesc(*(formalParamList->at(i)));
+                copyOfFormalParamList->push_back(oneTd);
+              }
+              rt = new TypeDesc(*(envPtr->getSymbol(resultType)->getTypeDesc()));
+              td = new TypeDesc("function", copyOfFormalParamList, rt);
+              sym = new Symbol(lexime, 0, td);
+              globalEnv->setSymbol(lexime, sym);
+            }*/
           } else {
-            TypeDesc* rt = new TypeDesc(*(envs.top()->getSymbol(resultType)->getTypeDesc()));
+            // Add to the local symbol table.
+            TypeDesc* rt = new TypeDesc(*(envs.top()->getPrevEnv()->getSymbol(resultType)->getTypeDesc()));
             TypeDesc* td = new TypeDesc("function", formalParamList, rt);
             Symbol* sym = new Symbol(lexime, 0, td);
             envs.top()->setSymbol(lexime, sym);
+
+            // Add to the global symbol table.
+            Env* globalEnv = envs.top()->getPrevEnv();
+            vector<TypeDesc*>* copyOfFormalParamList =
+                new vector<TypeDesc*>();
+            for (int i = 0; i < formalParamList->size(); ++i) {
+              TypeDesc* oneTd = new TypeDesc(*(formalParamList->at(i)));
+              copyOfFormalParamList->push_back(oneTd);
+            }
+            rt = new TypeDesc(*(envs.top()->getPrevEnv()->getSymbol(resultType)->getTypeDesc()));
+            td = new TypeDesc("function", copyOfFormalParamList, rt);
+            sym = new Symbol(lexime, 0, td);
+            globalEnv->setSymbol(lexime, sym);
           }
         } 
       }
-    };
+    }
+    TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
+    { cout << "function_declaration" << endl; envs.pop(); };
 
 groupBlockForward: block | TOKEN_FORWARD;
 
@@ -520,7 +629,7 @@ formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
             for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
               string lexime(*it);
               TypeDesc* td = new TypeDesc(strs[0]);
-              formalParamList->push_back(pair<string, TypeDesc*>(lexime, td));
+              formalParamList->push_back(td);
               Symbol* sym = new Symbol(lexime, 0, td);
               envs.top()->setSymbol(lexime, sym);
             }
@@ -534,7 +643,7 @@ formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
                   for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
                     string lexime(*it);
                     TypeDesc* td = new TypeDesc(*(envPtr->getSymbol(strs[0])->getTypeDesc()));
-                    formalParamList->push_back(pair<string, TypeDesc*>(lexime, td));
+                    formalParamList->push_back(td);
                     Symbol* sym = new Symbol(lexime, 0, td);
                     envs.top()->setSymbol(lexime, sym);
                   }
@@ -549,7 +658,7 @@ formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
               for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
                 string lexime(*it);
                 TypeDesc* td = new TypeDesc(*(envs.top()->getSymbol(strs[0])->getTypeDesc()));
-                formalParamList->push_back(pair<string, TypeDesc*>(lexime, td));
+                formalParamList->push_back(td);
                 Symbol* sym = new Symbol(lexime, 0, td);
                 envs.top()->setSymbol(lexime, sym);
               }
@@ -563,7 +672,7 @@ formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
         for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
           string lexime(*it);
           TypeDesc* td = new TypeDesc("record", fieldListStack.top());
-          formalParamList->push_back(pair<string, TypeDesc*>(lexime, td));
+          formalParamList->push_back(td);
           Symbol* sym = new Symbol(lexime, 0, td);
           envs.top()->setSymbol(lexime, sym);
         }
@@ -602,7 +711,7 @@ formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
         Env* env = new Env(prevEnv);
         envs.push(env);
         allEnvs.push_back(env);
-        formalParamList = new vector<pair<string, TypeDesc*> >;
+        formalParamList = new vector<TypeDesc*>();
 
         vector<string> strs = split($3);
         if (strs[0].compare(rec) != 0 && strs[0].compare(arr) !=0) {
@@ -614,7 +723,7 @@ formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
               for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
                 string lexime(*it);
                 TypeDesc* td = new TypeDesc(strs[0]);
-                formalParamList->push_back(pair<string, TypeDesc*>(lexime, td));
+                formalParamList->push_back(td);
                 Symbol* sym = new Symbol(lexime, 0, td);
                 envs.top()->setSymbol(lexime, sym);
               }
@@ -628,7 +737,7 @@ formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
                     for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
                       string lexime(*it);
                       TypeDesc* td = new TypeDesc(*(envPtr->getSymbol(strs[0])->getTypeDesc()));
-                      formalParamList->push_back(pair<string, TypeDesc*>(lexime, td));
+                      formalParamList->push_back(td);
                       Symbol* sym = new Symbol(lexime, 0, td);
                       envs.top()->setSymbol(lexime, sym);
                     }
@@ -643,7 +752,7 @@ formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
                 for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
                   string lexime(*it);
                   TypeDesc* td = new TypeDesc(*(envs.top()->getSymbol(strs[0])->getTypeDesc()));
-                  formalParamList->push_back(pair<string, TypeDesc*>(lexime, td));
+                  formalParamList->push_back(td);
                   Symbol* sym = new Symbol(lexime, 0, td);
                   envs.top()->setSymbol(lexime, sym);
                 }
@@ -657,7 +766,7 @@ formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
           for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
             string lexime(*it);
             TypeDesc* td = new TypeDesc("record", fieldListStack.top());
-            formalParamList->push_back(pair<string, TypeDesc*>(lexime, td));
+            formalParamList->push_back(td);
             Symbol* sym = new Symbol(lexime, 0, td);
             envs.top()->setSymbol(lexime, sym);
           }
@@ -670,7 +779,7 @@ formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
             for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
               string lexime(*it);
               TypeDesc* td = arrayTypeStack.top();
-              formalParamList->push_back(pair<string, TypeDesc*>(lexime, td));
+              formalParamList->push_back(td);
               Symbol* sym = new Symbol(lexime, 0, td);
               envs.top()->setSymbol(lexime, sym);
             }
@@ -795,6 +904,14 @@ resultType: TOKEN_ID { cout << "result_type" << endl;
     if (symTable.find(id) == symTable.end()) {
       addSymbol($1, nilStr);
     };
+
+    // Lab3
+    /*
+    Env* globalEnv = envs.top()->getPrevEnv();
+    string lexime($1);
+    if (globalEnv->getSymbol(lexime) == NULL) {
+      
+    }*/
     };
 
 fieldList: fieldListSeq { cout << "field_list" << endl; }
@@ -1176,9 +1293,8 @@ main(int argc, char **argv) {
   
   //envs.top()->displayTable();
   for (int i = allEnvs.size() - 1; i >= 0; --i) {
-    //delete allEnvs[i];
-    //cout << allEnvs[i]->getTableSize() << endl;
-    //allEnvs[i]->displayTable();
+    cout << allEnvs[i]->getTableSize() << endl;
+    allEnvs[i]->displayTable();
   } 
   //cout << envs.size() << endl;
   for (int i = allEnvs.size() - 1; i >= 0; --i) {
