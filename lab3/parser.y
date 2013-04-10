@@ -33,6 +33,8 @@ extern "C++" stack<TypeDesc*> arrayTypeStack;
 extern "C" int recordSeq;
 extern "C" int arraySeq;
 vector<TypeDesc*>* formalParamList;
+stack<TypeDesc*> expTypeStack;
+TypeDesc* varType = NULL;
 
 void yyerror(const char *s);
 static void lookup(char *token_buffer);
@@ -44,6 +46,7 @@ void addSymbol(const string &id, const string &type);
 vector<string> split(char *ids);
 void fixAddress(int addr);
 void freeFieldList(vector<pair<string, TypeDesc*> >* fl); 
+bool checkTypeEquiv(TypeDesc* td1, TypeDesc* td2);
 
 #define YYPRINT
 
@@ -1312,13 +1315,50 @@ relationalOp: TOKEN_LT { cout << "relational_op" << endl; }
 
 simpleExpression: sign term { cout << "simple_expression" << endl; }
     | term { cout << "simple_expression" << endl; }
-    | simpleExpression addOp term { cout << "simple_expression_more" << endl; };
+    | simpleExpression addOp term { cout << "simple_expression_more" << endl;
+
+      // Lab3
+      TypeDesc* td2 = expTypeStack.top();
+      expTypeStack.pop();
+      TypeDesc* td1 = expTypeStack.top();
+      expTypeStack.pop();
+      if (checkTypeEquiv(td1, td2)) {
+        TypeDesc* resultTd = new TypeDesc(*td1);
+        expTypeStack.push(resultTd);
+      } else {
+        cout << "Error: types not equivalent for " << td1->getType()
+            << " and " << td2->getType() << endl;
+        TypeDesc* resultTd = new TypeDesc("invalid");
+        expTypeStack.push(resultTd);
+      }
+      
+      delete td1;
+      delete td2;
+    };
 
 addOp: TOKEN_PLUS { cout << "addop" << endl; }
     | TOKEN_MINUS { cout << "addop" << endl; }
     | TOKEN_OR { cout << "addop" << endl; };
 
-term: term mulOp factor { cout << "term_more" << endl; }
+term: term mulOp factor { cout << "term_more" << endl;
+
+      // Lab3
+      TypeDesc* td2 = expTypeStack.top();
+      expTypeStack.pop();
+      TypeDesc* td1 = expTypeStack.top();
+      expTypeStack.pop();
+      if (checkTypeEquiv(td1, td2)) {
+        TypeDesc* resultTd = new TypeDesc(*td1);
+        expTypeStack.push(resultTd);
+      } else {
+        cout << "Error: type not equivalent" << endl;
+        TypeDesc* resultTd = new TypeDesc("invalid");
+        expTypeStack.push(resultTd);
+      }
+      
+      delete td1;
+      delete td2;
+    }
     | factor { cout << "term" << endl; } ;
 
 mulOp: TOKEN_MULTIPLY { cout << "mulop" << endl; }
@@ -1326,11 +1366,27 @@ mulOp: TOKEN_MULTIPLY { cout << "mulop" << endl; }
   | TOKEN_MOD { cout << "mulop" << endl; }
   | TOKEN_AND { cout << "mulop" << endl; };
 
-factor: TOKEN_INT { cout << "factor" << endl; }
-    | TOKEN_STR { cout << "factor" << endl; }
-    | variable { cout << "factor" << endl; }
+factor: TOKEN_INT { cout << "factor" << endl; 
+      // Lab3
+      TypeDesc* td = new TypeDesc("integer");
+      expTypeStack.push(td);
+    }
+    | TOKEN_STR { cout << "factor" << endl;
+      TypeDesc* td = new TypeDesc("string");
+      expTypeStack.push(td);
+    }
+    | variable { cout << "factor" << endl; 
+      TypeDesc* td = new TypeDesc(*varType);
+      delete varType;
+      varType = NULL;
+      expTypeStack.push(td);
+    }
     | functionReference { cout << "factor" << endl; }
-    | TOKEN_NOT factor { cout << "factor" << endl; }
+    | TOKEN_NOT factor { cout << "factor" << endl;
+      if (expTypeStack.top()->getType().compare("boolean") != 0) {
+        cout << "Error: Boolean operator 'not' applied to non-boolean type" << endl;
+      }
+    }
     | TOKEN_LPAR expression TOKEN_RPAR { cout << "factor" << endl; };
 
 functionReference: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
@@ -1344,7 +1400,9 @@ functionReference: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
 variable: TOKEN_ID 
     {
       // Lab3
+      /*
       string lexime($1);
+      
       bool found = false;
       if (envs.top()->getSymbol(lexime) == NULL) {
         Env* envPtr = envs.top()->getPrevEnv();
@@ -1363,12 +1421,11 @@ variable: TOKEN_ID
         cout << "Error: variable " << lexime << " hasn't been declared" << endl;
 
         // Assign an invalid type to this undeclared variable.
-        /*
-        TypeDesc* td = new TypeDesc("invalid");
-        Symbol* sym = new Symbol(lexime, 0, td);
-        envs.top()->setSymbol(lexime, sym);
-        */
+        //TypeDesc* td = new TypeDesc("invalid");
+        //Symbol* sym = new Symbol(lexime, 0, td);
+        //envs.top()->setSymbol(lexime, sym);
       }
+      */
 
     }
  componentSelection { cout << "variable" << endl;
@@ -1378,28 +1435,31 @@ variable: TOKEN_ID
     }
 
     // Lab3
-    // Validate component selection.
-    if ($3 != NULL) {
-      vector<string> components = split($3);
-
-      string lexime($1);
-      TypeDesc* outterMostTd = NULL;
-      if (envs.top()->getSymbol(lexime) == NULL) {
-        Env* envPtr = envs.top()->getPrevEnv();
-        while (envPtr != NULL) {
-          if (envPtr->getSymbol(lexime) != NULL) {
-            outterMostTd = envPtr->getSymbol(lexime)->getTypeDesc();
-            break;
-          }
-          envPtr = envPtr->getPrevEnv();
+    string lexime($1);
+    TypeDesc* outterMostTd = NULL;
+    if (envs.top()->getSymbol(lexime) == NULL) {
+      Env* envPtr = envs.top()->getPrevEnv();
+      while (envPtr != NULL) {
+        if (envPtr->getSymbol(lexime) != NULL) {
+          outterMostTd = envPtr->getSymbol(lexime)->getTypeDesc();
+          break;
         }
-      } else {
-        outterMostTd = envs.top()->getSymbol(lexime)->getTypeDesc();
+        envPtr = envPtr->getPrevEnv();
       }
+    } else {
+      outterMostTd = envs.top()->getSymbol(lexime)->getTypeDesc();
+    }
 
-      if (outterMostTd != NULL) {
+    if (outterMostTd == NULL) {
+      cout << "Error: variable " << lexime << " hasn't been declared" << endl;
+      varType = new TypeDesc("invalid");
+    } else {
+      // Validate component selection.
+      if ($3 != NULL) {
+        vector<string> components = split($3);
         TypeDesc* currentTd = outterMostTd;
         TypeDesc* prevTd = currentTd;
+        bool valid = true;
         for (int i = 0; i < components.size(); ++i) {
           if (prevTd->getType().compare(rec) == 0) {
             currentTd = prevTd->getTypeDescFromFieldList(components[i]);
@@ -1412,6 +1472,7 @@ variable: TOKEN_ID
               }
               cout << "Variable " << components[i] << " hasn't been defined in record "
                   << name << endl;
+              valid = false;
               break;
             } else {
               prevTd = currentTd;
@@ -1424,39 +1485,20 @@ variable: TOKEN_ID
               name = components[i - 1];
             }
             cout << "Variable " << name << " is not a record" << endl;
+            valid = false;
             break;
           }
         }
-      } else {
-        // Variable should have invalid type.
-      }
-
-      /*
-      if (outterMostTd != NULL) {
-        if (outterMostTd->getType().compare(rec) == 0) {
-          TypeDesc* currentTd = outterMostTd->getTypeDescFromFieldList(components[0]);
-          if (currentTd != NULL) {
-            if (currentTd.getType().compare(rec) == 0) {
-              for (int i = 1; i < components.size(); ++i) {
-                currentTd = currentTd->getTypeDescFromFieldList(components[i]);
-                if (currentTd == NULL) {
-                  cout << "Variable " << components[i] << " doesn't exist within record " << lexime << endl;
-                  break;
-                }
-              }
-            } else {
-              cout << "Variable " << component[1] << " is not a record" << endl;
-            }
-          } else {
-            cout << "Variable " << components[0] << " doesn't exist within record " << lexime << endl;
-          }
+        if (valid) {
+          varType = new TypeDesc(*currentTd);
         } else {
-          cout << "Variable " << lexime << " is not a record" << endl;
+          varType = new TypeDesc("invalid");
         }
+      } else {
+        varType = new TypeDesc(*outterMostTd);
       }
-      */
-      
     }
+
     
     };
 
@@ -1673,3 +1715,47 @@ void freeFieldList(vector<pair<string, TypeDesc*> >* fl) {
     fl = NULL;
 }
 
+bool checkTypeEquiv(TypeDesc* td1, TypeDesc* td2) {
+  string name1 = td1->getType();
+  string name2 = td2->getType();
+
+  if (name1.compare("invalid") == 0 || name2.compare("invalid") == 0) {
+    return true;
+  } else {
+    if (name1.compare(name2) == 0) {
+      if (name1.compare("integer") == 0 ||
+          name1.compare("string") == 0 ||
+          name1.compare("boolean") == 0) {
+        return true;
+      } else if (name1.compare("array") == 0) {
+        if (td1->getLower() == td2->getLower() && td1->getUpper() == td2->getUpper()) {
+          return checkTypeEquiv(td1->getArrayEleType(), td2->getArrayEleType());
+        } else {
+          return false;
+        }
+      } else {
+        vector<pair<string, TypeDesc*> >* fl1 = td1->getFieldList();
+        vector<pair<string, TypeDesc*> >* fl2 = td2->getFieldList();
+        if (fl1->size() == fl2->size()) {
+          bool equiv = true;
+          for (int i = 0; i < fl1->size(); ++i) {
+            if (fl1->at(i).first.compare(fl2->at(i).first) == 0) {
+              if (!checkTypeEquiv(fl1->at(i).second, fl2->at(i).second)) {
+                equiv = false;
+                break; 
+              }
+            } else {
+              equiv = false;
+              break;
+            }
+          }
+          return equiv;
+        } else {
+          return false;
+        }
+      }
+    } else {
+      return false;
+    } 
+  }
+}
