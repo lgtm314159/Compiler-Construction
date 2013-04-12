@@ -52,12 +52,16 @@ ERROR   [^{DELIM}{WS}{NEWLINE}{LETTER}{DIGIT}{ID}{INTEGER}{DECIMAL}{EXPNUM}{STR}
                 //return TOKEN_COMMENT;
               }
 and         {//printf("KEYWORD %s\n", yytext);
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
 return TOKEN_AND;}
 begin     {//printf("KEYWORD %s\n", yytext);
 return TOKEN_BEGIN;}
 forward     {//printf("KEYWORD %s\n", yytext);
 return TOKEN_FORWARD;}
 div     {//printf("KEYWORD %s\n", yytext);
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
 return TOKEN_DIV;}
 do     {//printf("KEYWORD %s\n", yytext);
 return TOKEN_DO;}
@@ -78,12 +82,16 @@ arrSavedAddr = address;
 ++address;
 return TOKEN_ARRAY;}
 mod     {//printf("KEYWORD %s\n", yytext);
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
 return TOKEN_MOD;}
 not     {//printf("KEYWORD %s\n", yytext);
 return TOKEN_NOT;}
 of     {//printf("KEYWORD %s\n", yytext);
 return TOKEN_OF;}
 or     {//printf("KEYWORD %s\n", yytext);
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
 return TOKEN_OR;}
 procedure     {//printf("KEYWORD %s\n", yytext);
 procSavedAddr = address;
@@ -109,24 +117,43 @@ return TOKEN_VAR;}
 while     {//printf("KEYWORD %s\n", yytext); 
 return TOKEN_WHILE;}
 "+" {//printf("PLUS\n");
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
 return TOKEN_PLUS;}
 "-" {//printf("MINUS\n");
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
 return TOKEN_MINUS;}
 "*" {//printf("MULT\n");
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
 return TOKEN_MULTIPLY;}
 "/" {//printf("DIVIDE\n");
 return TOKEN_DIVIDE;}
 "=" {//printf("RELOP %s\n", yytext);
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
 return TOKEN_EQ;}
 "<" {//printf("RELOP %s\n", yytext);
-return TOKEN_LT;}
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
+return TOKEN_LT;
+}
 "<=" {//printf("RELOP %s\n", yytext);
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
 return TOKEN_LE;}
 ">" {//printf("RELOP %s\n", yytext);
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
 return TOKEN_GT;}
 ">=" {//printf("RELOP %s\n", yytext);
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
 return TOKEN_GE;}
 "<>" {//printf("RELOP %s\n", yytext);
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
 return TOKEN_NOTEQ;}
 {ID}        {//printf("IDENTIFIER %s\n", yytext);
              yylval.sval = (char*) malloc(strlen(yytext) + 1);

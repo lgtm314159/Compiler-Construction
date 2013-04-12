@@ -1,8 +1,6 @@
 #!/bin/bash
 
-./run1
-./run2
-./run3
-./run4
-./run5
-
+mck
+./parser test.pas
+cat rules.out
+cat symtable.out

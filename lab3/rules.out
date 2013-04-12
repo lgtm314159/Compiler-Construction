@@ -35,20 +35,5 @@ variable
 factor
 term
 simple_expression
-addop
-component_selection_empty
-variable
-factor
-term
-simple_expression_more
-Error: types not equivalent for array and array
-expression
-assignment_statement
-simple_statement
-statement
-statement_sequence
-simple_statement_empty
-statement
-statement_sequence_more
-compound_statement
-program
+stack size: 2
+Error: Unary operator can only be applied to integer type, boolean found however.

@@ -17,8 +17,7 @@ using namespace std;
 
 extern "C" int yylex();
 extern "C" int yyparse();
-extern "C" FILE *yyin;
-extern "C" int address;
+extern "C" FILE *yyin; extern "C" int address;
 extern "C" int funcSavedAddr;
 extern "C" int procSavedAddr;
 extern "C" int recSavedAddr;
@@ -34,7 +33,7 @@ extern "C" int recordSeq;
 extern "C" int arraySeq;
 vector<TypeDesc*>* formalParamList;
 stack<TypeDesc*> expTypeStack;
-TypeDesc* varType = NULL;
+//TypeDesc* varType = NULL;
 
 void yyerror(const char *s);
 static void lookup(char *token_buffer);
@@ -73,10 +72,10 @@ string arr(arrayStr);
 
 %token TOKEN_COMMENT;
 %token <sval> TOKEN_STR
-%token TOKEN_AND
+%token <sval> TOKEN_AND
 %token TOKEN_BEGIN
 %token TOKEN_FORWARD
-%token TOKEN_DIV
+%token <sval> TOKEN_DIV
 %token TOKEN_DO
 %token TOKEN_ELSE
 %token TOKEN_END
@@ -84,10 +83,10 @@ string arr(arrayStr);
 %token TOKEN_FUNCTION
 %token TOKEN_IF
 %token TOKEN_ARRAY
-%token TOKEN_MOD
-%token TOKEN_NOT
+%token <sval> TOKEN_MOD
+%token <sval> TOKEN_NOT
 %token TOKEN_OF
-%token TOKEN_OR
+%token <sval> TOKEN_OR
 %token TOKEN_PROCEDURE
 %token TOKEN_PROGRAM
 %token TOKEN_RECORD
@@ -97,15 +96,15 @@ string arr(arrayStr);
 %token TOKEN_VAR
 %token TOKEN_WHILE
 %token <sval> TOKEN_PLUS
-%token TOKEN_MINUS
-%token TOKEN_MULTIPLY
+%token <sval> TOKEN_MINUS
+%token <sval> TOKEN_MULTIPLY
 %token TOKEN_DIVIDE
-%token TOKEN_EQ
-%token TOKEN_LT
-%token TOKEN_LE
-%token TOKEN_GT
-%token TOKEN_GE
-%token TOKEN_NOTEQ
+%token <sval> TOKEN_EQ
+%token <sval> TOKEN_LT
+%token <sval> TOKEN_LE
+%token <sval> TOKEN_GT
+%token <sval> TOKEN_GE
+%token <sval> TOKEN_NOTEQ
 %token <sval> TOKEN_ID
 %token <ival> TOKEN_INT
 %token TOKEN_DECIMAL
@@ -126,7 +125,7 @@ string arr(arrayStr);
 %left TOKEN_MULTIPLY TOKEN_DIV TOKEN_MOD TOKEN_AND
 %right UPLUS UMINUS
 
-%type <sval> type identifierList resultType componentSelection
+%type <sval> type identifierList resultType componentSelection relationalOp addOp mulOp
 %type <ival> formalParamSeq formalParameterList constant
 %%
 
@@ -293,18 +292,21 @@ typeDefinition: TOKEN_ID TOKEN_EQ type TOKEN_SEMICOLON
 variableDeclaration: identifierList TOKEN_COLON type TOKEN_SEMICOLON
     { cout << "variable_declaration" << endl;
       vector<string> ids = split($1);
+      vector<string> strs = split($3);
       for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
-        addSymbol(*it, $3);
+        addSymbol(*it, strs[0]);
       }
       string type($3);
-      if (type.compare(rec) != 0 && type.compare(arr) !=0) {
-        if (symTable.find(type) == symTable.end()) {
-          addSymbol($3, nilStr);
+      //cout << type << " whatttt" << endl;
+      if (strs[0].compare(rec) != 0 && strs[0].compare(arr) !=0) {
+        if (symTable.find(strs[0]) == symTable.end()) {
+          addSymbol(strs[0], nilStr);
         }
       }
+      //delete $3;
 
       // Lab3. Address will be fixed later.
-      vector<string> strs = split($3);
+      //vector<string> strs = split($3);
       if (strs[0].compare(rec) != 0 && strs[0].compare(arr) !=0) {
         // Type is not literally named record or array.
         if (!envs.empty()) {
@@ -647,18 +649,19 @@ formalParameterList: formalParamSeq { cout << "formal_parameter_list" << endl; $
 formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
     { cout << "identifier_lists_more" << endl;
       vector<string> ids = split($3);
+      vector<string> strs = split($5);
       for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
         addSymbol(*it, $5);
       }
       string type($5);
-      if (type.compare(rec) != 0 && type.compare(arr) !=0) {
-        if (symTable.find(type) == symTable.end()) {
-          addSymbol($5, nilStr);
+      if (strs[0].compare(rec) != 0 && strs[0].compare(arr) !=0) {
+        if (symTable.find(strs[0]) == symTable.end()) {
+          addSymbol(strs[0], nilStr);
         }
       }
       $$ = $1 + ids.size();
 
-      vector<string> strs = split($5);
+      //vector<string> strs = split($5);
       if (strs[0].compare(rec) != 0 && strs[0].compare(arr) !=0) {
         // Type is not literally named record or array.
         if (!envs.empty()) {
@@ -874,7 +877,8 @@ simpleStatement: assignmentStatement { cout << "simple_statement" << endl; }
     | procedureStatement { cout << "simple_statement" << endl; }
     | { cout << "simple_statement_empty" << endl; };
 
-assignmentStatement: variable TOKEN_ASSIGN expression { cout << "assignment_statement" << endl; };
+assignmentStatement: variable TOKEN_ASSIGN expression { cout << "assignment_statement" << endl;
+    };
 
 procedureStatement: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
     { cout << "procedure_statement" << endl;
@@ -1304,16 +1308,95 @@ constant: TOKEN_INT { cout << "constant" << endl; $$ = $1;}
 
 expression: simpleExpression groupRelOpSimExpr { cout << "expression" << endl; };
 
-groupRelOpSimExpr: relationalOp simpleExpression |;
+groupRelOpSimExpr: relationalOp simpleExpression {
+      // Lab3
+      string op($1);
+      TypeDesc* td2 = expTypeStack.top();
+      expTypeStack.pop();
+      TypeDesc* td1 = expTypeStack.top();
+      expTypeStack.pop();
+      if (op.compare("=") == 0 || op.compare("<>") == 0) {
+        if (checkTypeEquiv(td1, td2)) {
+          if (td1->getType().compare("invalid") != 0 &&
+              td2->getType().compare("invalid") != 0) {
+            TypeDesc* resultTd = new TypeDesc("boolean");
+            expTypeStack.push(resultTd);
+          } else {
+            TypeDesc* resultTd = new TypeDesc("invalid");
+            expTypeStack.push(resultTd);
+          }
+        } else {
+          cout << "Error: Types not equivalent for " << td1->getType()
+              << " and " << td2->getType() << " for operator " << op << endl;
+          TypeDesc* resultTd = new TypeDesc("invalid");
+          expTypeStack.push(resultTd);
+        }
+      } else {
+        if (td1->getType().compare("integer") == 0 &&
+            td2->getType().compare("integer") == 0) {
+          TypeDesc* resultTd = new TypeDesc("boolean");
+          expTypeStack.push(resultTd);
+        /*
+        } else if (td1->getType().compare("integer") == 0 &&
+              td2->getType().compare("invalid") == 0) {
+          TypeDesc* resultTd = new TypeDesc("invalid");
+          expTypeStack.push(resultTd);
+        } else if (td1->getType().compare("invalid") == 0 &&
+              td2->getType().compare("integer") == 0) {
+          TypeDesc* resultTd = new TypeDesc("invalid");
+          expTypeStack.push(resultTd);
+        */
+        } else {
+          cout << "Error: Operator " << op
+              << " only valid for integer equivalents, "
+              << td1->getType() << " and " << td2->getType()
+              << " found however" << endl;
+          TypeDesc* resultTd = new TypeDesc("invalid");
+          expTypeStack.push(resultTd);
+        }
+      }
+      delete td1;
+      delete td2;
+    }
+    |;
 
-relationalOp: TOKEN_LT { cout << "relational_op" << endl; }
-    | TOKEN_LE { cout << "relational_op" << endl; }
-    | TOKEN_GT { cout << "relational_op" << endl; }
-    | TOKEN_GE { cout << "relational_op" << endl; }
-    | TOKEN_NOTEQ { cout << "relational_op" << endl; }
-    | TOKEN_EQ { cout << "relational_op" << endl; };
+relationalOp: TOKEN_LT { cout << "relational_op" << endl; 
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    }
+    | TOKEN_LE { cout << "relational_op" << endl;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    }
+    | TOKEN_GT { cout << "relational_op" << endl;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    }
+    | TOKEN_GE { cout << "relational_op" << endl;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    }
+    | TOKEN_NOTEQ { cout << "relational_op" << endl;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    }
+    | TOKEN_EQ { cout << "relational_op" << endl;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    };
 
-simpleExpression: sign term { cout << "simple_expression" << endl; }
+simpleExpression: sign term { cout << "simple_expression" << endl; 
+      TypeDesc* td = expTypeStack.top();
+      cout << "stack size: " << expTypeStack.size() << endl;
+      if (td->getType().compare("integer") != 0) {
+        cout << "Error: Unary operator can only be applied to integer type, "
+            << td->getType() << " found however." << endl;
+        expTypeStack.pop();
+        TypeDesc* resultTd = new TypeDesc("invalid");
+        expTypeStack.push(resultTd);
+        delete td;
+      }
+    }
     | term { cout << "simple_expression" << endl; }
     | simpleExpression addOp term { cout << "simple_expression_more" << endl;
 
@@ -1322,9 +1405,38 @@ simpleExpression: sign term { cout << "simple_expression" << endl; }
       expTypeStack.pop();
       TypeDesc* td1 = expTypeStack.top();
       expTypeStack.pop();
+      string op($2);
       if (checkTypeEquiv(td1, td2)) {
-        TypeDesc* resultTd = new TypeDesc(*td1);
-        expTypeStack.push(resultTd);
+        if (td1->getType().compare("invalid") != 0 &&
+            td2->getType().compare("invalid") != 0) {
+          if (op.compare("or") == 0) {
+            // If the operator is or, check if the types are booleans.
+            if (td1->getType().compare("boolean") == 0) {
+              TypeDesc* resultTd = new TypeDesc(*td1);
+              expTypeStack.push(resultTd);
+            } else {
+              cout << "Error: Operator " << op << " can only be applied to"
+                  << " booleans, " << td1->getType() << " and "
+                  << td2->getType() << " found however" << endl;
+              TypeDesc* resultTd = new TypeDesc("invalid");
+              expTypeStack.push(resultTd);
+            } 
+          } else {
+            if (td1->getType().compare("integer") == 0) {
+              TypeDesc* resultTd = new TypeDesc(*td1);
+              expTypeStack.push(resultTd);
+            } else {
+              cout << "Error: Operator " << op << " can only be applied to"
+                  << " integers, " << td1->getType() << " and "
+                  << td2->getType() << " found however" << endl;
+              TypeDesc* resultTd = new TypeDesc("invalid");
+              expTypeStack.push(resultTd);
+            }
+          }
+        } else {
+          TypeDesc* resultTd = new TypeDesc("invalid");
+          expTypeStack.push(resultTd);
+        }
       } else {
         cout << "Error: types not equivalent for " << td1->getType()
             << " and " << td2->getType() << endl;
@@ -1336,9 +1448,18 @@ simpleExpression: sign term { cout << "simple_expression" << endl; }
       delete td2;
     };
 
-addOp: TOKEN_PLUS { cout << "addop" << endl; }
-    | TOKEN_MINUS { cout << "addop" << endl; }
-    | TOKEN_OR { cout << "addop" << endl; };
+addOp: TOKEN_PLUS { cout << "addop" << endl; $$ == NULL;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    }
+    | TOKEN_MINUS { cout << "addop" << endl; $$ == NULL;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    }
+    | TOKEN_OR { cout << "addop" << endl;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    };
 
 term: term mulOp factor { cout << "term_more" << endl;
 
@@ -1347,11 +1468,51 @@ term: term mulOp factor { cout << "term_more" << endl;
       expTypeStack.pop();
       TypeDesc* td1 = expTypeStack.top();
       expTypeStack.pop();
+      /*
       if (checkTypeEquiv(td1, td2)) {
         TypeDesc* resultTd = new TypeDesc(*td1);
         expTypeStack.push(resultTd);
       } else {
         cout << "Error: type not equivalent" << endl;
+        TypeDesc* resultTd = new TypeDesc("invalid");
+        expTypeStack.push(resultTd);
+      }
+      */
+      string op($2);
+      if (checkTypeEquiv(td1, td2)) {
+        if (td1->getType().compare("invalid") != 0 &&
+            td2->getType().compare("invalid") != 0) {
+          if (op.compare("and") == 0) {
+            // If the operator is and, check if the types are booleans.
+            if (td1->getType().compare("boolean") == 0) {
+              TypeDesc* resultTd = new TypeDesc(*td1);
+              expTypeStack.push(resultTd);
+            } else {
+              cout << "Error: Operator " << op << " can only be applied to"
+                  << " booleans, " << td1->getType() << " and "
+                  << td2->getType() << " found however" << endl;
+              TypeDesc* resultTd = new TypeDesc("invalid");
+              expTypeStack.push(resultTd);
+            } 
+          } else {
+            if (td1->getType().compare("integer") == 0) {
+              TypeDesc* resultTd = new TypeDesc(*td1);
+              expTypeStack.push(resultTd);
+            } else {
+              cout << "Error: Operator " << op << " can only be applied to"
+                  << " integers, " << td1->getType() << " and "
+                  << td2->getType() << " found however" << endl;
+              TypeDesc* resultTd = new TypeDesc("invalid");
+              expTypeStack.push(resultTd);
+            }
+          }
+        } else {
+          TypeDesc* resultTd = new TypeDesc("invalid");
+          expTypeStack.push(resultTd);
+        }
+      } else {
+        cout << "Error: types not equivalent for " << td1->getType()
+            << " and " << td2->getType() << endl;
         TypeDesc* resultTd = new TypeDesc("invalid");
         expTypeStack.push(resultTd);
       }
@@ -1361,10 +1522,22 @@ term: term mulOp factor { cout << "term_more" << endl;
     }
     | factor { cout << "term" << endl; } ;
 
-mulOp: TOKEN_MULTIPLY { cout << "mulop" << endl; }
-  | TOKEN_DIV { cout << "mulop" << endl; } 
-  | TOKEN_MOD { cout << "mulop" << endl; }
-  | TOKEN_AND { cout << "mulop" << endl; };
+mulOp: TOKEN_MULTIPLY { cout << "mulop" << endl; $$ = NULL;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    }
+  | TOKEN_DIV { cout << "mulop" << endl; $$ = NULL;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    } 
+  | TOKEN_MOD { cout << "mulop" << endl; $$ = NULL;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    }
+  | TOKEN_AND { cout << "mulop" << endl;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    };
 
 factor: TOKEN_INT { cout << "factor" << endl; 
       // Lab3
@@ -1376,15 +1549,19 @@ factor: TOKEN_INT { cout << "factor" << endl;
       expTypeStack.push(td);
     }
     | variable { cout << "factor" << endl; 
-      TypeDesc* td = new TypeDesc(*varType);
-      delete varType;
-      varType = NULL;
-      expTypeStack.push(td);
+      //TypeDesc* td = new TypeDesc(*varType);
+      //delete varType;
+      //varType = NULL;
+      //expTypeStack.push(td);
     }
     | functionReference { cout << "factor" << endl; }
     | TOKEN_NOT factor { cout << "factor" << endl;
-      if (expTypeStack.top()->getType().compare("boolean") != 0) {
+      TypeDesc* td = expTypeStack.top();
+      expTypeStack.pop();
+      if (td->getType().compare("boolean") != 0) {
         cout << "Error: Boolean operator 'not' applied to non-boolean type" << endl;
+        TypeDesc* resultTd = new TypeDesc("invalid");
+        expTypeStack.push(resultTd);
       }
     }
     | TOKEN_LPAR expression TOKEN_RPAR { cout << "factor" << endl; };
@@ -1452,7 +1629,9 @@ variable: TOKEN_ID
 
     if (outterMostTd == NULL) {
       cout << "Error: variable " << lexime << " hasn't been declared" << endl;
-      varType = new TypeDesc("invalid");
+      //varType = new TypeDesc("invalid");
+      TypeDesc* td = new TypeDesc("invalid");
+      expTypeStack.push(td);
     } else {
       // Validate component selection.
       if ($3 != NULL) {
@@ -1490,12 +1669,18 @@ variable: TOKEN_ID
           }
         }
         if (valid) {
-          varType = new TypeDesc(*currentTd);
+          //varType = new TypeDesc(*currentTd);
+          TypeDesc* td = new TypeDesc(*currentTd);
+          expTypeStack.push(td);
         } else {
-          varType = new TypeDesc("invalid");
+          //varType = new TypeDesc("invalid");
+          TypeDesc* td = new TypeDesc("invalid");
+          expTypeStack.push(td);
         }
       } else {
-        varType = new TypeDesc(*outterMostTd);
+        //varType = new TypeDesc(*outterMostTd);
+        TypeDesc* td = new TypeDesc(*outterMostTd);
+        expTypeStack.push(td);
       }
     }
 
@@ -1598,8 +1783,8 @@ main(int argc, char **argv) {
   
   //envs.top()->displayTable();
   for (int i = allEnvs.size() - 1; i >= 0; --i) {
-    cout << allEnvs[i]->getTableSize() << endl;
-    allEnvs[i]->displayTable();
+    //cout << allEnvs[i]->getTableSize() << endl;
+    //allEnvs[i]->displayTable();
   } 
   //cout << envs.size() << endl;
   for (int i = allEnvs.size() - 1; i >= 0; --i) {

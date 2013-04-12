@@ -86,8 +86,7 @@ using namespace std;
 
 extern "C" int yylex();
 extern "C" int yyparse();
-extern "C" FILE *yyin;
-extern "C" int address;
+extern "C" FILE *yyin; extern "C" int address;
 extern "C" int funcSavedAddr;
 extern "C" int procSavedAddr;
 extern "C" int recSavedAddr;
@@ -103,7 +102,7 @@ extern "C" int recordSeq;
 extern "C" int arraySeq;
 vector<TypeDesc*>* formalParamList;
 stack<TypeDesc*> expTypeStack;
-TypeDesc* varType = NULL;
+//TypeDesc* varType = NULL;
 
 void yyerror(const char *s);
 static void lookup(char *token_buffer);
@@ -130,7 +129,7 @@ string arr(arrayStr);
 
 
 /* Line 268 of yacc.c  */
-#line 134 "parser.tab.c"
+#line 133 "parser.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -218,7 +217,7 @@ typedef union YYSTYPE
 {
 
 /* Line 293 of yacc.c  */
-#line 65 "parser.y"
+#line 64 "parser.y"
 
   int ival;
   float fval;
@@ -228,7 +227,7 @@ typedef union YYSTYPE
 
 
 /* Line 293 of yacc.c  */
-#line 232 "parser.tab.c"
+#line 231 "parser.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -240,7 +239,7 @@ typedef union YYSTYPE
 
 
 /* Line 343 of yacc.c  */
-#line 244 "parser.tab.c"
+#line 243 "parser.tab.c"
 
 #ifdef short
 # undef short
@@ -569,17 +568,17 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   133,   133,   143,   143,   144,   144,   145,   145,   147,
-     149,   150,   152,   154,   155,   157,   159,   160,   161,   162,
-     164,   293,   435,   434,   472,   470,   632,   632,   634,   637,
-     647,   750,   862,   864,   866,   867,   869,   871,   871,   873,
-     874,   875,   877,   879,   887,   888,   889,   890,   891,   893,
-     896,   970,   969,   979,   995,   996,  1001,  1152,  1302,  1303,
-    1305,  1307,  1307,  1309,  1310,  1311,  1312,  1313,  1314,  1316,
-    1317,  1318,  1339,  1340,  1341,  1343,  1362,  1364,  1365,  1366,
-    1367,  1369,  1374,  1378,  1384,  1385,  1390,  1392,  1401,  1400,
-    1505,  1518,  1529,  1533,  1534,  1536,  1538,  1540,  1555,  1560,
-    1560
+       0,   132,   132,   142,   142,   143,   143,   144,   144,   146,
+     148,   149,   151,   153,   154,   156,   158,   159,   160,   161,
+     163,   292,   437,   436,   474,   472,   634,   634,   636,   639,
+     649,   753,   865,   867,   869,   870,   872,   874,   874,   876,
+     877,   878,   880,   883,   891,   892,   893,   894,   895,   897,
+     900,   974,   973,   983,   999,  1000,  1005,  1156,  1306,  1307,
+    1309,  1311,  1361,  1363,  1367,  1371,  1375,  1379,  1383,  1388,
+    1401,  1402,  1452,  1456,  1460,  1465,  1524,  1526,  1530,  1534,
+    1538,  1543,  1548,  1552,  1558,  1559,  1568,  1570,  1579,  1578,
+    1691,  1704,  1715,  1719,  1720,  1722,  1724,  1726,  1741,  1746,
+    1746
 };
 #endif
 
@@ -1646,7 +1645,7 @@ yyreduce:
         case 2:
 
 /* Line 1806 of yacc.c  */
-#line 136 "parser.y"
+#line 135 "parser.y"
     { cout << "program" << endl;
       string id((yyvsp[(2) - (8)].sval));
       symTable[id].first = 0;
@@ -1658,63 +1657,63 @@ yyreduce:
   case 10:
 
 /* Line 1806 of yacc.c  */
-#line 149 "parser.y"
+#line 148 "parser.y"
     { cout << "type_definition_more" << endl; }
     break;
 
   case 11:
 
 /* Line 1806 of yacc.c  */
-#line 150 "parser.y"
+#line 149 "parser.y"
     { cout << "type_definition" << endl; }
     break;
 
   case 13:
 
 /* Line 1806 of yacc.c  */
-#line 154 "parser.y"
+#line 153 "parser.y"
     { cout << "variable_declaration_more" << endl; }
     break;
 
   case 14:
 
 /* Line 1806 of yacc.c  */
-#line 155 "parser.y"
+#line 154 "parser.y"
     {cout << "variable_declaration" << endl; }
     break;
 
   case 16:
 
 /* Line 1806 of yacc.c  */
-#line 159 "parser.y"
+#line 158 "parser.y"
     { cout << "sub_program_declarations_more" << endl; }
     break;
 
   case 17:
 
 /* Line 1806 of yacc.c  */
-#line 160 "parser.y"
+#line 159 "parser.y"
     { cout << "sub_program_declarations_more" << endl; }
     break;
 
   case 18:
 
 /* Line 1806 of yacc.c  */
-#line 161 "parser.y"
+#line 160 "parser.y"
     { cout << "sub_program_declarations" << endl; }
     break;
 
   case 19:
 
 /* Line 1806 of yacc.c  */
-#line 162 "parser.y"
+#line 161 "parser.y"
     { cout << "sub_program_declarations" << endl; }
     break;
 
   case 20:
 
 /* Line 1806 of yacc.c  */
-#line 165 "parser.y"
+#line 164 "parser.y"
     { cout << "type_definition" << endl;
       vector<string> strs = split((yyvsp[(3) - (4)].sval));
       if (strs[0].compare(rec) != 0 && strs[0].compare(arr) !=0) {
@@ -1847,21 +1846,24 @@ yyreduce:
   case 21:
 
 /* Line 1806 of yacc.c  */
-#line 294 "parser.y"
+#line 293 "parser.y"
     { cout << "variable_declaration" << endl;
       vector<string> ids = split((yyvsp[(1) - (4)].sval));
+      vector<string> strs = split((yyvsp[(3) - (4)].sval));
       for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
-        addSymbol(*it, (yyvsp[(3) - (4)].sval));
+        addSymbol(*it, strs[0]);
       }
-      string type((yyvsp[(3) - (4)].sval));
-      if (type.compare(rec) != 0 && type.compare(arr) !=0) {
-        if (symTable.find(type) == symTable.end()) {
-          addSymbol((yyvsp[(3) - (4)].sval), nilStr);
+      //string type($3);
+      //cout << type << " whatttt" << endl;
+      if (strs[0].compare(rec) != 0 && strs[0].compare(arr) !=0) {
+        if (symTable.find(strs[0]) == symTable.end()) {
+          addSymbol(strs[0], nilStr);
         }
       }
+      //delete $3;
 
       // Lab3. Address will be fixed later.
-      vector<string> strs = split((yyvsp[(3) - (4)].sval));
+      //vector<string> strs = split($3);
       if (strs[0].compare(rec) != 0 && strs[0].compare(arr) !=0) {
         // Type is not literally named record or array.
         if (!envs.empty()) {
@@ -1992,7 +1994,7 @@ yyreduce:
   case 22:
 
 /* Line 1806 of yacc.c  */
-#line 435 "parser.y"
+#line 437 "parser.y"
     { 
       string id((yyvsp[(2) - (4)].sval));
       if (symTable.find(id) != symTable.end()) {
@@ -2029,14 +2031,14 @@ yyreduce:
   case 23:
 
 /* Line 1806 of yacc.c  */
-#line 467 "parser.y"
+#line 469 "parser.y"
     { cout << "procedure_declaration" << endl; envs.pop(); }
     break;
 
   case 24:
 
 /* Line 1806 of yacc.c  */
-#line 472 "parser.y"
+#line 474 "parser.y"
     { 
       string id((yyvsp[(2) - (7)].sval));
       if (symTable.find(id) != symTable.end()) {
@@ -2199,21 +2201,21 @@ yyreduce:
   case 25:
 
 /* Line 1806 of yacc.c  */
-#line 630 "parser.y"
+#line 632 "parser.y"
     { cout << "function_declaration" << endl; envs.pop(); }
     break;
 
   case 28:
 
 /* Line 1806 of yacc.c  */
-#line 634 "parser.y"
+#line 636 "parser.y"
     { cout << "formal_parameter_list" << endl; (yyval.ival) = (yyvsp[(1) - (1)].ival);}
     break;
 
   case 29:
 
 /* Line 1806 of yacc.c  */
-#line 637 "parser.y"
+#line 639 "parser.y"
     { cout << "formal_parameter_list_empty" << endl; 
       (yyval.ival) = 0; 
 
@@ -2228,21 +2230,22 @@ yyreduce:
   case 30:
 
 /* Line 1806 of yacc.c  */
-#line 648 "parser.y"
+#line 650 "parser.y"
     { cout << "identifier_lists_more" << endl;
       vector<string> ids = split((yyvsp[(3) - (5)].sval));
+      vector<string> strs = split((yyvsp[(5) - (5)].sval));
       for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
         addSymbol(*it, (yyvsp[(5) - (5)].sval));
       }
       string type((yyvsp[(5) - (5)].sval));
-      if (type.compare(rec) != 0 && type.compare(arr) !=0) {
-        if (symTable.find(type) == symTable.end()) {
-          addSymbol((yyvsp[(5) - (5)].sval), nilStr);
+      if (strs[0].compare(rec) != 0 && strs[0].compare(arr) !=0) {
+        if (symTable.find(strs[0]) == symTable.end()) {
+          addSymbol(strs[0], nilStr);
         }
       }
       (yyval.ival) = (yyvsp[(1) - (5)].ival) + ids.size();
 
-      vector<string> strs = split((yyvsp[(5) - (5)].sval));
+      //vector<string> strs = split($5);
       if (strs[0].compare(rec) != 0 && strs[0].compare(arr) !=0) {
         // Type is not literally named record or array.
         if (!envs.empty()) {
@@ -2336,7 +2339,7 @@ yyreduce:
   case 31:
 
 /* Line 1806 of yacc.c  */
-#line 751 "parser.y"
+#line 754 "parser.y"
     { cout << "identifier_lists" << endl;
         vector<string> ids = split((yyvsp[(1) - (3)].sval));
         for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
@@ -2452,70 +2455,71 @@ yyreduce:
   case 32:
 
 /* Line 1806 of yacc.c  */
-#line 862 "parser.y"
+#line 865 "parser.y"
     { cout << "block" << endl; }
     break;
 
   case 33:
 
 /* Line 1806 of yacc.c  */
-#line 864 "parser.y"
+#line 867 "parser.y"
     { cout << "compound_statement" << endl; }
     break;
 
   case 34:
 
 /* Line 1806 of yacc.c  */
-#line 866 "parser.y"
+#line 869 "parser.y"
     { cout << "statement_sequence_more" << endl; }
     break;
 
   case 35:
 
 /* Line 1806 of yacc.c  */
-#line 867 "parser.y"
+#line 870 "parser.y"
     { cout << "statement_sequence" << endl; }
     break;
 
   case 36:
 
 /* Line 1806 of yacc.c  */
-#line 869 "parser.y"
+#line 872 "parser.y"
     { cout << "statement" << endl; }
     break;
 
   case 39:
 
 /* Line 1806 of yacc.c  */
-#line 873 "parser.y"
+#line 876 "parser.y"
     { cout << "simple_statement" << endl; }
     break;
 
   case 40:
 
 /* Line 1806 of yacc.c  */
-#line 874 "parser.y"
+#line 877 "parser.y"
     { cout << "simple_statement" << endl; }
     break;
 
   case 41:
 
 /* Line 1806 of yacc.c  */
-#line 875 "parser.y"
+#line 878 "parser.y"
     { cout << "simple_statement_empty" << endl; }
     break;
 
   case 42:
 
 /* Line 1806 of yacc.c  */
-#line 877 "parser.y"
-    { cout << "assignment_statement" << endl; }
+#line 880 "parser.y"
+    { cout << "assignment_statement" << endl;
+    }
     break;
 
   case 43:
 
 /* Line 1806 of yacc.c  */
-#line 880 "parser.y"
+#line 884 "parser.y"
     { cout << "procedure_statement" << endl;
       string id((yyvsp[(1) - (4)].sval));
       if (symTable.find(id) == symTable.end()) {
@@ -2527,42 +2531,42 @@ yyreduce:
   case 44:
 
 /* Line 1806 of yacc.c  */
-#line 887 "parser.y"
+#line 891 "parser.y"
     { cout << "compound_statement" << endl; }
     break;
 
   case 45:
 
 /* Line 1806 of yacc.c  */
-#line 888 "parser.y"
+#line 892 "parser.y"
     { cout << "if_statement" << endl; }
     break;
 
   case 46:
 
 /* Line 1806 of yacc.c  */
-#line 889 "parser.y"
+#line 893 "parser.y"
     { cout << "ifelse_statement" << endl; }
     break;
 
   case 47:
 
 /* Line 1806 of yacc.c  */
-#line 890 "parser.y"
+#line 894 "parser.y"
     { cout << "while_statement" << endl; }
     break;
 
   case 48:
 
 /* Line 1806 of yacc.c  */
-#line 891 "parser.y"
+#line 895 "parser.y"
     { cout << "for_statement" << endl; }
     break;
 
   case 49:
 
 /* Line 1806 of yacc.c  */
-#line 893 "parser.y"
+#line 897 "parser.y"
     { cout << "type_ID" << endl; //addSymbol($1, nilStr);
                  (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
                  strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));}
@@ -2571,7 +2575,7 @@ yyreduce:
   case 50:
 
 /* Line 1806 of yacc.c  */
-#line 897 "parser.y"
+#line 901 "parser.y"
     { cout << "type_array" << endl;
         //$$ = (char*) malloc(sizeof(arrayStr));;
 
@@ -2649,7 +2653,7 @@ yyreduce:
   case 51:
 
 /* Line 1806 of yacc.c  */
-#line 970 "parser.y"
+#line 974 "parser.y"
     {
         vector<pair<string, TypeDesc*> >* fieldList = new vector<pair<string, TypeDesc*> >;
         fieldListStack.push(fieldList);
@@ -2659,7 +2663,7 @@ yyreduce:
   case 52:
 
 /* Line 1806 of yacc.c  */
-#line 975 "parser.y"
+#line 979 "parser.y"
     { cout << "type_record" << endl;
         (yyval.sval) = (char*) malloc(strlen(recordStr) + 1);;
         strcpy((yyval.sval), recordStr); }
@@ -2668,7 +2672,7 @@ yyreduce:
   case 53:
 
 /* Line 1806 of yacc.c  */
-#line 979 "parser.y"
+#line 983 "parser.y"
     { cout << "result_type" << endl;
     (yyval.sval) = (yyvsp[(1) - (1)].sval);
     string id((yyvsp[(1) - (1)].sval));
@@ -2689,14 +2693,14 @@ yyreduce:
   case 54:
 
 /* Line 1806 of yacc.c  */
-#line 995 "parser.y"
+#line 999 "parser.y"
     { cout << "field_list" << endl; }
     break;
 
   case 55:
 
 /* Line 1806 of yacc.c  */
-#line 996 "parser.y"
+#line 1000 "parser.y"
     { cout << "field_list_empty" << endl;
         vector<pair<string, TypeDesc*> >* fieldList = NULL;
         fieldListStack.push(fieldList);
@@ -2706,7 +2710,7 @@ yyreduce:
   case 56:
 
 /* Line 1806 of yacc.c  */
-#line 1002 "parser.y"
+#line 1006 "parser.y"
     { cout << "identifier_lists_more" << endl;
       vector<string> ids = split((yyvsp[(3) - (5)].sval));
       for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
@@ -2862,7 +2866,7 @@ yyreduce:
   case 57:
 
 /* Line 1806 of yacc.c  */
-#line 1153 "parser.y"
+#line 1157 "parser.y"
     { cout << "identifier_lists" << endl;
       vector<string> ids = split((yyvsp[(1) - (3)].sval));
       for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
@@ -3016,84 +3020,170 @@ yyreduce:
   case 58:
 
 /* Line 1806 of yacc.c  */
-#line 1302 "parser.y"
+#line 1306 "parser.y"
     { cout << "constant" << endl; (yyval.ival) = (yyvsp[(1) - (1)].ival);}
     break;
 
   case 59:
 
 /* Line 1806 of yacc.c  */
-#line 1303 "parser.y"
+#line 1307 "parser.y"
     { cout << "constant" << endl; (yyval.ival) = (yyvsp[(2) - (2)].ival);}
     break;
 
   case 60:
 
 /* Line 1806 of yacc.c  */
-#line 1305 "parser.y"
+#line 1309 "parser.y"
     { cout << "expression" << endl; }
+    break;
+
+  case 61:
+
+/* Line 1806 of yacc.c  */
+#line 1311 "parser.y"
+    {
+      // Lab3
+      string op((yyvsp[(1) - (2)].sval));
+      TypeDesc* td2 = expTypeStack.top();
+      expTypeStack.pop();
+      TypeDesc* td1 = expTypeStack.top();
+      expTypeStack.pop();
+      if (op.compare("=") == 0 || op.compare("<>") == 0) {
+        if (checkTypeEquiv(td1, td2)) {
+          if (td1->getType().compare("invalid") != 0 &&
+              td2->getType().compare("invalid") != 0) {
+            TypeDesc* resultTd = new TypeDesc("boolean");
+            expTypeStack.push(resultTd);
+          } else {
+            TypeDesc* resultTd = new TypeDesc("invalid");
+            expTypeStack.push(resultTd);
+          }
+        } else {
+          cout << "Error: Types not equivalent for " << td1->getType()
+              << " and " << td2->getType() << " for operator " << op << endl;
+          TypeDesc* resultTd = new TypeDesc("invalid");
+          expTypeStack.push(resultTd);
+        }
+      } else {
+        if (td1->getType().compare("integer") == 0 &&
+            td2->getType().compare("integer") == 0) {
+          TypeDesc* resultTd = new TypeDesc("boolean");
+          expTypeStack.push(resultTd);
+        /*
+        } else if (td1->getType().compare("integer") == 0 &&
+              td2->getType().compare("invalid") == 0) {
+          TypeDesc* resultTd = new TypeDesc("invalid");
+          expTypeStack.push(resultTd);
+        } else if (td1->getType().compare("invalid") == 0 &&
+              td2->getType().compare("integer") == 0) {
+          TypeDesc* resultTd = new TypeDesc("invalid");
+          expTypeStack.push(resultTd);
+        */
+        } else {
+          cout << "Error: Operator " << op
+              << " only valid for integer equivalents, "
+              << td1->getType() << " and " << td2->getType()
+              << " found however" << endl;
+          TypeDesc* resultTd = new TypeDesc("invalid");
+          expTypeStack.push(resultTd);
+        }
+      }
+      delete td1;
+      delete td2;
+    }
     break;
 
   case 63:
 
 /* Line 1806 of yacc.c  */
-#line 1309 "parser.y"
-    { cout << "relational_op" << endl; }
+#line 1363 "parser.y"
+    { cout << "relational_op" << endl; 
+      (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
+      strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
+    }
     break;
 
   case 64:
 
 /* Line 1806 of yacc.c  */
-#line 1310 "parser.y"
-    { cout << "relational_op" << endl; }
+#line 1367 "parser.y"
+    { cout << "relational_op" << endl;
+      (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
+      strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
+    }
     break;
 
   case 65:
 
 /* Line 1806 of yacc.c  */
-#line 1311 "parser.y"
-    { cout << "relational_op" << endl; }
+#line 1371 "parser.y"
+    { cout << "relational_op" << endl;
+      (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
+      strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
+    }
     break;
 
   case 66:
 
 /* Line 1806 of yacc.c  */
-#line 1312 "parser.y"
-    { cout << "relational_op" << endl; }
+#line 1375 "parser.y"
+    { cout << "relational_op" << endl;
+      (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
+      strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
+    }
     break;
 
   case 67:
 
 /* Line 1806 of yacc.c  */
-#line 1313 "parser.y"
-    { cout << "relational_op" << endl; }
+#line 1379 "parser.y"
+    { cout << "relational_op" << endl;
+      (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
+      strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
+    }
     break;
 
   case 68:
 
 /* Line 1806 of yacc.c  */
-#line 1314 "parser.y"
-    { cout << "relational_op" << endl; }
+#line 1383 "parser.y"
+    { cout << "relational_op" << endl;
+      (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
+      strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
+    }
     break;
 
   case 69:
 
 /* Line 1806 of yacc.c  */
-#line 1316 "parser.y"
-    { cout << "simple_expression" << endl; }
+#line 1388 "parser.y"
+    { cout << "simple_expression" << endl; 
+      TypeDesc* td = expTypeStack.top();
+      cout << "stack size: " << expTypeStack.size() << endl;
+      if (td->getType().compare("integer") != 0) {
+        cout << "Error: Unary operator can only be applied to integer type, "
+            << td->getType() << " found however." << endl;
+        delete td;
+        expTypeStack.pop();
+        TypeDesc* resultTd = new TypeDesc("invalid");
+        expTypeStack.push(resultTd);
+        //td = NULL;
+      }
+    }
     break;
 
   case 70:
 
 /* Line 1806 of yacc.c  */
-#line 1317 "parser.y"
+#line 1401 "parser.y"
     { cout << "simple_expression" << endl; }
     break;
 
   case 71:
 
 /* Line 1806 of yacc.c  */
-#line 1318 "parser.y"
+#line 1402 "parser.y"
     { cout << "simple_expression_more" << endl;
 
       // Lab3
@@ -3101,9 +3191,38 @@ yyreduce:
       expTypeStack.pop();
       TypeDesc* td1 = expTypeStack.top();
       expTypeStack.pop();
+      string op((yyvsp[(2) - (3)].sval));
       if (checkTypeEquiv(td1, td2)) {
-        TypeDesc* resultTd = new TypeDesc(*td1);
-        expTypeStack.push(resultTd);
+        if (td1->getType().compare("invalid") != 0 &&
+            td2->getType().compare("invalid") != 0) {
+          if (op.compare("or") == 0) {
+            // If the operator is or, check if the types are booleans.
+            if (td1->getType().compare("boolean") == 0) {
+              TypeDesc* resultTd = new TypeDesc(*td1);
+              expTypeStack.push(resultTd);
+            } else {
+              cout << "Error: Operator " << op << " can only be applied to"
+                  << " booleans, " << td1->getType() << " and "
+                  << td2->getType() << " found however" << endl;
+              TypeDesc* resultTd = new TypeDesc("invalid");
+              expTypeStack.push(resultTd);
+            } 
+          } else {
+            if (td1->getType().compare("integer") == 0) {
+              TypeDesc* resultTd = new TypeDesc(*td1);
+              expTypeStack.push(resultTd);
+            } else {
+              cout << "Error: Operator " << op << " can only be applied to"
+                  << " integers, " << td1->getType() << " and "
+                  << td2->getType() << " found however" << endl;
+              TypeDesc* resultTd = new TypeDesc("invalid");
+              expTypeStack.push(resultTd);
+            }
+          }
+        } else {
+          TypeDesc* resultTd = new TypeDesc("invalid");
+          expTypeStack.push(resultTd);
+        }
       } else {
         cout << "Error: types not equivalent for " << td1->getType()
             << " and " << td2->getType() << endl;
@@ -3119,28 +3238,37 @@ yyreduce:
   case 72:
 
 /* Line 1806 of yacc.c  */
-#line 1339 "parser.y"
-    { cout << "addop" << endl; }
+#line 1452 "parser.y"
+    { cout << "addop" << endl; (yyval.sval) == NULL;
+      (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
+      strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
+    }
     break;
 
   case 73:
 
 /* Line 1806 of yacc.c  */
-#line 1340 "parser.y"
-    { cout << "addop" << endl; }
+#line 1456 "parser.y"
+    { cout << "addop" << endl; (yyval.sval) == NULL;
+      (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
+      strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
+    }
     break;
 
   case 74:
 
 /* Line 1806 of yacc.c  */
-#line 1341 "parser.y"
-    { cout << "addop" << endl; }
+#line 1460 "parser.y"
+    { cout << "addop" << endl;
+      (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
+      strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
+    }
     break;
 
   case 75:
 
 /* Line 1806 of yacc.c  */
-#line 1343 "parser.y"
+#line 1465 "parser.y"
     { cout << "term_more" << endl;
 
       // Lab3
@@ -3148,11 +3276,51 @@ yyreduce:
       expTypeStack.pop();
       TypeDesc* td1 = expTypeStack.top();
       expTypeStack.pop();
+      /*
       if (checkTypeEquiv(td1, td2)) {
         TypeDesc* resultTd = new TypeDesc(*td1);
         expTypeStack.push(resultTd);
       } else {
         cout << "Error: type not equivalent" << endl;
+        TypeDesc* resultTd = new TypeDesc("invalid");
+        expTypeStack.push(resultTd);
+      }
+      */
+      string op((yyvsp[(2) - (3)].sval));
+      if (checkTypeEquiv(td1, td2)) {
+        if (td1->getType().compare("invalid") != 0 &&
+            td2->getType().compare("invalid") != 0) {
+          if (op.compare("and") == 0) {
+            // If the operator is and, check if the types are booleans.
+            if (td1->getType().compare("boolean") == 0) {
+              TypeDesc* resultTd = new TypeDesc(*td1);
+              expTypeStack.push(resultTd);
+            } else {
+              cout << "Error: Operator " << op << " can only be applied to"
+                  << " booleans, " << td1->getType() << " and "
+                  << td2->getType() << " found however" << endl;
+              TypeDesc* resultTd = new TypeDesc("invalid");
+              expTypeStack.push(resultTd);
+            } 
+          } else {
+            if (td1->getType().compare("integer") == 0) {
+              TypeDesc* resultTd = new TypeDesc(*td1);
+              expTypeStack.push(resultTd);
+            } else {
+              cout << "Error: Operator " << op << " can only be applied to"
+                  << " integers, " << td1->getType() << " and "
+                  << td2->getType() << " found however" << endl;
+              TypeDesc* resultTd = new TypeDesc("invalid");
+              expTypeStack.push(resultTd);
+            }
+          }
+        } else {
+          TypeDesc* resultTd = new TypeDesc("invalid");
+          expTypeStack.push(resultTd);
+        }
+      } else {
+        cout << "Error: types not equivalent for " << td1->getType()
+            << " and " << td2->getType() << endl;
         TypeDesc* resultTd = new TypeDesc("invalid");
         expTypeStack.push(resultTd);
       }
@@ -3165,42 +3333,54 @@ yyreduce:
   case 76:
 
 /* Line 1806 of yacc.c  */
-#line 1362 "parser.y"
+#line 1524 "parser.y"
     { cout << "term" << endl; }
     break;
 
   case 77:
 
 /* Line 1806 of yacc.c  */
-#line 1364 "parser.y"
-    { cout << "mulop" << endl; }
+#line 1526 "parser.y"
+    { cout << "mulop" << endl; (yyval.sval) = NULL;
+      (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
+      strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
+    }
     break;
 
   case 78:
 
 /* Line 1806 of yacc.c  */
-#line 1365 "parser.y"
-    { cout << "mulop" << endl; }
+#line 1530 "parser.y"
+    { cout << "mulop" << endl; (yyval.sval) = NULL;
+      (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
+      strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
+    }
     break;
 
   case 79:
 
 /* Line 1806 of yacc.c  */
-#line 1366 "parser.y"
-    { cout << "mulop" << endl; }
+#line 1534 "parser.y"
+    { cout << "mulop" << endl; (yyval.sval) = NULL;
+      (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
+      strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
+    }
     break;
 
   case 80:
 
 /* Line 1806 of yacc.c  */
-#line 1367 "parser.y"
-    { cout << "mulop" << endl; }
+#line 1538 "parser.y"
+    { cout << "mulop" << endl;
+      (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
+      strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
+    }
     break;
 
   case 81:
 
 /* Line 1806 of yacc.c  */
-#line 1369 "parser.y"
+#line 1543 "parser.y"
     { cout << "factor" << endl; 
       // Lab3
       TypeDesc* td = new TypeDesc("integer");
@@ -3211,7 +3391,7 @@ yyreduce:
   case 82:
 
 /* Line 1806 of yacc.c  */
-#line 1374 "parser.y"
+#line 1548 "parser.y"
     { cout << "factor" << endl;
       TypeDesc* td = new TypeDesc("string");
       expTypeStack.push(td);
@@ -3221,29 +3401,33 @@ yyreduce:
   case 83:
 
 /* Line 1806 of yacc.c  */
-#line 1378 "parser.y"
+#line 1552 "parser.y"
     { cout << "factor" << endl; 
-      TypeDesc* td = new TypeDesc(*varType);
-      delete varType;
-      varType = NULL;
-      expTypeStack.push(td);
+      //TypeDesc* td = new TypeDesc(*varType);
+      //delete varType;
+      //varType = NULL;
+      //expTypeStack.push(td);
     }
     break;
 
   case 84:
 
 /* Line 1806 of yacc.c  */
-#line 1384 "parser.y"
+#line 1558 "parser.y"
     { cout << "factor" << endl; }
     break;
 
   case 85:
 
 /* Line 1806 of yacc.c  */
-#line 1385 "parser.y"
+#line 1559 "parser.y"
     { cout << "factor" << endl;
-      if (expTypeStack.top()->getType().compare("boolean") != 0) {
+      TypeDesc* td = expTypeStack.top();
+      expTypeStack.pop();
+      if (td->getType().compare("boolean") != 0) {
         cout << "Error: Boolean operator 'not' applied to non-boolean type" << endl;
+        TypeDesc* resultTd = new TypeDesc("invalid");
+        expTypeStack.push(resultTd);
       }
     }
     break;
@@ -3251,14 +3435,14 @@ yyreduce:
   case 86:
 
 /* Line 1806 of yacc.c  */
-#line 1390 "parser.y"
+#line 1568 "parser.y"
     { cout << "factor" << endl; }
     break;
 
   case 87:
 
 /* Line 1806 of yacc.c  */
-#line 1393 "parser.y"
+#line 1571 "parser.y"
     { cout << "function_reference" << endl;
       string id((yyvsp[(1) - (4)].sval));
       if (symTable.find(id) == symTable.end()) {
@@ -3270,7 +3454,7 @@ yyreduce:
   case 88:
 
 /* Line 1806 of yacc.c  */
-#line 1401 "parser.y"
+#line 1579 "parser.y"
     {
       // Lab3
       /*
@@ -3306,7 +3490,7 @@ yyreduce:
   case 89:
 
 /* Line 1806 of yacc.c  */
-#line 1431 "parser.y"
+#line 1609 "parser.y"
     { cout << "variable" << endl;
     string id((yyvsp[(1) - (3)].sval));
     if (symTable.find(id) == symTable.end()) {
@@ -3331,7 +3515,9 @@ yyreduce:
 
     if (outterMostTd == NULL) {
       cout << "Error: variable " << lexime << " hasn't been declared" << endl;
-      varType = new TypeDesc("invalid");
+      //varType = new TypeDesc("invalid");
+      TypeDesc* td = new TypeDesc("invalid");
+      expTypeStack.push(td);
     } else {
       // Validate component selection.
       if ((yyvsp[(3) - (3)].sval) != NULL) {
@@ -3369,12 +3555,18 @@ yyreduce:
           }
         }
         if (valid) {
-          varType = new TypeDesc(*currentTd);
+          //varType = new TypeDesc(*currentTd);
+          TypeDesc* td = new TypeDesc(*currentTd);
+          expTypeStack.push(td);
         } else {
-          varType = new TypeDesc("invalid");
+          //varType = new TypeDesc("invalid");
+          TypeDesc* td = new TypeDesc("invalid");
+          expTypeStack.push(td);
         }
       } else {
-        varType = new TypeDesc(*outterMostTd);
+        //varType = new TypeDesc(*outterMostTd);
+        TypeDesc* td = new TypeDesc(*outterMostTd);
+        expTypeStack.push(td);
       }
     }
 
@@ -3385,7 +3577,7 @@ yyreduce:
   case 90:
 
 /* Line 1806 of yacc.c  */
-#line 1506 "parser.y"
+#line 1692 "parser.y"
     {
       // Lab3
       stringstream ss;
@@ -3403,7 +3595,7 @@ yyreduce:
   case 91:
 
 /* Line 1806 of yacc.c  */
-#line 1519 "parser.y"
+#line 1705 "parser.y"
     {
         // Lab3
         if ((yyvsp[(4) - (4)].sval) == NULL) {
@@ -3419,7 +3611,7 @@ yyreduce:
   case 92:
 
 /* Line 1806 of yacc.c  */
-#line 1529 "parser.y"
+#line 1715 "parser.y"
     { cout << "component_selection_empty" << endl;
         // Lab3
         (yyval.sval) = NULL;}
@@ -3428,35 +3620,35 @@ yyreduce:
   case 93:
 
 /* Line 1806 of yacc.c  */
-#line 1533 "parser.y"
+#line 1719 "parser.y"
     { cout << "actual_parameter_list" << endl; }
     break;
 
   case 94:
 
 /* Line 1806 of yacc.c  */
-#line 1534 "parser.y"
+#line 1720 "parser.y"
     { cout << "actual_parameter_list_empty" << endl; }
     break;
 
   case 95:
 
 /* Line 1806 of yacc.c  */
-#line 1537 "parser.y"
+#line 1723 "parser.y"
     { cout << "expressions_more" << endl; }
     break;
 
   case 96:
 
 /* Line 1806 of yacc.c  */
-#line 1538 "parser.y"
+#line 1724 "parser.y"
     { cout << "expressions" << endl; }
     break;
 
   case 97:
 
 /* Line 1806 of yacc.c  */
-#line 1541 "parser.y"
+#line 1727 "parser.y"
     { cout << "identifier_list_more" << endl;
       (yyval.sval) = (char*) malloc (strlen((yyvsp[(1) - (3)].sval)) + strlen((yyvsp[(3) - (3)].sval)) + 2);
       int i = 0;
@@ -3476,7 +3668,7 @@ yyreduce:
   case 98:
 
 /* Line 1806 of yacc.c  */
-#line 1556 "parser.y"
+#line 1742 "parser.y"
     { cout << "identifier_list" << endl;
       (yyval.sval) = (char*) malloc (strlen((yyvsp[(1) - (1)].sval)) + 1);
       strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));}
@@ -3485,7 +3677,7 @@ yyreduce:
 
 
 /* Line 1806 of yacc.c  */
-#line 3489 "parser.tab.c"
+#line 3681 "parser.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -3716,7 +3908,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 1562 "parser.y"
+#line 1748 "parser.y"
 
 main(int argc, char **argv) {
   FILE *myfile = fopen(argv[1], "r");
@@ -3756,8 +3948,8 @@ main(int argc, char **argv) {
   
   //envs.top()->displayTable();
   for (int i = allEnvs.size() - 1; i >= 0; --i) {
-    cout << allEnvs[i]->getTableSize() << endl;
-    allEnvs[i]->displayTable();
+    //cout << allEnvs[i]->getTableSize() << endl;
+    //allEnvs[i]->displayTable();
   } 
   //cout << envs.size() << endl;
   for (int i = allEnvs.size() - 1; i >= 0; --i) {

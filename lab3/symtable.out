@@ -5,32 +5,7 @@ address: 4    , identifier: integer        , type: nil
 address: 5    , identifier: c              , type: record    
 address: 6    , identifier: e              , type: record    
 address: 7    , identifier: var1           , type: r         
-address: 9    , identifier: var2           , type: array 1 10 integer
-address: 10   , identifier: array 1 10 integer, type: nil       
-address: 12   , identifier: string         , type: nil       
-address: 13   , identifier: var3           , type: array 1 10 string
-address: 14   , identifier: array 1 10 string, type: nil       
-9
-boolean boolean
-false boolean
-integer integer
-r record
-field list size: 2
-record field: c record
-field list size: 1
-record field: d integer
-record field: e record
-field list size: 1
-record field: d integer
-string string
-true boolean
-var1 record
-field list size: 2
-record field: c record
-field list size: 1
-record field: d integer
-record field: e record
-field list size: 1
-record field: d integer
-var2 array
-var3 array
+address: 9    , identifier: var2           , type: array     
+address: 11   , identifier: string         , type: nil       
+address: 12   , identifier: var3           , type: array     
+address: 13   , identifier: false          , type: nil       
