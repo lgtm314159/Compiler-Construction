@@ -65,7 +65,7 @@ TypeDesc::TypeDesc(const TypeDesc& td):
 TypeDesc::~TypeDesc() {
   if (fieldList != NULL) {
     for(int i = 0; i < fieldList->size(); ++i) {
-      //delete (fieldList->at(i).second);
+      delete (fieldList->at(i).second);
       fieldList->at(i).second = NULL;
     }
 
