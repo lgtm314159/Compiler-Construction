@@ -162,8 +162,9 @@ subprogramDeclarationList: subprogramDeclarationList procedureDeclaration { cout
 
 typeDefinition: TOKEN_ID TOKEN_EQ type TOKEN_SEMICOLON
     { cout << "type_definition" << endl;
-      vector<string> strs = split($3);
-      if (strs[0].compare(rec) != 0 && strs[0].compare(arr) !=0) {
+      //vector<string> strs = split($3);
+      string type($3);
+      if (type.compare(rec) != 0 && type.compare(arr) !=0) {
         // Type is not literally named record or array.
         addSymbol($1, $3);
         addSymbol($3, nilStr);
@@ -177,21 +178,21 @@ typeDefinition: TOKEN_ID TOKEN_EQ type TOKEN_SEMICOLON
             cout << "Duplicated type definition for " << lexime << endl;
         } else {
           if (!envs.empty()) {
-            if (strs[0].compare("integer") == 0 ||
-                strs[0].compare("string") == 0 ||
-                strs[0].compare("boolean") == 0) {
-              TypeDesc* td = new TypeDesc(strs[0]);
+            if (type.compare("integer") == 0 ||
+                type.compare("string") == 0 ||
+                type.compare("boolean") == 0) {
+              TypeDesc* td = new TypeDesc(type);
               Symbol* sym = new Symbol(lexime, 0, td);
               envs.top()->setSymbol(lexime, sym);
             } else {
-              if (envs.top()->getSymbol(strs[0]) == NULL) {
+              if (envs.top()->getSymbol(type) == NULL) {
                 Env* envPtr = envs.top()->getPrevEnv();
                 bool found = false;
                 while (envPtr != NULL) {
-                  if (envPtr->getSymbol(strs[0]) != NULL) {
+                  if (envPtr->getSymbol(type) != NULL) {
                     found = true;
                     // Copy the type descriptor.
-                    TypeDesc* tmpTd = envPtr->getSymbol(strs[0])->getTypeDesc();
+                    TypeDesc* tmpTd = envPtr->getSymbol(type)->getTypeDesc();
                     TypeDesc* td = new TypeDesc(*tmpTd);
                     Symbol* sym = new Symbol(lexime, 0, td);
                     envs.top()->setSymbol(lexime, sym);
@@ -200,26 +201,26 @@ typeDefinition: TOKEN_ID TOKEN_EQ type TOKEN_SEMICOLON
                   envPtr = envPtr->getPrevEnv();
                 }
                 if (!found) {
-                  cout << "Error: type " << strs[0] << " not defined" << endl;
+                  cout << "Error: type " << type << " not defined" << endl;
                   
                   // Add this invalid type to the symbol table.
                   TypeDesc* invalidTd = new TypeDesc("invalid");
-                  Symbol* sym = new Symbol(strs[0], 0, invalidTd);
-                  envs.top()->setSymbol(strs[0], sym);
+                  Symbol* sym = new Symbol(type, 0, invalidTd);
+                  envs.top()->setSymbol(type, sym);
                   // Add the defined type to the symbol table with invalid type. 
                   TypeDesc* td = new TypeDesc(*invalidTd);
                   sym = new Symbol(lexime, 0, td);
                   envs.top()->setSymbol(lexime, sym);
                 }
               } else {
-                TypeDesc* td = envs.top()->getSymbol(strs[0])->getTypeDesc();
+                TypeDesc* td = envs.top()->getSymbol(type)->getTypeDesc();
                 Symbol* sym = new Symbol(lexime, 0, td);
                 envs.top()->setSymbol(lexime, sym);
               }
             }          
           }
         }
-      } else if (strs[0].compare(rec) == 0) {
+      } else if (type.compare(rec) == 0) {
         // Type is record.
         string id($1);
         if (symTable.find(id) == symTable.end()) {
@@ -255,7 +256,7 @@ typeDefinition: TOKEN_ID TOKEN_EQ type TOKEN_SEMICOLON
         string id($1);
         if (symTable.find(id) == symTable.end()) {
           symTable[id].first = arrSavedAddr;
-          symTable[id].second = strs[0];
+          symTable[id].second = type;
           
         } else {
           if (symTable[id].first > arrSavedAddr) {
@@ -265,7 +266,7 @@ typeDefinition: TOKEN_ID TOKEN_EQ type TOKEN_SEMICOLON
           } else {
             fixAddress(arrSavedAddr);
           }
-          symTable[id].second = strs[0];
+          symTable[id].second = type;
         }
         
         // Lab3
@@ -813,6 +814,25 @@ simpleStatement: assignmentStatement { cout << "simple_statement" << endl; }
     | { cout << "simple_statement_empty" << endl; };
 
 assignmentStatement: variable TOKEN_ASSIGN expression { cout << "assignment_statement" << endl;
+      TypeDesc* td2 = expTypeStack.top();
+      expTypeStack.pop();
+      TypeDesc* td1 = expTypeStack.top();
+      expTypeStack.pop();
+      if (checkTypeEquiv(td1, td2)) {
+        if (td1->getType().compare("invalid") != 0 &&
+            td2->getType().compare("invalid") != 0) {
+          TypeDesc* resultTd = new TypeDesc(*td1);
+          expTypeStack.push(resultTd);
+        } else {
+          TypeDesc* resultTd = new TypeDesc("invalid");
+          expTypeStack.push(resultTd);
+        }
+      } else {
+        cout << "Error: types not equivalent for assignment operation, found "
+            << td1->getType() << " and " << td2->getType() << endl;
+        TypeDesc* resultTd = new TypeDesc("invalid");
+        expTypeStack.push(resultTd);
+      }
     };
 
 procedureStatement: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
@@ -824,9 +844,33 @@ procedureStatement: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
     };
 
 structuredStatement: compoundStatement { cout << "compound_statement" << endl; }
-    | TOKEN_IF expression TOKEN_THEN statement { cout << "if_statement" << endl; }
-    | TOKEN_IF expression TOKEN_THEN statement TOKEN_ELSE statement { cout << "ifelse_statement" << endl; }
-    | TOKEN_WHILE expression TOKEN_DO statement { cout << "while_statement" << endl; }
+    | TOKEN_IF expression TOKEN_THEN
+      {
+        if (expTypeStack.top()->getType().compare("boolean") != 0) {
+          cout << "Error: If construct expects boolean expression, "
+              << expTypeStack.top()->getType() << " found" << endl;
+        }
+        expTypeStack.pop();
+      }
+      statement { cout << "if_statement" << endl; }
+    | TOKEN_IF expression 
+      {
+        if (expTypeStack.top()->getType().compare("boolean") != 0) {
+          cout << "Error: If construct expects boolean expression, "
+              << expTypeStack.top()->getType() << " found" << endl;
+        }
+        expTypeStack.pop();
+      }
+      TOKEN_THEN statement TOKEN_ELSE statement { cout << "ifelse_statement" << endl; }
+    | TOKEN_WHILE expression 
+      {
+        if (expTypeStack.top()->getType().compare("boolean") != 0) {
+          cout << "Error: While construct expects boolean expression, "
+              << expTypeStack.top()->getType() << " found" << endl;
+        }
+        expTypeStack.pop();
+      }
+      TOKEN_DO statement { cout << "while_statement" << endl; }
     | TOKEN_FOR TOKEN_ID TOKEN_ASSIGN expression TOKEN_TO expression TOKEN_DO statement { cout << "for_statement" << endl; };
 
 type: TOKEN_ID { cout << "type_ID" << endl; //addSymbol($1, nilStr);
@@ -1438,8 +1482,8 @@ term: term mulOp factor { cout << "term_more" << endl;
           expTypeStack.push(resultTd);
         }
       } else {
-        cout << "Error: types not equivalent for " << td1->getType()
-            << " and " << td2->getType() << endl;
+        cout << "Error: types not equivalent for " << op << ", found "
+            << td1->getType() << " and " << td2->getType() << endl;
         TypeDesc* resultTd = new TypeDesc("invalid");
         expTypeStack.push(resultTd);
       }
@@ -1710,8 +1754,8 @@ main(int argc, char **argv) {
   
   //envs.top()->displayTable();
   for (int i = allEnvs.size() - 1; i >= 0; --i) {
-    //cout << allEnvs[i]->getTableSize() << endl;
-    //allEnvs[i]->displayTable();
+   // cout << allEnvs[i]->getTableSize() << endl;
+   // allEnvs[i]->displayTable();
   } 
   //cout << envs.size() << endl;
   for (int i = allEnvs.size() - 1; i >= 0; --i) {

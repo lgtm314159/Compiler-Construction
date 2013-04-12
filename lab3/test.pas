@@ -9,6 +9,7 @@ var
   var1: r;
 	var2: array[1..10] of integer;
 	var3: array[1..10] of string;
+  a: boolean;
 
 {
 function foo1(a : integer) : r;  
@@ -18,5 +19,6 @@ begin
 end;
 }
 begin
-  var1 := -false + var3;
+  var1 := false * var3;
+  if 0 then a := 0; 
 end.
