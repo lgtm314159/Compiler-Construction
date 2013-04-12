@@ -15,18 +15,23 @@ class TypeDesc {
     // These fields are for array types.
     int lower;
     int upper;
-    string arrayEleType;
+    //string arrayEleType;
+    TypeDesc* arrayEleType;
     // This field is for record types.
-    //Env* recordEnv;
     vector<pair<string, TypeDesc*> >* fieldList;
-    
+    // These fields are for function and procedure types.
+    vector<TypeDesc*>* formalParamList;
+    TypeDesc* resultType;
+
   public:
 //    TypeDesc();
     TypeDesc(const string& t);
-    TypeDesc(const string& t, int l, int u, const string& et);
+    TypeDesc(const string& t, int l, int u, TypeDesc* et);
     //TypeDesc(const string& t, Env* re, vector<pair<string, TypeDesc> >* fl);
     TypeDesc(const string& t, vector<pair<string, TypeDesc*> >* fl);
     TypeDesc(const TypeDesc& td);
+    TypeDesc(const string& t, vector<TypeDesc*>* fpl,
+        TypeDesc* rt);
     ~TypeDesc();
     string& getType();
     void setType(const string& t);
@@ -34,11 +39,13 @@ class TypeDesc {
     void setLower(int l);
     int getUpper();
     void setUpper(int u);
-    string& getArrayEleType();
-    void setArrayEleType(const string& t);
+    TypeDesc* getArrayEleType();
+    void setArrayEleType(TypeDesc* t);
     Env* getRecordEnv();
     void setRecordEnv(Env* re); 
     vector<pair<string, TypeDesc*> >* getFieldList();
+    TypeDesc* getTypeDescFromFieldList(const string& name);
+    void displayFieldList();
 };
 
 #endif

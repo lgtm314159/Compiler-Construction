@@ -57,9 +57,35 @@ int main() {
 */
 
   Env* env = new Env(NULL);
-  TypeDesc* td = env->getSymbol("integer")->getTypeDesc(); 
+  TypeDesc* td = new TypeDesc(*(env->getSymbol("integer")->getTypeDesc())); 
   Symbol* sym = new Symbol("int", 0, td);
   env->setSymbol("int", sym);
+  vector<pair<string, TypeDesc*> >* fl = new vector<pair<string, TypeDesc*> >();
+  fl->push_back(pair<string, TypeDesc*>("a", new TypeDesc("integer")));
+  fl->push_back(pair<string, TypeDesc*>("b", new TypeDesc("integer")));
+  TypeDesc* td2 = new TypeDesc("record", fl);
+  Symbol* sym2 = new Symbol("c", 0, td2);
+  env->setSymbol("c", sym2);
+
+  cout << fl->at(0).second->getType() << endl;
+  cout << fl->at(1).second->getType() << endl;
+  cout << td2->getTypeDescFromFieldList("a")->getType() << endl;
+  cout << td2->getTypeDescFromFieldList("b")->getType() << endl;
+  fl->at(0).second->setType("boolean"); 
+  fl->at(1).second->setType("string");
+  cout << fl->at(0).second->getType() << endl;
+  cout << fl->at(1).second->getType() << endl;
+  cout << td2->getTypeDescFromFieldList("a")->getType() << endl;
+  cout << td2->getTypeDescFromFieldList("b")->getType() << endl;
+
+  for (int i = 0; i < fl->size(); ++i) {
+    delete fl->at(i).second;
+    fl->at(i).second = NULL;
+  }
+
+  delete env;
+
+  //delete env;
   //cout << env->getSymbol("int")->getTypeDesc()->getType() << endl;
 /*
   env->getSymbol("integer")->getTypeDesc()->setType("whatever");
@@ -67,17 +93,17 @@ int main() {
   cout << env->getSymbol("integer")->getTypeDesc()->getType() << endl;
   cout << env->getTableSize() << endl;
 */
-  TypeDesc* td2 = env->getSymbol("integer")->getTypeDesc(); 
-  Symbol* sym2 = new Symbol("a", 0, td);
-  env->setSymbol("integer", sym2);
-  //delete env;
   //delete td;
-  delete env;
+  //delete env;
 
-
-  char str[] = "cccccawegawegwaegw";
   //char* newStr = (char*) malloc(sizeof(str));
   //cout << newStr << endl;
-  cout << sizeof(str) << endl;
+
+  //string str("array 1 10 string");
+  //cout << str << endl;
+  //cout << ss << endl;
+  //char* var = (char*) malloc(ss.str().length() + 100);
+  //strcpy(var, ss.str().c_str());
+  //cout << var << endl;
 }
 

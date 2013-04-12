@@ -19,5 +19,4 @@ end;
 }
 begin
   var1 := -false + var3;
-  var1 := false; 
 end.
