@@ -740,6 +740,7 @@ formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
           for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
             string lexime(*it);
             TypeDesc* td = arrayTypeStack.top();
+            formalParamList->push_back(td);
             Symbol* sym = new Symbol(lexime, 0, td);
             envs.top()->setSymbol(lexime, sym);
           }

@@ -7,9 +7,13 @@
 #include "TypeDesc.h"
 #include <stack>
 #include <vector>
+#include <iostream>
 
 #define YY_DECL extern "C" int yylex()
 #define MYNEWLINE 10;
+
+using namespace std;
+
 int line = 1;
 int address = 1;
 int funcSavedAddr;
@@ -23,6 +27,7 @@ stack<int> offsets;
 vector<Env*> allEnvs;
 stack<vector<pair<string, TypeDesc> >* > fieldListStack;
 stack<TypeDesc*> arrayTypeStack;
+stack<TypeDesc*> expTypeStack;
 int recordSeq = 0;
 int arraySeq = 0;
 %}
@@ -107,6 +112,11 @@ recSavedAddr = address;
 ++address;
 return TOKEN_RECORD;}
 then     {//printf("KEYWORD %s\n", yytext); 
+if (expTypeStack.top()->getType().compare("boolean") != 0) {
+  cout << "Error: If construct expects boolean expression, "
+      << expTypeStack.top()->getType() << " found" << endl;
+}
+expTypeStack.pop();
 return TOKEN_THEN;}
 to     {//printf("KEYWORD %s\n", yytext); 
 return TOKEN_TO;}

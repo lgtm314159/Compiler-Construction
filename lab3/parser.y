@@ -31,8 +31,8 @@ extern "C++" stack<vector<pair<string, TypeDesc*> >* > fieldListStack;
 extern "C++" stack<TypeDesc*> arrayTypeStack;
 extern "C" int recordSeq;
 extern "C" int arraySeq;
+extern "C++" stack<TypeDesc*> expTypeStack;
 vector<TypeDesc*>* formalParamList;
-stack<TypeDesc*> expTypeStack;
 //TypeDesc* varType = NULL;
 
 void yyerror(const char *s);
@@ -585,61 +585,83 @@ formalParameterList: formalParamSeq { cout << "formal_parameter_list" << endl; $
 formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
     { cout << "identifier_lists_more" << endl;
       vector<string> ids = split($3);
-      vector<string> strs = split($5);
+      //vector<string> strs = split($5);
       for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
         addSymbol(*it, $5);
       }
       string type($5);
-      if (strs[0].compare(rec) != 0 && strs[0].compare(arr) !=0) {
-        if (symTable.find(strs[0]) == symTable.end()) {
-          addSymbol(strs[0], nilStr);
+      if (type.compare(rec) != 0 && type.compare(arr) !=0) {
+        if (symTable.find(type) == symTable.end()) {
+          addSymbol(type, nilStr);
         }
       }
       $$ = $1 + ids.size();
 
       //vector<string> strs = split($5);
-      if (strs[0].compare(rec) != 0 && strs[0].compare(arr) !=0) {
+      if (type.compare(rec) != 0 && type.compare(arr) !=0) {
         // Type is not literally named record or array.
         if (!envs.empty()) {
-          if (strs[0].compare("integer") == 0 ||
-              strs[0].compare("string") == 0 ||
-              strs[0].compare("boolean") == 0) {
+          if (type.compare("integer") == 0 ||
+              type.compare("string") == 0 ||
+              type.compare("boolean") == 0) {
             for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
               string lexime(*it);
-              TypeDesc* td = new TypeDesc(strs[0]);
-              formalParamList->push_back(td);
-              Symbol* sym = new Symbol(lexime, 0, td);
-              envs.top()->setSymbol(lexime, sym);
+              if (envs.top()->getSymbol(lexime) != NULL) {
+                cout << "Error: Duplicated decaration of parameter "
+                    << lexime << " for function" << endl;
+                TypeDesc* td = new TypeDesc("invalid");
+                formalParamList->push_back(td);
+                Symbol* sym = new Symbol(lexime, 0, td);
+                envs.top()->setSymbol(lexime, sym);
+              } else {
+                TypeDesc* td = new TypeDesc(type);
+                formalParamList->push_back(td);
+                Symbol* sym = new Symbol(lexime, 0, td);
+                envs.top()->setSymbol(lexime, sym);
+              }
             }
           } else {
-            if (envs.top()->getSymbol(strs[0]) == NULL) {
+            if (envs.top()->getSymbol(type) == NULL) {
               Env* envPtr = envs.top()->getPrevEnv();
               bool found = false;
               while (envPtr != NULL) {
-                if (envPtr->getSymbol(strs[0]) != NULL) {
+                if (envPtr->getSymbol(type) != NULL) {
                   found = true;
                   for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
                     string lexime(*it);
-                    TypeDesc* td = new TypeDesc(*(envPtr->getSymbol(strs[0])->getTypeDesc()));
-                    formalParamList->push_back(td);
-                    Symbol* sym = new Symbol(lexime, 0, td);
-                    envs.top()->setSymbol(lexime, sym);
+                    if (envs.top()->getSymbol(lexime) != NULL) {
+                      cout << "Error: Duplicated decaration of parameter "
+                          << lexime << " for function" << endl;
+                      TypeDesc* td = new TypeDesc("invalid");
+                      formalParamList->push_back(td);
+                      Symbol* sym = new Symbol(lexime, 0, td);
+                      envs.top()->setSymbol(lexime, sym);
+                    } else {
+                      TypeDesc* td = new TypeDesc(*(envPtr->getSymbol(type)->getTypeDesc()));
+                      formalParamList->push_back(td);
+                      Symbol* sym = new Symbol(lexime, 0, td);
+                      envs.top()->setSymbol(lexime, sym);
+                    }
                   }
                   break;
                 }
                 envPtr = envPtr->getPrevEnv();
               }
               if (!found) {
-                cout << "Error: type " << strs[0] << " not defined" << endl;
+                cout << "Error: type " << type << " not defined" << endl;
 
                 // Add this invalid type to the symbol table.
                 TypeDesc* invalidTd = new TypeDesc("invalid");
-                Symbol* sym = new Symbol(strs[0], 0, invalidTd);
-                envs.top()->setSymbol(strs[0], sym);
+                Symbol* sym = new Symbol(type, 0, invalidTd);
+                envs.top()->setSymbol(type, sym);
 
                 // Add the defined parameters to the symbol table with invalid type. 
                 for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
                   string lexime(*it);
+                  if (envs.top()->getSymbol(lexime) != NULL) {
+                    cout << "Error: Duplicated decaration of parameter "
+                        << lexime << " for function" << endl;
+                  }
                   TypeDesc* td = new TypeDesc(*invalidTd);
                   formalParamList->push_back(td);
                   Symbol* sym = new Symbol(lexime, 0, td);
@@ -649,24 +671,42 @@ formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
             } else {
               for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
                 string lexime(*it);
-                TypeDesc* td = new TypeDesc(*(envs.top()->getSymbol(strs[0])->getTypeDesc()));
-                formalParamList->push_back(td);
-                Symbol* sym = new Symbol(lexime, 0, td);
-                envs.top()->setSymbol(lexime, sym);
+                if (envs.top()->getSymbol(lexime) != NULL) {
+                  cout << "Error: Duplicated decaration of parameter "
+                      << lexime << " for function" << endl;
+                  TypeDesc* td = new TypeDesc("invalid");
+                  formalParamList->push_back(td);
+                  Symbol* sym = new Symbol(lexime, 0, td);
+                  envs.top()->setSymbol(lexime, sym);
+                } else {
+                  TypeDesc* td = new TypeDesc(*(envs.top()->getSymbol(type)->getTypeDesc()));
+                  formalParamList->push_back(td);
+                  Symbol* sym = new Symbol(lexime, 0, td);
+                  envs.top()->setSymbol(lexime, sym);
+                }
               }
             }
           } 
         }
-      } else if (strs[0].compare(rec) == 0) {
+      } else if (type.compare(rec) == 0) {
         // Type is record.
         
         // Lab3
         for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
           string lexime(*it);
-          TypeDesc* td = new TypeDesc("record", fieldListStack.top());
-          formalParamList->push_back(td);
-          Symbol* sym = new Symbol(lexime, 0, td);
-          envs.top()->setSymbol(lexime, sym);
+          if (envs.top()->getSymbol(lexime) != NULL) {
+            cout << "Error: Duplicated decaration of parameter "
+                << lexime << " for function" << endl;
+            TypeDesc* td = new TypeDesc("invalid");
+            formalParamList->push_back(td);
+            Symbol* sym = new Symbol(lexime, 0, td);
+            envs.top()->setSymbol(lexime, sym);
+          } else {
+            TypeDesc* td = new TypeDesc("record", fieldListStack.top());
+            formalParamList->push_back(td);
+            Symbol* sym = new Symbol(lexime, 0, td);
+            envs.top()->setSymbol(lexime, sym);
+          }
         }
         //delete fieldListStack.top();
         //freeFieldList(fieldListStack.top());
@@ -678,9 +718,19 @@ formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
         if (!envs.empty()) {
           for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
             string lexime(*it);
-            TypeDesc* td = arrayTypeStack.top();
-            Symbol* sym = new Symbol(lexime, 0, td);
-            envs.top()->setSymbol(lexime, sym);
+            if (envs.top()->getSymbol(lexime) != NULL) {
+              cout << "Error: Duplicated decaration of parameter "
+                  << lexime << " for function" << endl;
+              TypeDesc* td = new TypeDesc("invalid");
+              formalParamList->push_back(td);
+              Symbol* sym = new Symbol(lexime, 0, td);
+              envs.top()->setSymbol(lexime, sym);
+            } else {
+              TypeDesc* td = arrayTypeStack.top();
+              formalParamList->push_back(td);
+              Symbol* sym = new Symbol(lexime, 0, td);
+              envs.top()->setSymbol(lexime, sym);
+            }
           }
           arrayTypeStack.pop();
         }
@@ -716,10 +766,19 @@ formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
                 type.compare("boolean") == 0) {
               for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
                 string lexime(*it);
-                TypeDesc* td = new TypeDesc(type);
-                formalParamList->push_back(td);
-                Symbol* sym = new Symbol(lexime, 0, td);
-                envs.top()->setSymbol(lexime, sym);
+                if (envs.top()->getSymbol(lexime) != NULL) {
+                  cout << "Error: Duplicated decaration of parameter "
+                      << lexime << " for function" << endl;
+                  TypeDesc* td = new TypeDesc("invalid");
+                  formalParamList->push_back(td);
+                  Symbol* sym = new Symbol(lexime, 0, td);
+                  envs.top()->setSymbol(lexime, sym);
+                } else {
+                  TypeDesc* td = new TypeDesc(type);
+                  formalParamList->push_back(td);
+                  Symbol* sym = new Symbol(lexime, 0, td);
+                  envs.top()->setSymbol(lexime, sym);
+                }
               }
             } else {
               if (envs.top()->getSymbol(type) == NULL) {
@@ -730,10 +789,19 @@ formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
                     found = true;
                     for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
                       string lexime(*it);
-                      TypeDesc* td = new TypeDesc(*(envPtr->getSymbol(type)->getTypeDesc()));
-                      formalParamList->push_back(td);
-                      Symbol* sym = new Symbol(lexime, 0, td);
-                      envs.top()->setSymbol(lexime, sym);
+                      if (envs.top()->getSymbol(lexime) != NULL) {
+                        cout << "Error: Duplicated decaration of parameter "
+                            << lexime << " for function" << endl;
+                        TypeDesc* td = new TypeDesc("invalid");
+                        formalParamList->push_back(td);
+                        Symbol* sym = new Symbol(lexime, 0, td);
+                        envs.top()->setSymbol(lexime, sym);
+                      } else {
+                        TypeDesc* td = new TypeDesc(*(envPtr->getSymbol(type)->getTypeDesc()));
+                        formalParamList->push_back(td);
+                        Symbol* sym = new Symbol(lexime, 0, td);
+                        envs.top()->setSymbol(lexime, sym);
+                      }
                     }
                     break;
                   }
@@ -750,6 +818,10 @@ formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
                   // Add the defined parameters to the symbol table with invalid type. 
                   for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
                     string lexime(*it);
+                    if (envs.top()->getSymbol(lexime) != NULL) {
+                      cout << "Error: Duplicated decaration of parameter "
+                          << lexime << " for function" << endl;
+                    }
                     TypeDesc* td = new TypeDesc(*invalidTd);
                     formalParamList->push_back(td);
                     Symbol* sym = new Symbol(lexime, 0, td);
@@ -759,10 +831,19 @@ formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
               } else {
                 for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
                   string lexime(*it);
-                  TypeDesc* td = new TypeDesc(*(envs.top()->getSymbol(type)->getTypeDesc()));
-                  formalParamList->push_back(td);
-                  Symbol* sym = new Symbol(lexime, 0, td);
-                  envs.top()->setSymbol(lexime, sym);
+                  if (envs.top()->getSymbol(lexime) != NULL) {
+                    cout << "Error: Duplicated decaration of parameter "
+                        << lexime << " for function" << endl;
+                    TypeDesc* td = new TypeDesc("invalid");
+                    formalParamList->push_back(td);
+                    Symbol* sym = new Symbol(lexime, 0, td);
+                    envs.top()->setSymbol(lexime, sym);
+                  } else {
+                    TypeDesc* td = new TypeDesc(*(envs.top()->getSymbol(type)->getTypeDesc()));
+                    formalParamList->push_back(td);
+                    Symbol* sym = new Symbol(lexime, 0, td);
+                    envs.top()->setSymbol(lexime, sym);
+                  }
                 }
               }
             } 
@@ -773,10 +854,19 @@ formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
           // Lab3
           for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
             string lexime(*it);
-            TypeDesc* td = new TypeDesc("record", fieldListStack.top());
-            formalParamList->push_back(td);
-            Symbol* sym = new Symbol(lexime, 0, td);
-            envs.top()->setSymbol(lexime, sym);
+            if (envs.top()->getSymbol(lexime) != NULL) {
+              cout << "Error: Duplicated decaration of parameter "
+                  << lexime << " for function" << endl;
+              TypeDesc* td = new TypeDesc("invalid");
+              formalParamList->push_back(td);
+              Symbol* sym = new Symbol(lexime, 0, td);
+              envs.top()->setSymbol(lexime, sym);
+            } else {
+              TypeDesc* td = new TypeDesc("record", fieldListStack.top());
+              formalParamList->push_back(td);
+              Symbol* sym = new Symbol(lexime, 0, td);
+              envs.top()->setSymbol(lexime, sym);
+            }
           }
           //delete fieldListStack.top();
           //freeFieldList(fieldListStack.top());
@@ -788,10 +878,19 @@ formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
           if (!envs.empty()) {
             for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
               string lexime(*it);
-              TypeDesc* td = arrayTypeStack.top();
-              formalParamList->push_back(td);
-              Symbol* sym = new Symbol(lexime, 0, td);
-              envs.top()->setSymbol(lexime, sym);
+              if (envs.top()->getSymbol(lexime) != NULL) {
+                cout << "Error: Duplicated decaration of parameter "
+                    << lexime << " for function" << endl;
+                TypeDesc* td = new TypeDesc("invalid");
+                formalParamList->push_back(td);
+                Symbol* sym = new Symbol(lexime, 0, td);
+                envs.top()->setSymbol(lexime, sym);
+              } else {
+                TypeDesc* td = arrayTypeStack.top();
+                formalParamList->push_back(td);
+                Symbol* sym = new Symbol(lexime, 0, td);
+                envs.top()->setSymbol(lexime, sym);
+              }
             }
             arrayTypeStack.pop();
           }
@@ -905,28 +1004,8 @@ procedureStatement: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
     };
 
 structuredStatement: compoundStatement { cout << "compound_statement" << endl; }
-    | TOKEN_IF expression TOKEN_THEN
-      /*
-      {
-        if (expTypeStack.top()->getType().compare("boolean") != 0) {
-          cout << "Error: If construct expects boolean expression, "
-              << expTypeStack.top()->getType() << " found" << endl;
-        }
-        expTypeStack.pop();
-      }
-      */
-      statement { cout << "if_statement" << endl; }
-    | TOKEN_IF expression 
-      /*
-      {
-        if (expTypeStack.top()->getType().compare("boolean") != 0) {
-          cout << "Error: If construct expects boolean expression, "
-              << expTypeStack.top()->getType() << " found" << endl;
-        }
-        expTypeStack.pop();
-      }
-      */
-      TOKEN_THEN statement TOKEN_ELSE statement { cout << "ifelse_statement" << endl; }
+    | TOKEN_IF expression TOKEN_THEN statement { cout << "if_statement" << endl; }
+    | TOKEN_IF expression TOKEN_THEN statement TOKEN_ELSE statement { cout << "ifelse_statement" << endl; }
     | TOKEN_WHILE expression 
       {
         if (expTypeStack.top()->getType().compare("boolean") != 0) {
