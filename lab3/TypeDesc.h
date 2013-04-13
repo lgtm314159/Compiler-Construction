@@ -46,6 +46,9 @@ class TypeDesc {
     vector<pair<string, TypeDesc*> >* getFieldList();
     TypeDesc* getTypeDescFromFieldList(const string& name);
     void displayFieldList();
+    int getNumOfFormalParams();
+    TypeDesc* getNthFormalParamType(int i);
+    TypeDesc* getResultType();
 };
 
 #endif

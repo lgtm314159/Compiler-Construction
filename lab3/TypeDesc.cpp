@@ -147,3 +147,26 @@ void TypeDesc::displayFieldList() {
   }
 }
 
+int TypeDesc::getNumOfFormalParams() {
+  if (formalParamList == NULL) {
+    return 0;
+  } else {
+    return formalParamList->size();
+  }
+}
+
+TypeDesc* TypeDesc::getNthFormalParamType(int n) {
+  if (formalParamList != NULL) {
+    if (n >= 0 && n < formalParamList->size()) {
+      return formalParamList->at(n);
+    } else {
+      return NULL;
+    }
+  } else {
+    return NULL;
+  }
+}
+
+TypeDesc* TypeDesc::getResultType() {
+  return resultType;
+}
