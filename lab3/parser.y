@@ -128,7 +128,7 @@ string arr(arrayStr);
 %left TOKEN_MULTIPLY TOKEN_DIV TOKEN_MOD TOKEN_AND
 %right UPLUS UMINUS
 
-%type <sval> type identifierList resultType componentSelection relationalOp addOp mulOp
+%type <sval> type identifierList resultType componentSelection relationalOp addOp mulOp variable
 %type <ival> formalParamSeq formalParameterList constant actualParameterList expressionList expression
 %%
 
@@ -948,7 +948,8 @@ assignmentStatement: variable TOKEN_ASSIGN expression { ruleFile << "assignment_
           expTypeStack.push(resultTd);
         }
       } else {
-        cout << "Error: types not equivalent for assignment operation, found "
+        cout << "Error: types not equivalent for assignment operation on"
+            << " variable " << $1 << ", found "
             << td1->getType() << " and " << td2->getType() << endl;
         TypeDesc* resultTd = new TypeDesc("invalid");
         expTypeStack.push(resultTd);
@@ -1928,6 +1929,8 @@ functionReference: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
     };
 
 variable: TOKEN_ID componentSelection { ruleFile << "variable " << endl;
+    $$ = (char*) malloc(strlen($1) + 1);
+    $$ = strcpy($$, $1);
     string id($1);
     if (symTable.find(id) == symTable.end()) {
       addSymbol($1, nilStr);

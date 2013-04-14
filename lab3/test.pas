@@ -20,6 +20,15 @@ var
   var4: s;
   int1: integer;
   int2: integer;
+  var5: record
+          s1: record
+            s2: record
+              s3: boolean;
+              s4: integer;
+              s5: array[1..10] of string
+            end
+          end
+        end;
 
 function foo1(a, a : integer) : r;  
 begin
@@ -38,4 +47,5 @@ begin
   for a := 0 to 10 do begin for b:= 0 to var2 do begin end end;
   var4.s1.s2.s3 := var4.s1.s2.s4.s6.s7;
   var1 := foo1(false, var1);
+  var5 := var1;
 end.
