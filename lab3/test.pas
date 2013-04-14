@@ -7,7 +7,8 @@ type
   s = record
     s1: record
       s2: record
-        s3: boolean
+        s3: boolean;
+        s4: integer
       end
     end
   end;
@@ -31,9 +32,10 @@ begin
 end;
 
 begin
-  {var1 := false * var3;}
-  {if int1+int2 then a := 0; 
-  if false then var1 := false;}
-  var4.s1.s2.s3 := 0;
-  var4.s1.s2.s3 := 0;
+  var1 := false * var3;
+  if int1+int2 then a := 0; 
+  if false then var1 := false;
+  for a := 0 to 10 do begin end;
+  var4.s1.s2.s3 := var4.s1.s2.s4.s6.s7;
+  var1 := foo1(false, var1);
 end.

@@ -18,6 +18,7 @@ Env::Env(const Env& e) {
 Env::~Env() {
   map<string, Symbol*>::iterator it;
   for (it = table.begin(); it != table.end(); ++it) {
+    cout << "deleting " << (*it).first << endl;
     delete (*it).second;
     (*it).second = NULL;
   }

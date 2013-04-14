@@ -558,6 +558,7 @@ functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList
             Symbol* sym2 = new Symbol(lexime, 0, td2);
             globalEnv->setSymbol(lexime, sym2);
           } else {
+            cout << "bp1" << endl;
             // Add to the local symbol table.
             TypeDesc* rt1 = new TypeDesc(*(envs.top()->getPrevEnv()->getSymbol(resultType)->getTypeDesc()));
             TypeDesc* td1 = new TypeDesc("function", formalParamList, rt1);
@@ -730,7 +731,7 @@ formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
           }
         }
         //delete fieldListStack.top();
-        //freeFieldList(fieldListStack.top());
+        freeFieldList(fieldListStack.top());
         fieldListStack.pop();
       } else {
         // Type is array.
@@ -954,18 +955,10 @@ assignmentStatement: variable TOKEN_ASSIGN expression { ruleFile << "assignment_
         expTypeStack.push(resultTd);
       }
 
-      /*
-      cout << "here" << endl;
-      cout << td1->getType() << endl;
-      cout << td2->getType() << endl;
-      td1->setType("string");
-      cout << td1->getType() << endl;
-      cout << td2->getType() << endl;
-      */
       //delete td1;
-      //td1 = NULL;
+      td1 = NULL;
       //delete td2;
-      //td2 = NULL;
+      td2 = NULL;
     };
 
 procedureStatement: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
@@ -1053,9 +1046,8 @@ procedureStatement: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
 structuredStatement: compoundStatement { ruleFile << "compound_statement" << endl; }
     | TOKEN_IF expression TOKEN_THEN statement { ruleFile << "if_statement" << endl;
       int ifExpIndex = $2;
-      int currentExpTypeStackSize = expTypeStack.size();
       stack<TypeDesc*> tmpStack;
-      for (int i = 0; i < currentExpTypeStackSize - ifExpIndex - 1; ++i) {
+      for (int i = 0; i < expTypeStack.size() - ifExpIndex - 1; ++i) {
         tmpStack.push(expTypeStack.top());
         expTypeStack.pop();
       }
@@ -1075,9 +1067,8 @@ structuredStatement: compoundStatement { ruleFile << "compound_statement" << end
     }
     | TOKEN_IF expression TOKEN_THEN statement TOKEN_ELSE statement { ruleFile << "ifelse_statement" << endl;
       int ifExpIndex = $2;
-      int currentExpTypeStackSize = expTypeStack.size();
       stack<TypeDesc*> tmpStack;
-      for (int i = 0; i < currentExpTypeStackSize - ifExpIndex - 1; ++i) {
+      for (int i = 0; i < expTypeStack.size() - ifExpIndex - 1; ++i) {
         tmpStack.push(expTypeStack.top());
         expTypeStack.pop();
       }
@@ -1168,7 +1159,7 @@ type: TOKEN_ID { ruleFile << "type_ID" << endl; //addSymbol($1, nilStr);
           TypeDesc* td = new TypeDesc("array", lower, upper, arrayEleType);
           arrayTypeStack.push(td);
           //delete fieldListStack.top();
-          //freeFieldList(fieldListStack.top());
+          freeFieldList(fieldListStack.top());
           fieldListStack.pop();
         } else {
           // Array's element type is array.
@@ -1335,7 +1326,7 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
           }
         }
         //delete recFl;
-        //freeFieldList(recFl);
+        freeFieldList(recFl);
         //fieldListStack.pop();
       } else {
         // Type is array.
@@ -1483,7 +1474,7 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
           }
         }
         //delete recFl;
-        //freeFieldList(recFl);
+        freeFieldList(recFl);
         //fieldListStack.pop();
       } else {
         // Type is array.
@@ -1561,9 +1552,9 @@ groupRelOpSimExpr: relationalOp simpleExpression {
           expTypeStack.push(resultTd);
         }
       }
-      //delete td1;
+      delete td1;
       td1 = NULL;
-      //delete td2;
+      delete td2;
       td2 = NULL;
     }
     |;
@@ -1598,7 +1589,7 @@ simpleExpression: sign term { ruleFile << "simple_expression" << endl;
       if (td->getType().compare("integer") != 0) {
         cout << "Error: Unary operator can only be applied to integer type, "
             << td->getType() << " found however." << endl;
-        //delete td;
+        delete td;
         td = NULL;
         expTypeStack.pop();
         TypeDesc* resultTd = new TypeDesc("invalid");
@@ -1829,9 +1820,8 @@ functionReference: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
                 //delete td;
               } else {
                 cout << "Error: Function " << funcName
-                    << "'s parameter type not matched, expected "
-                    << formalParamTd->getType() << ", given " 
-                    << td->getType() << endl; 
+                    << "'s parameter type not matched, found "
+                    << td->getType() << " and " << formalParamTd << endl; 
                 //delete td;
                 td = NULL;
                 isMatched = false;
@@ -1925,7 +1915,7 @@ variable: TOKEN_ID componentSelection { ruleFile << "variable " << endl;
               } else {
                 name = components[i - 1];
               }
-              cout << "Error: Variable " << components[i] << " hasn't been defined in record "
+              cout << "Variable " << components[i] << " hasn't been defined in record "
                   << name << endl;
               valid = false;
               break;
@@ -1939,7 +1929,7 @@ variable: TOKEN_ID componentSelection { ruleFile << "variable " << endl;
             } else {
               name = components[i - 1];
             }
-            cout << "Error: Variable " << name << " is not a record" << endl;
+            cout << "Variable " << name << " is not a record" << endl;
             valid = false;
             break;
           }
@@ -2065,8 +2055,8 @@ main(int argc, char **argv) {
   } 
   //cout << envs.size() << endl;
   for (int i = allEnvs.size() - 1; i >= 0; --i) {
-    //cout << "Env " << i << endl;
-    //delete allEnvs[i];
+    cout << "Env " << i << endl;
+    delete allEnvs[i];
   } 
 
   ruleFile.close();
