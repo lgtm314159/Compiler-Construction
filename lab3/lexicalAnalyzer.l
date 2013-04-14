@@ -28,8 +28,10 @@ vector<Env*> allEnvs;
 stack<vector<pair<string, TypeDesc> >* > fieldListStack;
 stack<TypeDesc*> arrayTypeStack;
 stack<TypeDesc*> expTypeStack;
+stack<int> ifExpIndexStack;
 int recordSeq = 0;
 int arraySeq = 0;
+//stack<int> ifExpIndexStack;
 %}
 
 DELIM   [ \t]
@@ -112,11 +114,6 @@ recSavedAddr = address;
 ++address;
 return TOKEN_RECORD;}
 then     {//printf("KEYWORD %s\n", yytext); 
-if (expTypeStack.top()->getType().compare("boolean") != 0) {
-  cout << "Error: If construct expects boolean expression, "
-      << expTypeStack.top()->getType() << " found" << endl;
-}
-expTypeStack.pop();
 return TOKEN_THEN;}
 to     {//printf("KEYWORD %s\n", yytext); 
 return TOKEN_TO;}

@@ -33,7 +33,7 @@ extern "C++" stack<TypeDesc*> arrayTypeStack;
 extern "C" int recordSeq;
 extern "C" int arraySeq;
 extern "C++" stack<TypeDesc*> expTypeStack;
-extern "C++" stack<int> ifExpIndexStack;
+stack<int> ifExpIndexStack;
 vector<TypeDesc*>* formalParamList;
 ofstream ruleFile;
 //TypeDesc* varType = NULL;
@@ -129,7 +129,7 @@ string arr(arrayStr);
 %right UPLUS UMINUS
 
 %type <sval> type identifierList resultType componentSelection relationalOp addOp mulOp
-%type <ival> formalParamSeq formalParameterList constant actualParameterList expressionList expression
+%type <ival> formalParamSeq formalParameterList constant actualParameterList expressionList
 %%
 
 program: TOKEN_PROGRAM TOKEN_ID TOKEN_SEMICOLON groupTypeDefinitions
@@ -1026,44 +1026,8 @@ procedureStatement: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
     };
 
 structuredStatement: compoundStatement { ruleFile << "compound_statement" << endl; }
-    | TOKEN_IF expression TOKEN_THEN statement { ruleFile << "if_statement" << endl;
-      int ifExpIndex = $2;
-      stack<TypeDesc*> tmpStack;
-      for (int i = 0; i < expTypeStack.size() - ifExpIndex - 1; ++i) {
-        tmpStack.push(expTypeStack.top());
-        expTypeStack.pop();
-      }
-      TypeDesc* ifExpTypeDesc = expTypeStack.top();
-      expTypeStack.pop();
-      if (ifExpTypeDesc->getType().compare("boolean") != 0) {
-        cout << "Error: If construct only accepts boolean conditional "
-            << "expression, " << ifExpTypeDesc->getType() << " found however"
-            << endl;
-      }
-      for (int i = 0; i < tmpStack.size(); ++i) {
-        expTypeStack.push(tmpStack.top());
-        tmpStack.pop();
-      }
-    }
-    | TOKEN_IF expression TOKEN_THEN statement TOKEN_ELSE statement { ruleFile << "ifelse_statement" << endl;
-      int ifExpIndex = $2;
-      stack<TypeDesc*> tmpStack;
-      for (int i = 0; i < expTypeStack.size() - ifExpIndex - 1; ++i) {
-        tmpStack.push(expTypeStack.top());
-        expTypeStack.pop();
-      }
-      TypeDesc* ifExpTypeDesc = expTypeStack.top();
-      expTypeStack.pop();
-      if (ifExpTypeDesc->getType().compare("boolean") != 0) {
-        cout << "Error: If construct only accepts boolean conditional "
-            << "expression, " << ifExpTypeDesc->getType() << " found however"
-            << endl;
-      }
-      for (int i = 0; i < tmpStack.size(); ++i) {
-        expTypeStack.push(tmpStack.top());
-        tmpStack.pop();
-      }
-    }
+    | TOKEN_IF expression TOKEN_THEN statement { ruleFile << "if_statement" << endl; }
+    | TOKEN_IF expression TOKEN_THEN statement TOKEN_ELSE statement { ruleFile << "ifelse_statement" << endl; }
     | TOKEN_WHILE expression 
       {
         if (expTypeStack.top()->getType().compare("boolean") != 0) {
@@ -1479,7 +1443,7 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
 constant: TOKEN_INT { ruleFile << "constant" << endl; $$ = $1;}
     | sign TOKEN_INT { ruleFile << "constant" << endl; $$ = $2;};
 
-expression: simpleExpression groupRelOpSimExpr { ruleFile << "expression" << endl; $$ = expTypeStack.size() - 1;};
+expression: simpleExpression groupRelOpSimExpr { ruleFile << "expression" << endl; };
 
 groupRelOpSimExpr: relationalOp simpleExpression {
       // Lab3
@@ -1560,6 +1524,7 @@ relationalOp: TOKEN_LT { ruleFile << "relational_op" << endl;
 
 simpleExpression: sign term { ruleFile << "simple_expression" << endl; 
       TypeDesc* td = expTypeStack.top();
+      cout << "stack size: " << expTypeStack.size() << endl;
       if (td->getType().compare("integer") != 0) {
         cout << "Error: Unary operator can only be applied to integer type, "
             << td->getType() << " found however." << endl;
@@ -1734,9 +1699,6 @@ factor: TOKEN_INT { ruleFile << "factor" << endl;
         cout << "Error: Boolean operator 'not' applied to non-boolean type" << endl;
         TypeDesc* resultTd = new TypeDesc("invalid");
         expTypeStack.push(resultTd);
-      } else {
-        TypeDesc* resultTd = new TypeDesc("boolean");
-        expTypeStack.push(resultTd);
       }
     }
     | TOKEN_LPAR expression TOKEN_RPAR { ruleFile << "factor" << endl; };
@@ -1894,18 +1856,15 @@ variable: TOKEN_ID componentSelection { ruleFile << "variable " << endl;
         }
         if (valid) {
           //varType = new TypeDesc(*currentTd);
-          cout << "bp2" << endl;
           TypeDesc* td = new TypeDesc(*currentTd);
           expTypeStack.push(td);
         } else {
           //varType = new TypeDesc("invalid");
-          cout << "bp1" << endl;
           TypeDesc* td = new TypeDesc("invalid");
           expTypeStack.push(td);
         }
       } else {
         //varType = new TypeDesc(*outterMostTd);
-        cout << "bp3" << endl;
         TypeDesc* td = new TypeDesc(*outterMostTd);
         expTypeStack.push(td);
       }

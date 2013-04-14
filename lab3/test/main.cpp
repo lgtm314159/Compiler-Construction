@@ -56,6 +56,7 @@ int main() {
   cout << sizeof(arrayStr) << endl;
   cout << str.length() << endl; 
 */
+  /*
   stack<Env*> envs;
   Env* env = new Env(NULL);
   envs.push(env);
@@ -89,7 +90,7 @@ int main() {
     fl = NULL;
   }
   delete env;
-
+  */
 
 /*
   cout << fl->at(0).second->getType() << endl;
@@ -131,5 +132,14 @@ int main() {
   //strcpy(var, ss.str().c_str());
   //cout << var << endl;
 
+
+  vector<TypeDesc*> typeVec;
+  TypeDesc* td = new TypeDesc("integer");
+  typeVec.push_back(td);
+  cout << td->getType() << endl;
+  typeVec.back()->setType("string");
+  cout << td->getType() << endl;
+  typeVec.pop_back();
+  cout << td->getType() << endl;
 }
 

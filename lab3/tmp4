@@ -1,0 +1,6 @@
+Error: types not equivalent for assignment operation, found function and boolean
+Error: type float not defined
+Error: type float not defined
+Error: variable pi hasn't been declared
+Error: Function readint hasn't been declared
+Error: Function readint hasn't been declared

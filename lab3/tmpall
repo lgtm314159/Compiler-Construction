@@ -1,0 +1,3 @@
+Error: While construct expects boolean expression, integer found
+Error: Procedure bar hasn't been declared
+Error: Function foo3's parameters number not matching! Expected 2, given 1

@@ -569,9 +569,11 @@ vector<Env*> allEnvs;
 stack<vector<pair<string, TypeDesc> >* > fieldListStack;
 stack<TypeDesc*> arrayTypeStack;
 stack<TypeDesc*> expTypeStack;
+stack<int> ifExpIndexStack;
 int recordSeq = 0;
 int arraySeq = 0;
-#line 575 "lex.yy.c"
+//stack<int> ifExpIndexStack;
+#line 577 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -758,10 +760,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 47 "lexicalAnalyzer.l"
+#line 49 "lexicalAnalyzer.l"
 
 
-#line 765 "lex.yy.c"
+#line 767 "lex.yy.c"
 
 	if ( !(yy_init) )
 		{
@@ -846,19 +848,19 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 49 "lexicalAnalyzer.l"
+#line 51 "lexicalAnalyzer.l"
 {/* Do nothing */}
 	YY_BREAK
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 50 "lexicalAnalyzer.l"
+#line 52 "lexicalAnalyzer.l"
 {++line;};
 	YY_BREAK
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 51 "lexicalAnalyzer.l"
+#line 53 "lexicalAnalyzer.l"
 {/* Do nothing */
                 char* str = yytext;
                 int i;
@@ -870,7 +872,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 59 "lexicalAnalyzer.l"
+#line 61 "lexicalAnalyzer.l"
 {//printf("KEYWORD %s\n", yytext);
 yylval.sval = (char*) malloc(strlen(yytext) + 1);
 strcpy(yylval.sval, yytext);
@@ -878,19 +880,19 @@ return TOKEN_AND;}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 63 "lexicalAnalyzer.l"
+#line 65 "lexicalAnalyzer.l"
 {//printf("KEYWORD %s\n", yytext);
 return TOKEN_BEGIN;}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 65 "lexicalAnalyzer.l"
+#line 67 "lexicalAnalyzer.l"
 {//printf("KEYWORD %s\n", yytext);
 return TOKEN_FORWARD;}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 67 "lexicalAnalyzer.l"
+#line 69 "lexicalAnalyzer.l"
 {//printf("KEYWORD %s\n", yytext);
 yylval.sval = (char*) malloc(strlen(yytext) + 1);
 strcpy(yylval.sval, yytext);
@@ -898,31 +900,31 @@ return TOKEN_DIV;}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 71 "lexicalAnalyzer.l"
+#line 73 "lexicalAnalyzer.l"
 {//printf("KEYWORD %s\n", yytext);
 return TOKEN_DO;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 73 "lexicalAnalyzer.l"
+#line 75 "lexicalAnalyzer.l"
 {//printf("KEYWORD %s\n", yytext);
 return TOKEN_ELSE;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 75 "lexicalAnalyzer.l"
+#line 77 "lexicalAnalyzer.l"
 {//printf("KEYWORD %s\n", yytext);
 return TOKEN_END;}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 77 "lexicalAnalyzer.l"
+#line 79 "lexicalAnalyzer.l"
 {//printf("KEYWORD %s\n", yytext);
 return TOKEN_FOR;}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 79 "lexicalAnalyzer.l"
+#line 81 "lexicalAnalyzer.l"
 {//printf("KEYWORD %s\n", yytext);
 funcSavedAddr = address;
 ++address;
@@ -930,13 +932,13 @@ return TOKEN_FUNCTION;}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 83 "lexicalAnalyzer.l"
+#line 85 "lexicalAnalyzer.l"
 {//printf("KEYWORD %s\n", yytext);
 return TOKEN_IF;}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 85 "lexicalAnalyzer.l"
+#line 87 "lexicalAnalyzer.l"
 {//printf("KEYWORD %s\n", yytext);
 arrSavedAddr = address;
 ++address;
@@ -944,7 +946,7 @@ return TOKEN_ARRAY;}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 89 "lexicalAnalyzer.l"
+#line 91 "lexicalAnalyzer.l"
 {//printf("KEYWORD %s\n", yytext);
 yylval.sval = (char*) malloc(strlen(yytext) + 1);
 strcpy(yylval.sval, yytext);
@@ -952,19 +954,19 @@ return TOKEN_MOD;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 93 "lexicalAnalyzer.l"
+#line 95 "lexicalAnalyzer.l"
 {//printf("KEYWORD %s\n", yytext);
 return TOKEN_NOT;}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 95 "lexicalAnalyzer.l"
+#line 97 "lexicalAnalyzer.l"
 {//printf("KEYWORD %s\n", yytext);
 return TOKEN_OF;}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 97 "lexicalAnalyzer.l"
+#line 99 "lexicalAnalyzer.l"
 {//printf("KEYWORD %s\n", yytext);
 yylval.sval = (char*) malloc(strlen(yytext) + 1);
 strcpy(yylval.sval, yytext);
@@ -972,7 +974,7 @@ return TOKEN_OR;}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 101 "lexicalAnalyzer.l"
+#line 103 "lexicalAnalyzer.l"
 {//printf("KEYWORD %s\n", yytext);
 procSavedAddr = address;
 ++address;
@@ -980,7 +982,7 @@ return TOKEN_PROCEDURE;}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 105 "lexicalAnalyzer.l"
+#line 107 "lexicalAnalyzer.l"
 {//printf("KEYWORD %s\n", yytext);
 Env* envPtr = new Env(NULL);
 envs.push(envPtr);
@@ -989,7 +991,7 @@ return TOKEN_PROGRAM;}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 110 "lexicalAnalyzer.l"
+#line 112 "lexicalAnalyzer.l"
 {//printf("KEYWORD %s\n", yytext);
 recSavedAddr = address;
 ++address;
@@ -997,42 +999,37 @@ return TOKEN_RECORD;}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 114 "lexicalAnalyzer.l"
+#line 116 "lexicalAnalyzer.l"
 {//printf("KEYWORD %s\n", yytext); 
-if (expTypeStack.top()->getType().compare("boolean") != 0) {
-  cout << "Error: If construct expects boolean expression, "
-      << expTypeStack.top()->getType() << " found" << endl;
-}
-expTypeStack.pop();
 return TOKEN_THEN;}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 121 "lexicalAnalyzer.l"
+#line 118 "lexicalAnalyzer.l"
 {//printf("KEYWORD %s\n", yytext); 
 return TOKEN_TO;}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 123 "lexicalAnalyzer.l"
+#line 120 "lexicalAnalyzer.l"
 {//printf("KEYWORD %s\n", yytext); 
 return TOKEN_TYPE;}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 125 "lexicalAnalyzer.l"
+#line 122 "lexicalAnalyzer.l"
 {//printf("KEYWORD %s\n", yytext); 
 return TOKEN_VAR;}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 127 "lexicalAnalyzer.l"
+#line 124 "lexicalAnalyzer.l"
 {//printf("KEYWORD %s\n", yytext); 
 return TOKEN_WHILE;}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 129 "lexicalAnalyzer.l"
+#line 126 "lexicalAnalyzer.l"
 {//printf("PLUS\n");
 yylval.sval = (char*) malloc(strlen(yytext) + 1);
 strcpy(yylval.sval, yytext);
@@ -1040,7 +1037,7 @@ return TOKEN_PLUS;}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 133 "lexicalAnalyzer.l"
+#line 130 "lexicalAnalyzer.l"
 {//printf("MINUS\n");
 yylval.sval = (char*) malloc(strlen(yytext) + 1);
 strcpy(yylval.sval, yytext);
@@ -1048,7 +1045,7 @@ return TOKEN_MINUS;}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 137 "lexicalAnalyzer.l"
+#line 134 "lexicalAnalyzer.l"
 {//printf("MULT\n");
 yylval.sval = (char*) malloc(strlen(yytext) + 1);
 strcpy(yylval.sval, yytext);
@@ -1056,13 +1053,13 @@ return TOKEN_MULTIPLY;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 141 "lexicalAnalyzer.l"
+#line 138 "lexicalAnalyzer.l"
 {//printf("DIVIDE\n");
 return TOKEN_DIVIDE;}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 143 "lexicalAnalyzer.l"
+#line 140 "lexicalAnalyzer.l"
 {//printf("RELOP %s\n", yytext);
 yylval.sval = (char*) malloc(strlen(yytext) + 1);
 strcpy(yylval.sval, yytext);
@@ -1070,7 +1067,7 @@ return TOKEN_EQ;}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 147 "lexicalAnalyzer.l"
+#line 144 "lexicalAnalyzer.l"
 {//printf("RELOP %s\n", yytext);
 yylval.sval = (char*) malloc(strlen(yytext) + 1);
 strcpy(yylval.sval, yytext);
@@ -1079,7 +1076,7 @@ return TOKEN_LT;
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 152 "lexicalAnalyzer.l"
+#line 149 "lexicalAnalyzer.l"
 {//printf("RELOP %s\n", yytext);
 yylval.sval = (char*) malloc(strlen(yytext) + 1);
 strcpy(yylval.sval, yytext);
@@ -1087,7 +1084,7 @@ return TOKEN_LE;}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 156 "lexicalAnalyzer.l"
+#line 153 "lexicalAnalyzer.l"
 {//printf("RELOP %s\n", yytext);
 yylval.sval = (char*) malloc(strlen(yytext) + 1);
 strcpy(yylval.sval, yytext);
@@ -1095,7 +1092,7 @@ return TOKEN_GT;}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 160 "lexicalAnalyzer.l"
+#line 157 "lexicalAnalyzer.l"
 {//printf("RELOP %s\n", yytext);
 yylval.sval = (char*) malloc(strlen(yytext) + 1);
 strcpy(yylval.sval, yytext);
@@ -1103,7 +1100,7 @@ return TOKEN_GE;}
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 164 "lexicalAnalyzer.l"
+#line 161 "lexicalAnalyzer.l"
 {//printf("RELOP %s\n", yytext);
 yylval.sval = (char*) malloc(strlen(yytext) + 1);
 strcpy(yylval.sval, yytext);
@@ -1111,7 +1108,7 @@ return TOKEN_NOTEQ;}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 168 "lexicalAnalyzer.l"
+#line 165 "lexicalAnalyzer.l"
 {//printf("IDENTIFIER %s\n", yytext);
              yylval.sval = (char*) malloc(strlen(yytext) + 1);
              strcpy(yylval.sval, yytext);
@@ -1119,25 +1116,25 @@ YY_RULE_SETUP
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 172 "lexicalAnalyzer.l"
+#line 169 "lexicalAnalyzer.l"
 {//printf("INTEGER %s\n", yytext); 
              yylval.ival = atoi(yytext); return TOKEN_INT;}
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 174 "lexicalAnalyzer.l"
+#line 171 "lexicalAnalyzer.l"
 {//printf("DECIMAL %s\n", yytext);
              yylval.fval = atof(yytext); return TOKEN_DECIMAL;}
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 176 "lexicalAnalyzer.l"
+#line 173 "lexicalAnalyzer.l"
 {//printf("EXPNUMBER %s\n", yytext);
 return TOKEN_EXPNUM;}
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 178 "lexicalAnalyzer.l"
+#line 175 "lexicalAnalyzer.l"
 {printf("STRING %s\n", yytext);
              yylval.sval = (char*) malloc(strlen(yytext) + 1);
              strcpy(yylval.sval, yytext);
@@ -1145,76 +1142,76 @@ YY_RULE_SETUP
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 182 "lexicalAnalyzer.l"
+#line 179 "lexicalAnalyzer.l"
 {//printf("DOT\n");
 return TOKEN_DOT;}
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 184 "lexicalAnalyzer.l"
+#line 181 "lexicalAnalyzer.l"
 {//printf("COMMA\n"); 
 return TOKEN_COMMAS;}
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 186 "lexicalAnalyzer.l"
+#line 183 "lexicalAnalyzer.l"
 {//printf("COLON\n"); 
 return TOKEN_COLON;} 
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 188 "lexicalAnalyzer.l"
+#line 185 "lexicalAnalyzer.l"
 {//printf("SEMICOLON\n"); 
 return TOKEN_SEMICOLON;}
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 190 "lexicalAnalyzer.l"
+#line 187 "lexicalAnalyzer.l"
 {//printf("ASSIGN\n"); 
 return TOKEN_ASSIGN;}
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 192 "lexicalAnalyzer.l"
+#line 189 "lexicalAnalyzer.l"
 {//printf("RANGE\n"); 
 return TOKEN_RANGE;}
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 194 "lexicalAnalyzer.l"
+#line 191 "lexicalAnalyzer.l"
 {//printf("LPAR\n"); 
 return TOKEN_LPAR;}
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 196 "lexicalAnalyzer.l"
+#line 193 "lexicalAnalyzer.l"
 {//printf("RPAR\n"); 
 return TOKEN_RPAR;}
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 198 "lexicalAnalyzer.l"
+#line 195 "lexicalAnalyzer.l"
 {//printf("LBRACKET\n"); 
 return TOKEN_LBRACKET;}
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 200 "lexicalAnalyzer.l"
+#line 197 "lexicalAnalyzer.l"
 {//printf("RBRACKET\n");
 return TOKEN_RBRACKET;}
 	YY_BREAK
 case 52:
 /* rule 52 can match eol */
 YY_RULE_SETUP
-#line 202 "lexicalAnalyzer.l"
+#line 199 "lexicalAnalyzer.l"
 {printf("ERROR(%d): Unrecognized Symbol \"%s\"\n", line, yytext);}
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 203 "lexicalAnalyzer.l"
+#line 200 "lexicalAnalyzer.l"
 ECHO;
 	YY_BREAK
-#line 1218 "lex.yy.c"
+#line 1215 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2212,7 +2209,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 203 "lexicalAnalyzer.l"
+#line 200 "lexicalAnalyzer.l"
 
 
 

@@ -1,0 +1,6 @@
+formal_parameter_list
+formal_parameter_list
+Error: While construct expects boolean expression, integer found
+Error: Procedure bar hasn't been declared
+formal_parameter_list
+Error: Function foo3's parameters number not matching! Expected 2, given 1

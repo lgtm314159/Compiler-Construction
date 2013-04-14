@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ./oneliner.sh
-./parser sample_test/test3.pas > tmp3
+./parser sample_test/test3.pas 
 diff -b rules.out sample_test/test3_rule.out
 diff -b symtable.out sample_test/test3_symtable.out
 
