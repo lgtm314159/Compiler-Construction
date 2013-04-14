@@ -25,7 +25,6 @@ begin
   false := b;
   true := b and false;
   bar(int);
-  bar(integer);
-  bar()
+  bar(integer)
 end.
 

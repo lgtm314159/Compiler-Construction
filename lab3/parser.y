@@ -1106,7 +1106,53 @@ structuredStatement: compoundStatement { ruleFile << "compound_statement" << end
         expTypeStack.pop();
       }
       TOKEN_DO statement { ruleFile << "while_statement" << endl; }
-    | TOKEN_FOR TOKEN_ID TOKEN_ASSIGN expression TOKEN_TO expression TOKEN_DO statement { ruleFile << "for_statement" << endl; };
+    | TOKEN_FOR TOKEN_ID TOKEN_ASSIGN expression TOKEN_TO expression
+      {
+        TypeDesc* td2 = expTypeStack.top();
+        expTypeStack.pop();
+        TypeDesc* td1 = expTypeStack.top();
+        expTypeStack.pop();
+        
+        if (td1->getType().compare("integer") != 0 ||
+            td2->getType().compare("integer") != 0) {
+          cout << "Error: For construct only expects integer in range"
+            << " specification, found " << td1->getType()
+            << " and " << td2->getType() << " however" << endl;
+        }
+        string lexime($2);
+        Symbol* idSymbol = envs.top()->getSymbol(lexime);
+        if (idSymbol == NULL) {
+          Env* envPtr = envs.top()->getPrevEnv();
+          while (envPtr != NULL) {
+            idSymbol = envPtr->getSymbol(lexime);
+            if (idSymbol != NULL) {
+              if (idSymbol->getTypeDesc()->getType().compare("integer") != 0) {
+                cout << "Error: For construct's ranging variable " << lexime
+                    << " can only be integer, found "
+                    << idSymbol->getTypeDesc()->getType()
+                    << " however" << endl;
+              }
+              break;
+            }
+            envPtr = envPtr->getPrevEnv();
+          }
+          if (idSymbol == NULL) {
+            cout << "Error: For construct's ranging variable " << lexime
+                << " not defined" << endl;
+            TypeDesc* invalidTd = new TypeDesc("invalid");
+            idSymbol = new Symbol(lexime, 0, invalidTd);
+            envs.top()->setSymbol(lexime, idSymbol);
+          }
+        } else {
+          if (idSymbol->getTypeDesc()->getType().compare("integer") != 0) {
+            cout << "Error: For construct's ranging variable " << lexime
+                << " can only be integer, found "
+                << idSymbol->getTypeDesc()->getType()
+                << " however" << endl;
+          }
+        }
+      }
+      TOKEN_DO statement { ruleFile << "for_statement" << endl; };
 
 type: TOKEN_ID { ruleFile << "type_ID" << endl; //addSymbol($1, nilStr);
                  $$ = (char*) malloc(strlen($1) + 1);

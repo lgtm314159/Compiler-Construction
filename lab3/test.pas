@@ -35,7 +35,7 @@ begin
   var1 := false * var3;
   if int1+int2 then a := 0; 
   if false then var1 := false;
-  for a := 0 to 10 do begin end;
+  for a := 0 to 10 do begin for b:= 0 to var2 do begin end end;
   var4.s1.s2.s3 := var4.s1.s2.s4.s6.s7;
   var1 := foo1(false, var1);
 end.
