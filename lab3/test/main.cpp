@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <vector>
+#include <stack>
 #include "Symbol.h"
 #include "Env.h"
 
@@ -55,18 +56,42 @@ int main() {
   cout << sizeof(arrayStr) << endl;
   cout << str.length() << endl; 
 */
-
+  stack<Env*> envs;
   Env* env = new Env(NULL);
+  envs.push(env);
   TypeDesc* td = new TypeDesc(*(env->getSymbol("integer")->getTypeDesc())); 
   Symbol* sym = new Symbol("int", 0, td);
   env->setSymbol("int", sym);
   vector<pair<string, TypeDesc*> >* fl = new vector<pair<string, TypeDesc*> >();
   fl->push_back(pair<string, TypeDesc*>("a", new TypeDesc("integer")));
   fl->push_back(pair<string, TypeDesc*>("b", new TypeDesc("integer")));
+  fl->push_back(pair<string, TypeDesc*>("c", new TypeDesc("string")));
   TypeDesc* td2 = new TypeDesc("record", fl);
-  Symbol* sym2 = new Symbol("c", 0, td2);
-  env->setSymbol("c", sym2);
+  Symbol* sym2 = new Symbol("r", 0, td2);
+  env->setSymbol("r", sym2);
 
+  TypeDesc* resultTd1 = new TypeDesc(*(envs.top()->getSymbol("r")->getTypeDesc()));
+  TypeDesc* funcTd1 = new TypeDesc("function", NULL, resultTd1);
+  Symbol* funcSym1 = new Symbol("foo1", 0, funcTd1);
+  //TypeDesc* resultTd2 = new TypeDesc(*td2);
+  TypeDesc* resultTd2 = new TypeDesc(*(envs.top()->getSymbol("r")->getTypeDesc()));
+  TypeDesc* funcTd2 = new TypeDesc("function", NULL, resultTd2);
+  Symbol* funcSym2 = new Symbol("foo2", 0, funcTd2);
+  env->setSymbol("foo1", funcSym1);
+  env->setSymbol("foo2", funcSym2);
+  if (fl != NULL) {
+    cout << "here" << endl;
+    for(int i = 0; i < fl->size(); ++i) {
+      delete (fl->at(i).second);
+      fl->at(i).second = NULL;
+    }    
+    delete fl;
+    fl = NULL;
+  }
+  delete env;
+
+
+/*
   cout << fl->at(0).second->getType() << endl;
   cout << fl->at(1).second->getType() << endl;
   cout << td2->getTypeDescFromFieldList("a")->getType() << endl;
@@ -84,7 +109,7 @@ int main() {
   }
 
   delete env;
-
+*/
   //delete env;
   //cout << env->getSymbol("int")->getTypeDesc()->getType() << endl;
 /*
@@ -105,5 +130,6 @@ int main() {
   //char* var = (char*) malloc(ss.str().length() + 100);
   //strcpy(var, ss.str().c_str());
   //cout << var << endl;
+
 }
 

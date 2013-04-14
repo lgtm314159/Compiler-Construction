@@ -8,5 +8,4 @@
 ./run6
 ./run7
 ./run8
-./runall
 

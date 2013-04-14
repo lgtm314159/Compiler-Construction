@@ -1,6 +1,7 @@
 %{
 #include <cstdio>
 #include <iostream>
+#include <fstream>
 #include <iomanip>
 #include <sstream>
 #include <string.h>
@@ -448,11 +449,15 @@ procedureDeclaration: TOKEN_PROCEDURE TOKEN_ID TOKEN_LPAR formalParameterList
 
       // Add to the global symbol table.
       Env* globalEnv = envs.top()->getPrevEnv();
-      vector<TypeDesc*>* copyOfFormalParamList =
-          new vector<TypeDesc*>();
-      for (int i = 0; i < formalParamList->size(); ++i) {
-        TypeDesc* oneTd = new TypeDesc(*(formalParamList->at(i)));
-        copyOfFormalParamList->push_back(oneTd);
+      vector<TypeDesc*>* copyOfFormalParamList;
+      if (formalParamList != NULL) {
+        copyOfFormalParamList = new vector<TypeDesc*>();
+        for (int i = 0; i < formalParamList->size(); ++i) {
+          TypeDesc* oneTd = new TypeDesc(*(formalParamList->at(i)));
+          copyOfFormalParamList->push_back(oneTd);
+        }
+      } else {
+        copyOfFormalParamList = NULL;
       }
       td = new TypeDesc("procedure", copyOfFormalParamList, NULL);
       sym = new Symbol(lexime, 0, td);
@@ -505,11 +510,15 @@ functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList
 
           // Add to the global symbol table.
           Env* globalEnv = envs.top()->getPrevEnv();
-          vector<TypeDesc*>* copyOfFormalParamList =
-              new vector<TypeDesc*>();
-          for (int i = 0; i < formalParamList->size(); ++i) {
-            TypeDesc* oneTd = new TypeDesc(*(formalParamList->at(i)));
-            copyOfFormalParamList->push_back(oneTd);
+          vector<TypeDesc*>* copyOfFormalParamList;
+          if (formalParamList != NULL) {
+            copyOfFormalParamList = new vector<TypeDesc*>();
+            for (int i = 0; i < formalParamList->size(); ++i) {
+              TypeDesc* oneTd = new TypeDesc(*(formalParamList->at(i)));
+              copyOfFormalParamList->push_back(oneTd);
+            }
+          } else {
+            copyOfFormalParamList = NULL;
           }
           rt = new TypeDesc(resultType);
           td = new TypeDesc("function", copyOfFormalParamList, rt);
@@ -531,11 +540,15 @@ functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList
             envs.top()->setSymbol(lexime, sym);
 
             // Add to the global symbol table.
-            vector<TypeDesc*>* copyOfFormalParamList =
-                new vector<TypeDesc*>();
-            for (int i = 0; i < formalParamList->size(); ++i) {
-              TypeDesc* oneTd = new TypeDesc(*(formalParamList->at(i)));
-              copyOfFormalParamList->push_back(oneTd);
+            vector<TypeDesc*>* copyOfFormalParamList;
+            if (formalParamList != NULL) {
+              copyOfFormalParamList = new vector<TypeDesc*>();
+              for (int i = 0; i < formalParamList->size(); ++i) {
+                TypeDesc* oneTd = new TypeDesc(*(formalParamList->at(i)));
+                copyOfFormalParamList->push_back(oneTd);
+              }
+            } else {
+              copyOfFormalParamList = NULL;
             }
             rt = new TypeDesc(*invalidTd);
             td = new TypeDesc("function", copyOfFormalParamList, rt);
@@ -550,11 +563,15 @@ functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList
 
             // Add to the global symbol table.
             Env* globalEnv = envs.top()->getPrevEnv();
-            vector<TypeDesc*>* copyOfFormalParamList =
-                new vector<TypeDesc*>();
-            for (int i = 0; i < formalParamList->size(); ++i) {
-              TypeDesc* oneTd = new TypeDesc(*(formalParamList->at(i)));
-              copyOfFormalParamList->push_back(oneTd);
+            vector<TypeDesc*>* copyOfFormalParamList;
+            if (formalParamList != NULL) {
+              copyOfFormalParamList = new vector<TypeDesc*>();
+              for (int i = 0; i < formalParamList->size(); ++i) {
+                TypeDesc* oneTd = new TypeDesc(*(formalParamList->at(i)));
+                copyOfFormalParamList->push_back(oneTd);
+              }
+            } else {
+              copyOfFormalParamList = NULL;
             }
             rt = new TypeDesc(*(envs.top()->getPrevEnv()->getSymbol(resultType)->getTypeDesc()));
             td = new TypeDesc("function", copyOfFormalParamList, rt);
@@ -580,6 +597,7 @@ formalParameterList: formalParamSeq { cout << "formal_parameter_list" << endl; $
       Env* env = new Env(prevEnv);
       envs.push(env);
       allEnvs.push_back(env);
+      formalParamList = NULL;
     };
 
 formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
@@ -973,7 +991,8 @@ procedureStatement: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
               expTypeStack.pop();
               TypeDesc* formalParamTd = procTd->getNthFormalParamType(i);
               if (!checkTypeEquiv(td, formalParamTd)) {
-                cout << "Error: Procedure parameter type not matched, expected "
+                cout << "Error: Procedure " << procName
+                    << "'s parameter type not matched, expected "
                     << formalParamTd->getType() << ", given "
                     << td->getType() << endl;
                 // Pop the not checked actual parameters out of the expression
@@ -986,7 +1005,8 @@ procedureStatement: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
               }
             }
           } else {
-            cout << "Error: Procedure parameters number not matching!"
+            cout << "Error: Procedure " << procName
+                << "'s parameters number not matching!"
                 <<" Expected " << procTd->getNumOfFormalParams() << ", given "
                 << numOfParams << endl;
             for (int i = 0; i < numOfParams; ++i) {
@@ -1725,7 +1745,8 @@ functionReference: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
               TypeDesc* formalParamTd = funcTd->getNthFormalParamType(i);
               if (checkTypeEquiv(td, formalParamTd)) {
               } else {
-                cout << "Error: Function parameter type not matched, found "
+                cout << "Error: Function " << funcName
+                    << "'s parameter type not matched, found "
                     << td->getType() << " and " << formalParamTd << endl; 
                 isMatched = false;
                 // Pop the not checked actual parameters out of the expression
@@ -1746,7 +1767,8 @@ functionReference: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
               expTypeStack.push(resultTd);
             }
           } else {
-            cout << "Error: Function parameters not matching!"
+            cout << "Error: Function " << funcName
+                << "'s parameters number not matching!"
                 <<" Expected " << funcTd->getNumOfFormalParams() << ", given "
                 << numOfParams << endl;
             for (int i = 0; i < numOfParams; ++i) {

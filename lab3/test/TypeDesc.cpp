@@ -26,11 +26,13 @@ TypeDesc::TypeDesc(const string& t, vector<pair<string, TypeDesc*> >* fl):
 TypeDesc::TypeDesc(const string& t, vector<TypeDesc*>* fpl,
     TypeDesc* rt):
     type(t), lower(0), upper(0), arrayEleType(NULL), fieldList(NULL),
-    formalParamList(fpl), resultType(rt) {}
+    formalParamList(fpl), resultType(rt) {
+  // debugging
+  //resultType = new TypeDesc(*rt);
+}
 
 TypeDesc::TypeDesc(const TypeDesc& td):
-    type(td.type), lower(td.lower), upper(td.upper),
-    arrayEleType(td.arrayEleType) {
+    type(td.type), lower(td.lower), upper(td.upper) {
   if (td.fieldList != NULL) {
     fieldList = new vector<pair<string, TypeDesc*> >();
     for (int i = 0; i < td.fieldList->size(); ++i) {
@@ -63,16 +65,21 @@ TypeDesc::TypeDesc(const TypeDesc& td):
 }
 
 TypeDesc::~TypeDesc() {
+  cout << "destructing " << type << endl;
+  //  cout << "destructing " << type << endl;
   if (fieldList != NULL) {
+    /*
     for(int i = 0; i < fieldList->size(); ++i) {
+      //cout << "test " << i << " " << fieldList->at(i).second->getType() << endl;
       delete (fieldList->at(i).second);
       fieldList->at(i).second = NULL;
     }
 
     delete fieldList;
     fieldList = NULL;
+    */
+    freeFieldList();    
   }
-
 
   if (arrayEleType != NULL) {
     delete arrayEleType;
@@ -136,14 +143,54 @@ TypeDesc* TypeDesc::getTypeDescFromFieldList(const string& name) {
 }
 
 void TypeDesc::displayFieldList() {
-  cout << "field list size: " << fieldList->size() << endl;
-  for(int i = 0; i < fieldList->size(); ++i) {
-    cout << "record field: " << fieldList->at(i).first << " " <<
-        fieldList->at(i).second->getType() << endl;
+  if (fieldList != NULL) {
+    cout << "field list size: " << fieldList->size() << endl;
+    for(int i = 0; i < fieldList->size(); ++i) {
+      cout << "record field: " << fieldList->at(i).first << " " <<
+          fieldList->at(i).second->getType() << endl;
 
-    if (fieldList->at(i).second->getType().compare("record") == 0) {
-      fieldList->at(i).second->displayFieldList();
+      if (fieldList->at(i).second->getType().compare("record") == 0) {
+        fieldList->at(i).second->displayFieldList();
+      }
     }
   }
 }
 
+int TypeDesc::getNumOfFormalParams() {
+  if (formalParamList == NULL) {
+    return 0;
+  } else {
+    return formalParamList->size();
+  }
+}
+
+TypeDesc* TypeDesc::getNthFormalParamType(int n) {
+  if (formalParamList != NULL) {
+    if (n >= 0 && n < formalParamList->size()) {
+      return formalParamList->at(n);
+    } else {
+      return NULL;
+    }
+  } else {
+    return NULL;
+  }
+}
+
+TypeDesc* TypeDesc::getResultType() {
+  return resultType;
+}
+
+void TypeDesc::freeFieldList() {
+  cout << fieldList->size() << endl;
+  for(int i = 0; i < fieldList->size(); ++i) {
+    //cout << "test " << i << " " << fieldList->at(i).second->getType() << endl;
+    cout << fieldList->at(i).first << " " << fieldList->at(i).second->getType() << endl;
+    if (fieldList->at(i).second != NULL) {
+      delete (fieldList->at(i).second);
+      fieldList->at(i).second = NULL;
+    }
+  }
+
+  delete fieldList;
+  fieldList = NULL;
+}

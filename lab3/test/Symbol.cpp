@@ -1,4 +1,5 @@
 #include "Symbol.h"
+#include <iostream>
 
 using namespace std;
 
@@ -12,6 +13,7 @@ Symbol::Symbol(const Symbol& sb): lexime(sb.lexime), offset(sb.offset),
   typeDesc(sb.typeDesc) {}
 
 Symbol::~Symbol() {
+  cout << "destructing symbol " << lexime << " of type "<< typeDesc->getType() << endl;
   if (typeDesc != NULL) {
     delete typeDesc;
     typeDesc = NULL;

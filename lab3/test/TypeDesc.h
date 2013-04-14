@@ -22,6 +22,7 @@ class TypeDesc {
     // These fields are for function and procedure types.
     vector<TypeDesc*>* formalParamList;
     TypeDesc* resultType;
+    void freeFieldList();
 
   public:
 //    TypeDesc();
@@ -46,6 +47,9 @@ class TypeDesc {
     vector<pair<string, TypeDesc*> >* getFieldList();
     TypeDesc* getTypeDescFromFieldList(const string& name);
     void displayFieldList();
+    int getNumOfFormalParams();
+    TypeDesc* getNthFormalParamType(int i);
+    TypeDesc* getResultType();    
 };
 
 #endif

@@ -16,6 +16,11 @@ begin
    a := 0
 end;
 
+function foo3() : integer;
+begin
+  a := foo3(1, 2, 3);
+end;
+
 begin
   var1 := false * var3;
   if 0 then a := 0; 
