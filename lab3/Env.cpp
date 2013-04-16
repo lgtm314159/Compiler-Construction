@@ -1,6 +1,15 @@
 #include "Env.h"
-#include <iostream>
 
+#include <cstdio>
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <sstream>
+#include <string.h>
+#include <stdio.h>
+#include <map>
+#include <vector>
+#include <stack>
 using namespace std;
 
 Env::Env(Env* p): prev(p) {
@@ -73,3 +82,22 @@ void Env::displayTable() {
   }
 }
 
+void Env::outputSymTable() {
+  ofstream symFile;
+  symFile.open("symtable.out");
+  map<string, Symbol*>::iterator it;
+  stringstream ss; 
+  for (it = table.begin(); it != table.end(); ++it) {
+    //ss.str(string());
+    //ss << "address: " << it->first;
+    //symFile << setw(14) << std::left << ss.str();
+    ss.str(string());
+    ss << "identifier: " << it->first;
+    symFile << setw(29) << std::left << ss.str();
+    ss.str(string());
+    ss << "type: " << it->second->getTypeDesc()->getType();
+    symFile << setw(18) << std::left << ss.str();
+    symFile << endl;
+  }
+  symFile.close();
+}

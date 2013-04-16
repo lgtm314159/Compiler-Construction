@@ -23,6 +23,7 @@ class Env {
     void setSymbol(const string& name, Symbol* symbol);
     int getTableSize();
     void displayTable();
+    void outputSymTable();
 };
 
 
