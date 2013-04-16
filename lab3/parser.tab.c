@@ -581,8 +581,8 @@ static const yytype_uint16 yyrline[] =
     1291,  1296,  1446,  1595,  1596,  1598,  1600,  1652,  1654,  1658,
     1662,  1666,  1670,  1674,  1679,  1691,  1692,  1744,  1748,  1752,
     1757,  1818,  1820,  1824,  1828,  1832,  1837,  1842,  1846,  1852,
-    1853,  1867,  1869,  1977,  2062,  2075,  2086,  2090,  2091,  2093,
-    2095,  2097,  2112,  2117,  2117
+    1853,  1867,  1869,  1977,  2102,  2115,  2156,  2160,  2161,  2163,
+    2165,  2167,  2182,  2187,  2187
 };
 #endif
 
@@ -3920,47 +3920,87 @@ yyreduce:
     } else {
       // Validate component selection.
       if ((yyvsp[(2) - (2)].sval) != NULL) {
-        vector<string> components = split((yyvsp[(2) - (2)].sval));
-        TypeDesc* currentTd = outterMostTd;
-        TypeDesc* prevTd = currentTd;
-        bool valid = true;
-        for (int i = 0; i < components.size(); ++i) {
-          if (prevTd->getType().compare(rec) == 0) {
-            currentTd = prevTd->getTypeDescFromFieldList(components[i]);
-            if (currentTd == NULL) {
+        string compSelStr((yyvsp[(2) - (2)].sval));
+        if (compSelStr.find("invalid") != string::npos) {
+          TypeDesc* td = new TypeDesc("invalid");
+          expTypeStack.push(td);
+        } else {
+          vector<string> components = split((yyvsp[(2) - (2)].sval));
+          TypeDesc* currentTd = outterMostTd;
+          TypeDesc* prevTd = currentTd;
+          bool valid = true;
+          for (int i = 0; i < components.size(); ++i) {
+            if(components[i].find("[") != string::npos) {
+              prevTd = prevTd->getArrayEleType();
+              currentTd = prevTd;
+            } else {
+              if (prevTd->getType().compare(rec) == 0) {
+                currentTd = prevTd->getTypeDescFromFieldList(components[i]);
+                if (currentTd == NULL) {
+                  string name;
+                  if (i == 0) {
+                    name = lexime;
+                  } else {
+                    name = components[i - 1];
+                  }
+                  cout << "Error: Variable " << components[i] << " hasn't been defined in record "
+                      << name << endl;
+                  valid = false;
+                  break;
+                } else {
+                  prevTd = currentTd;
+                }
+              } else {
+                string name;
+                if (i == 0) {
+                  name = lexime;
+                } else {
+                  name = components[i - 1];
+                }
+                cout << "Error: Variable " << name << " is not a record" << endl;
+                valid = false;
+                break;
+              }
+            }
+            /*
+            if (prevTd->getType().compare(rec) == 0) {
+              currentTd = prevTd->getTypeDescFromFieldList(components[i]);
+              if (currentTd == NULL) {
+                string name;
+                if (i == 0) {
+                  name = lexime;
+                } else {
+                  name = components[i - 1];
+                }
+                cout << "Error: Variable " << components[i] << " hasn't been defined in record "
+                    << name << endl;
+                valid = false;
+                break;
+              } else {
+                prevTd = currentTd;
+              }
+            } else {
               string name;
               if (i == 0) {
                 name = lexime;
               } else {
                 name = components[i - 1];
               }
-              cout << "Error: Variable " << components[i] << " hasn't been defined in record "
-                  << name << endl;
+              cout << "Error: Variable " << name << " is not a record" << endl;
               valid = false;
               break;
-            } else {
-              prevTd = currentTd;
             }
-          } else {
-            string name;
-            if (i == 0) {
-              name = lexime;
-            } else {
-              name = components[i - 1];
-            }
-            cout << "Error: Variable " << name << " is not a record" << endl;
-            valid = false;
-            break;
+            */
           }
-        }
-        if (valid) {
-          //varType = new TypeDesc(*currentTd);
-          TypeDesc* td = new TypeDesc(*currentTd);
-          expTypeStack.push(td);
-        } else {
-          //varType = new TypeDesc("invalid");
-          TypeDesc* td = new TypeDesc("invalid");
-          expTypeStack.push(td);
+          if (valid) {
+            //varType = new TypeDesc(*currentTd);
+            TypeDesc* td = new TypeDesc(*currentTd);
+            expTypeStack.push(td);
+          } else {
+            //varType = new TypeDesc("invalid");
+            TypeDesc* td = new TypeDesc("invalid");
+            expTypeStack.push(td);
+          }
         }
       } else {
         //varType = new TypeDesc(*outterMostTd);
@@ -3974,7 +4014,7 @@ yyreduce:
   case 94:
 
 /* Line 1806 of yacc.c  */
-#line 2063 "parser.y"
+#line 2103 "parser.y"
     {
       // Lab3
       stringstream ss;
@@ -3992,15 +4032,45 @@ yyreduce:
   case 95:
 
 /* Line 1806 of yacc.c  */
-#line 2076 "parser.y"
+#line 2116 "parser.y"
     {
         // Lab3
-        if ((yyvsp[(4) - (4)].sval) == NULL) {
-          (yyval.sval) = NULL;
+        /*
+        if ($4 == NULL) {
+          $$ = NULL;
         }
         else {
-          (yyval.sval) = (char*) malloc(strlen((yyvsp[(4) - (4)].sval)) + 1);
-          strcpy((yyval.sval), (yyvsp[(4) - (4)].sval));
+          $$ = (char*) malloc(strlen($4) + 1);
+          strcpy($$, $4);
+        }
+        */
+
+        stringstream ss;
+        if (expTypeStack.top()->getType().compare("integer") != 0) {
+          cout << "Error: array's index can only be integer, found "
+              << expTypeStack.top()->getType() << endl;
+          expTypeStack.pop();
+          
+          if ((yyvsp[(4) - (4)].sval) != NULL) {
+            ss << "[invalid]" << " " << (yyvsp[(4) - (4)].sval);
+            (yyval.sval) = (char*) malloc(ss.str().length() + 1);
+            strcpy((yyval.sval), ss.str().c_str());
+          } else {
+            ss << "[invalid]";
+            (yyval.sval) = (char*) malloc(ss.str().length() + 1);
+            strcpy((yyval.sval), ss.str().c_str());
+          }
+        } else {
+          if ((yyvsp[(4) - (4)].sval) != NULL) {
+            ss << "[]" << " " << (yyvsp[(4) - (4)].sval);
+            (yyval.sval) = (char*) malloc(ss.str().length() + 1);
+            strcpy((yyval.sval), ss.str().c_str());
+          } else {
+            ss << "[]";
+            (yyval.sval) = (char*) malloc(ss.str().length() + 1);
+            strcpy((yyval.sval), ss.str().c_str());
+          }
+          expTypeStack.pop();
         }
       }
     break;
@@ -4008,7 +4078,7 @@ yyreduce:
   case 96:
 
 /* Line 1806 of yacc.c  */
-#line 2086 "parser.y"
+#line 2156 "parser.y"
     { ruleFile << "component_selection_empty" << endl;
         // Lab3
         (yyval.sval) = NULL;}
@@ -4017,35 +4087,35 @@ yyreduce:
   case 97:
 
 /* Line 1806 of yacc.c  */
-#line 2090 "parser.y"
+#line 2160 "parser.y"
     { ruleFile << "actual_parameter_list" << endl; (yyval.ival) = (yyvsp[(1) - (1)].ival); }
     break;
 
   case 98:
 
 /* Line 1806 of yacc.c  */
-#line 2091 "parser.y"
+#line 2161 "parser.y"
     { ruleFile << "actual_parameter_list_empty" << endl; (yyval.ival) = 0; }
     break;
 
   case 99:
 
 /* Line 1806 of yacc.c  */
-#line 2094 "parser.y"
+#line 2164 "parser.y"
     { ruleFile << "expressions_more" << endl; (yyval.ival) = (yyvsp[(1) - (3)].ival) + 1; }
     break;
 
   case 100:
 
 /* Line 1806 of yacc.c  */
-#line 2095 "parser.y"
+#line 2165 "parser.y"
     { ruleFile << "expressions" << endl; (yyval.ival) = 1; }
     break;
 
   case 101:
 
 /* Line 1806 of yacc.c  */
-#line 2098 "parser.y"
+#line 2168 "parser.y"
     { ruleFile << "identifier_list_more" << endl;
       (yyval.sval) = (char*) malloc (strlen((yyvsp[(1) - (3)].sval)) + strlen((yyvsp[(3) - (3)].sval)) + 2);
       int i = 0;
@@ -4065,7 +4135,7 @@ yyreduce:
   case 102:
 
 /* Line 1806 of yacc.c  */
-#line 2113 "parser.y"
+#line 2183 "parser.y"
     { ruleFile << "identifier_list" << endl;
       (yyval.sval) = (char*) malloc (strlen((yyvsp[(1) - (1)].sval)) + 1);
       strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));}
@@ -4074,7 +4144,7 @@ yyreduce:
 
 
 /* Line 1806 of yacc.c  */
-#line 4078 "parser.tab.c"
+#line 4148 "parser.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -4305,7 +4375,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 2119 "parser.y"
+#line 2189 "parser.y"
 
 main(int argc, char **argv) {
   FILE *myfile = fopen(argv[1], "r");
