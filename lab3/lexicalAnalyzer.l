@@ -105,9 +105,6 @@ procSavedAddr = address;
 ++address;
 return TOKEN_PROCEDURE;}
 program     {//printf("KEYWORD %s\n", yytext);
-Env* envPtr = new Env(NULL);
-envs.push(envPtr);
-allEnvs.push_back(envPtr);
 return TOKEN_PROGRAM;}
 record     {//printf("KEYWORD %s\n", yytext);
 recSavedAddr = address;

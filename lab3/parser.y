@@ -132,7 +132,16 @@ string arr(arrayStr);
 %type <ival> formalParamSeq formalParameterList constant actualParameterList expressionList expression
 %%
 
-program: TOKEN_PROGRAM TOKEN_ID TOKEN_SEMICOLON groupTypeDefinitions
+program: TOKEN_PROGRAM TOKEN_ID {
+      string id($2);
+      Env* envPtr = new Env(NULL, id);
+      envs.push(envPtr);
+      allEnvs.push_back(envPtr);
+
+      Symbol* sym = new Symbol(id, 0, new TypeDesc("program_id"));
+      envs.top()->setSymbol(id, sym);
+    }
+    TOKEN_SEMICOLON groupTypeDefinitions
     groupVariableDeclarations groupSubprogramDeclarations
     compoundStatement TOKEN_DOT
     { ruleFile << "program" << endl;
@@ -140,8 +149,6 @@ program: TOKEN_PROGRAM TOKEN_ID TOKEN_SEMICOLON groupTypeDefinitions
       symTable[id].first = 0;
       symTable[id].second = "nil";
 
-      Symbol* sym = new Symbol(id, 0, new TypeDesc("program_id"));
-      envs.top()->setSymbol(id, sym);
     };
 
 groupTypeDefinitions: typeDefinitions |;
@@ -433,7 +440,13 @@ variableDeclaration: identifierList TOKEN_COLON type TOKEN_SEMICOLON
       }
     };
 
-procedureDeclaration: TOKEN_PROCEDURE TOKEN_ID TOKEN_LPAR formalParameterList
+procedureDeclaration: TOKEN_PROCEDURE TOKEN_ID {
+      Env* prevEnv = envs.top();
+      Env* env = new Env(prevEnv, string($2));
+      envs.push(env);
+      allEnvs.push_back(env);
+    }
+    TOKEN_LPAR formalParameterList
     { 
       string id($2);
       if (symTable.find(id) != symTable.end()) {
@@ -442,7 +455,7 @@ procedureDeclaration: TOKEN_PROCEDURE TOKEN_ID TOKEN_LPAR formalParameterList
       }
       symTable[id].first = procSavedAddr;
       ostringstream convert;
-      convert << $4;
+      convert << $5;
       symTable[id].second = convert.str(); 
 
       // Lab3
@@ -473,7 +486,13 @@ procedureDeclaration: TOKEN_PROCEDURE TOKEN_ID TOKEN_LPAR formalParameterList
     { ruleFile << "procedure_declaration" << endl; envs.pop(); }
 ;
 
-functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList
+functionDeclaration: TOKEN_FUNCTION TOKEN_ID {
+      Env* prevEnv = envs.top();
+      Env* env = new Env(prevEnv, string($2));
+      envs.push(env);
+      allEnvs.push_back(env);
+    }
+    TOKEN_LPAR formalParameterList
     TOKEN_RPAR TOKEN_COLON resultType
     { 
       string id($2);
@@ -483,24 +502,24 @@ functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList
           fixAddress(addr);
           symTable[id].first = funcSavedAddr;
           ostringstream convert;
-          convert << $4;
+          convert << $5;
           symTable[id].second = convert.str();
         } else {
           fixAddress(funcSavedAddr);
           ostringstream convert;
-          convert << $4;
+          convert << $5;
           symTable[id].second = convert.str();
         }
       } else {
         symTable[id].first = funcSavedAddr;
         ostringstream convert;
-        convert << $4;
+        convert << $5;
         symTable[id].second = convert.str();
       }
 
       // Lab3
       string lexime($2);
-      string resultType($7);
+      string resultType($8);
 
       // Type is not literally named record or array.
       if (!envs.empty()) {
@@ -598,10 +617,6 @@ formalParameterList: formalParamSeq { ruleFile << "formal_parameter_list" << end
       $$ = 0; 
 
       // Lab3
-      Env* prevEnv = envs.top();
-      Env* env = new Env(prevEnv);
-      envs.push(env);
-      allEnvs.push_back(env);
       formalParamList = NULL;
     };
 
@@ -774,10 +789,6 @@ formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
         $$ = ids.size();
 
         // Lab3. Address will be fixed later.
-        Env* prevEnv = envs.top();
-        Env* env = new Env(prevEnv);
-        envs.push(env);
-        allEnvs.push_back(env);
         formalParamList = new vector<TypeDesc*>();
 
         //vector<string> strs = split($3);
@@ -996,45 +1007,54 @@ procedureStatement: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
       }
 
       if (procTd != NULL) {
-        if (procTd->getType().compare("procedure") != 0) {
+        if (procTd->getType().compare("procedure") != 0 &&
+            procTd->getType().compare("invalid") != 0) {
           cout << "Error: " << procName << " is not a procedure" << endl;
           for (int i = 0; i < numOfParams; ++i) {
             expTypeStack.pop();
           }
         } else {
-          // Check if the actual parameter list matches the function's
-          // formal parameter list.
-          if (numOfParams == procTd->getNumOfFormalParams()) {
-            for (int i = numOfParams - 1; i >= 0; --i) {
-              TypeDesc* td = expTypeStack.top();
-              expTypeStack.pop();
-              TypeDesc* formalParamTd = procTd->getNthFormalParamType(i);
-              if (checkTypeEquiv(td, formalParamTd)) {
-                //delete td;
-                td = NULL;
-              } else {
-                cout << "Error: Procedure " << procName
-                    << "'s parameter type not matched, expected "
-                    << formalParamTd->getType() << ", given "
-                    << td->getType() << endl;
-                //delete td;
-                td = NULL;
-                // Pop the not checked actual parameters out of the expression
-                // type stack;
-                --i;
-                while (i >= 0) {
-                  //delete expTypeStack.top();
-                  expTypeStack.top() = NULL;
-                  expTypeStack.pop();
+          if (procTd->getType().compare("procedure") != 0) {
+            // Check if the actual parameter list matches the function's
+            // formal parameter list.
+            if (numOfParams == procTd->getNumOfFormalParams()) {
+              for (int i = numOfParams - 1; i >= 0; --i) {
+                TypeDesc* td = expTypeStack.top();
+                expTypeStack.pop();
+                TypeDesc* formalParamTd = procTd->getNthFormalParamType(i);
+                if (checkTypeEquiv(td, formalParamTd)) {
+                  //delete td;
+                  td = NULL;
+                } else {
+                  cout << "Error: Procedure " << procName
+                      << "'s parameter type not matched, expected "
+                      << formalParamTd->getType() << ", given "
+                      << td->getType() << endl;
+                  //delete td;
+                  td = NULL;
+                  // Pop the not checked actual parameters out of the expression
+                  // type stack;
                   --i;
+                  while (i >= 0) {
+                    //delete expTypeStack.top();
+                    expTypeStack.top() = NULL;
+                    expTypeStack.pop();
+                    --i;
+                  }
                 }
+              }
+            } else {
+              cout << "Error: Procedure " << procName
+                  << "'s parameters number not matching!"
+                  <<" Expected " << procTd->getNumOfFormalParams() << ", given "
+                  << numOfParams << endl;
+              for (int i = 0; i < numOfParams; ++i) {
+                //delete expTypeStack.top();
+                expTypeStack.top() = NULL;
+                expTypeStack.pop();
               }
             }
           } else {
-            cout << "Error: Procedure " << procName
-                << "'s parameters number not matching!"
-                <<" Expected " << procTd->getNumOfFormalParams() << ", given "
-                << numOfParams << endl;
             for (int i = 0; i < numOfParams; ++i) {
               //delete expTypeStack.top();
               expTypeStack.top() = NULL;
@@ -1050,6 +1070,9 @@ procedureStatement: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
           expTypeStack.top() = NULL;
           expTypeStack.pop();
         }
+        TypeDesc* invalid = new TypeDesc("invalid");
+        Symbol* sym = new Symbol(procName, 0, invalid);
+        envs.top()->setSymbol(procName, sym);
       }
     };
 
@@ -1064,7 +1087,8 @@ structuredStatement: compoundStatement { ruleFile << "compound_statement" << end
       }
       TypeDesc* ifExpTypeDesc = expTypeStack.top();
       expTypeStack.pop();
-      if (ifExpTypeDesc->getType().compare("boolean") != 0) {
+      if (ifExpTypeDesc->getType().compare("boolean") != 0 &&
+          ifExpTypeDesc->getType().compare("invalid") != 0) {
         cout << "Error: If construct only accepts boolean conditional "
             << "expression, " << ifExpTypeDesc->getType() << " found however"
             << endl;
@@ -1086,7 +1110,8 @@ structuredStatement: compoundStatement { ruleFile << "compound_statement" << end
       }
       TypeDesc* ifExpTypeDesc = expTypeStack.top();
       expTypeStack.pop();
-      if (ifExpTypeDesc->getType().compare("boolean") != 0) {
+      if (ifExpTypeDesc->getType().compare("boolean") != 0 &&
+          ifExpTypeDesc->getType().compare("invalid") != 0) {
         cout << "Error: If construct only accepts boolean conditional "
             << "expression, " << ifExpTypeDesc->getType() << " found however"
             << endl;
@@ -1100,7 +1125,8 @@ structuredStatement: compoundStatement { ruleFile << "compound_statement" << end
     }
     | TOKEN_WHILE expression 
       {
-        if (expTypeStack.top()->getType().compare("boolean") != 0) {
+        if (expTypeStack.top()->getType().compare("boolean") != 0 &&
+            expTypeStack.top()->getType().compare("invalid") != 0) {
           cout << "Error: While construct expects boolean expression, "
               << expTypeStack.top()->getType() << " found" << endl;
         }
@@ -1116,8 +1142,10 @@ structuredStatement: compoundStatement { ruleFile << "compound_statement" << end
         TypeDesc* td1 = expTypeStack.top();
         expTypeStack.pop();
         
-        if (td1->getType().compare("integer") != 0 ||
-            td2->getType().compare("integer") != 0) {
+        if ((td1->getType().compare("integer") != 0 &&
+             td1->getType().compare("invalid") != 0) ||
+            (td2->getType().compare("integer") != 0 &&
+             td2->getType().compare("invalid") != 0)) {
           cout << "Error: For construct only expects integer in range"
             << " specification, found " << td1->getType()
             << " and " << td2->getType() << " however" << endl;
@@ -1204,6 +1232,12 @@ type: TOKEN_ID { ruleFile << "type_ID" << endl; //addSymbol($1, nilStr);
               }
               if (!found) {
                 cout << "Error: type " << arrayType << " undefined" << endl;
+                TypeDesc* invalid = new TypeDesc("invalid");
+                Symbol* sym = new Symbol(arrayType, 0, invalid);
+                envs.top()->setSymbol(arrayType, sym);
+                invalid = new TypeDesc("invalid");
+                TypeDesc* td = new TypeDesc("array", lower, upper, invalid);
+                arrayTypeStack.push(td);
               }
             } else {
               TypeDesc* arrayEleType = new TypeDesc(*(envs.top()->getSymbol(arrayType)->getTypeDesc()));
@@ -1858,7 +1892,8 @@ functionReference: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
       }
 
       if (funcTd != NULL) {
-        if (funcTd->getType().compare("function") != 0) {
+        if (funcTd->getType().compare("function") != 0 &&
+            funcTd->getType().compare("invalid") != 0) {
           cout << "Error: " << funcName << " is not a function" << endl;
           for (int i = 0; i < numOfParams; ++i) {
             expTypeStack.pop();
@@ -1866,53 +1901,58 @@ functionReference: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
           TypeDesc* td = new TypeDesc("invalid");
           expTypeStack.push(td);
         } else {
-          // Check if the actual parameter list matches the function's
-          // formal parameter list.
-          if (numOfParams == funcTd->getNumOfFormalParams()) {
-            bool isMatched = true;
-            for (int i = numOfParams - 1; i >= 0; --i) {
-              TypeDesc* td = expTypeStack.top();
-              expTypeStack.pop();
-              TypeDesc* formalParamTd = funcTd->getNthFormalParamType(i);
-              if (checkTypeEquiv(td, formalParamTd)) {
-                //delete td;
-              } else {
-                cout << "Error: Function " << funcName
-                    << "'s parameter type not matched, expected "
-                    << formalParamTd->getType() << ", given " 
-                    << td->getType() << endl; 
-                //delete td;
-                td = NULL;
-                isMatched = false;
-                // Pop the not checked actual parameters out of the expression
-                // type stack;
-                --i;
-                while (i >= 0) {
-                  //delete expTypeStack.top();
-                  expTypeStack.top() = NULL;
-                  expTypeStack.pop();
+          if (funcTd->getType().compare("function") == 0) {
+            // Check if the actual parameter list matches the function's
+            // formal parameter list.
+            if (numOfParams == funcTd->getNumOfFormalParams()) {
+              bool isMatched = true;
+              for (int i = numOfParams - 1; i >= 0; --i) {
+                TypeDesc* td = expTypeStack.top();
+                expTypeStack.pop();
+                TypeDesc* formalParamTd = funcTd->getNthFormalParamType(i);
+                if (checkTypeEquiv(td, formalParamTd)) {
+                  //delete td;
+                } else {
+                  cout << "Error: Function " << funcName
+                      << "'s parameter type not matched, expected "
+                      << formalParamTd->getType() << ", given " 
+                      << td->getType() << endl; 
+                  //delete td;
+                  td = NULL;
+                  isMatched = false;
+                  // Pop the not checked actual parameters out of the expression
+                  // type stack;
                   --i;
+                  while (i >= 0) {
+                    //delete expTypeStack.top();
+                    expTypeStack.top() = NULL;
+                    expTypeStack.pop();
+                    --i;
+                  }
                 }
               }
-            }
 
-            if (isMatched) {
-              TypeDesc* resultTd = new TypeDesc(*(funcTd->getResultType()));
-              expTypeStack.push(resultTd);
+              if (isMatched) {
+                TypeDesc* resultTd = new TypeDesc(*(funcTd->getResultType()));
+                expTypeStack.push(resultTd);
+              } else {
+                TypeDesc* resultTd = new TypeDesc("invalid");
+                expTypeStack.push(resultTd);
+              }
             } else {
-              TypeDesc* resultTd = new TypeDesc("invalid");
-              expTypeStack.push(resultTd);
+              cout << "Error: Function " << funcName
+                  << "'s parameters number not matching!"
+                  <<" Expected " << funcTd->getNumOfFormalParams() << ", given "
+                  << numOfParams << endl;
+              for (int i = 0; i < numOfParams; ++i) {
+                //delete expTypeStack.top();
+                expTypeStack.top() = NULL;
+                expTypeStack.pop();
+              }
+              TypeDesc* td = new TypeDesc("invalid");
+              expTypeStack.push(td);
             }
           } else {
-            cout << "Error: Function " << funcName
-                << "'s parameters number not matching!"
-                <<" Expected " << funcTd->getNumOfFormalParams() << ", given "
-                << numOfParams << endl;
-            for (int i = 0; i < numOfParams; ++i) {
-              //delete expTypeStack.top();
-              expTypeStack.top() = NULL;
-              expTypeStack.pop();
-            }
             TypeDesc* td = new TypeDesc("invalid");
             expTypeStack.push(td);
           }
@@ -1925,7 +1965,11 @@ functionReference: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
           expTypeStack.top() = NULL;
           expTypeStack.pop();
         }
+        
         TypeDesc* td = new TypeDesc("invalid");
+        Symbol* sym = new Symbol(funcName, 0, td);
+        envs.top()->setSymbol(funcName, sym);
+        td = new TypeDesc("invalid");
         expTypeStack.push(td);
       }
     };
@@ -1958,6 +2002,9 @@ variable: TOKEN_ID componentSelection { ruleFile << "variable " << endl;
       cout << "Error: variable " << lexime << " hasn't been declared" << endl;
       //varType = new TypeDesc("invalid");
       TypeDesc* td = new TypeDesc("invalid");
+      Symbol* sym = new Symbol(lexime, 0, td);
+      envs.top()->setSymbol(lexime, sym);
+      td = new TypeDesc("invalid");
       expTypeStack.push(td);
     } else {
       // Validate component selection.
@@ -2093,9 +2140,9 @@ main(int argc, char **argv) {
 
   map<int, pair<string, string> >::iterator it2;
   stringstream ss; 
-  //ofstream symFile;
-  //symFile.open("symtable.out");
-  envs.top()->outputSymTable();
+  ofstream symFile;
+  symFile.open("symtable.out");
+  //envs.top()->outputSymTable(symFile);
   //freopen("symtable.out", "w", stdout);
   /*
   for (it2 = symTableIndexedByAddr.begin(); it2 != symTableIndexedByAddr.end(); ++it2) {
@@ -2116,6 +2163,7 @@ main(int argc, char **argv) {
   for (int i = allEnvs.size() - 1; i >= 0; --i) {
     //cout << "Environment symbol table size: " << allEnvs[i]->getTableSize() << endl;
     //allEnvs[i]->displayTable();
+    allEnvs[i]->outputSymTable(symFile);
   } 
   //cout << envs.size() << endl;
   for (int i = allEnvs.size() - 1; i >= 0; --i) {
@@ -2124,7 +2172,7 @@ main(int argc, char **argv) {
   } 
 
   ruleFile.close();
-  //symFile.close();
+  symFile.close();
   fclose(myfile);
 
 }

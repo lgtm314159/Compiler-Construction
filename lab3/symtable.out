@@ -1,13 +1,29 @@
-identifier: boolean          type: boolean     
-identifier: errorfree        type: program_id  
-identifier: false            type: boolean     
-identifier: foo1             type: function    
-identifier: foo2             type: function    
-identifier: foo3             type: function    
-identifier: integer          type: integer     
-identifier: r                type: record      
-identifier: s                type: string      
-identifier: string           type: string      
-identifier: true             type: boolean     
-identifier: y                type: array       
-identifier: z                type: string      
+Symbol table of foo3: 
+address: 0    identifier: foo3             type: function    
+Symbol table of foo1: 
+address: 0    identifier: a                type: integer     
+address: 1    identifier: a                type: invalid     
+address: 2    identifier: foo1             type: function    
+Symbol table of whatever: 
+address: 0    identifier: integer          type: integer     
+address: 1    identifier: string           type: string      
+address: 2    identifier: boolean          type: boolean     
+address: 3    identifier: true             type: boolean     
+address: 4    identifier: false            type: boolean     
+address: 5    identifier: whatever         type: program_id  
+address: 6    identifier: r                type: record      
+address: 7    identifier: s                type: record      
+address: 8    identifier: var1             type: record      
+address: 9    identifier: var2             type: array       
+address: 10   identifier: var3             type: array       
+address: 11   identifier: a                type: boolean     
+address: 12   identifier: var4             type: record      
+address: 13   identifier: int1             type: integer     
+address: 14   identifier: int2             type: integer     
+address: 15   identifier: var5             type: record      
+address: 16   identifier: notatype         type: invalid     
+address: 17   identifier: var6             type: array       
+address: 18   identifier: var7             type: array       
+address: 19   identifier: foo1             type: function    
+address: 20   identifier: foo3             type: function    
+address: 21   identifier: b                type: invalid     

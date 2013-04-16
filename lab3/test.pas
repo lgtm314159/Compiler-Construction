@@ -29,6 +29,8 @@ var
             end
           end
         end;
+  var6: array[1..10] of array[1..10] of notatype;
+  var7: array[1..10] of notatype;
 
 function foo1(a, a : integer) : r;  
 begin
@@ -48,4 +50,5 @@ begin
   var4.s1.s2.s3 := var4.s1.s2.s4.s6.s7;
   var1 := foo1(false, var1);
   var5 := var1;
+  var3 := var7;
 end.

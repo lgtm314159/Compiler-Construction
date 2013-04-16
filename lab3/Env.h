@@ -2,7 +2,9 @@
 #define Env_h
 
 #include <map>
+#include <vector>
 #include <string>
+#include <fstream>
 #include "Symbol.h"
 
 using namespace std;
@@ -10,10 +12,12 @@ using namespace std;
 class Env {
   private:
     Env* prev;
+    string scopeName;
     map<string, Symbol*> table;
+    vector<Symbol*> symList;
 
   public:
-    Env(Env* p);
+    Env(Env* p, const string& scope);
     Env(const Env& e);
     ~Env();
     Env* getPrevEnv();
@@ -23,7 +27,7 @@ class Env {
     void setSymbol(const string& name, Symbol* symbol);
     int getTableSize();
     void displayTable();
-    void outputSymTable();
+    void outputSymTable(ofstream& synFile);
 };
 
 
