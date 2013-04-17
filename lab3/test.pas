@@ -55,5 +55,5 @@ begin
   var5 := var1;
   var3 := var7;
   {r := s.s1.var1;}
-  var3 := var7[1].s1.s2.s5;
+  var3 := var7[foo1(1, 2)].s1.s2.s5;
 end.

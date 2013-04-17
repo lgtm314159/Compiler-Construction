@@ -2019,9 +2019,43 @@ variable: TOKEN_ID componentSelection { ruleFile << "variable " << endl;
           TypeDesc* prevTd = currentTd;
           bool valid = true;
           for (int i = 0; i < components.size(); ++i) {
-            if(components[i].find("[") != string::npos) {
-              prevTd = prevTd->getArrayEleType();
-              currentTd = prevTd;
+            if (components[i].find("[") != string::npos) {
+              if (prevTd->getType().compare("array") == 0) {
+                prevTd = prevTd->getArrayEleType();
+                currentTd = prevTd;
+              } else {
+                /*
+                string name;
+                if (i == 0) {
+                  name = lexime;
+                } else {
+                  stringstream ss;
+                  ss.str(string());
+                  int j = i - 1;
+                  while (j >= 0 && components[j].compare("[]") == 0) {
+                    string tmp = ss.str();
+                    ss.str(string());
+                    ss << components[j] << tmp;
+                    --j;
+                  }
+                  if ( j < 0) {
+                    string tmp = ss.str();
+                    ss.str(string());
+                    ss << lexime << tmp;
+                  } else {
+                    string tmp = ss.str();
+                    ss.str(string());
+                    ss << components[j] << tmp;
+                  }
+                  //name = components[i - 1];
+                  name = ss.str();
+                }
+                */
+                cout << "Error: Trying to index a non-array variable ("
+                    << lexime << " or one of its component selection)" << endl;
+                valid = false;
+                break;
+              }
             } else {
               if (prevTd->getType().compare(rec) == 0) {
                 currentTd = prevTd->getTypeDescFromFieldList(components[i]);
