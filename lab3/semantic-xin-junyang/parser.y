@@ -1,0 +1,2432 @@
+%{
+#include <cstdio>
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <sstream>
+#include <string.h>
+#include <stdio.h>
+#include <map>
+#include <vector>
+#include <stack>
+#include "Symbol.h"
+#include "Env.h"
+#include "TypeDesc.h"
+#define YYDEBUG 1
+
+using namespace std;
+
+extern "C" int yylex();
+extern "C" int yyparse();
+extern "C" FILE *yyin; extern "C" int address;
+extern "C" int funcSavedAddr;
+extern "C" int procSavedAddr;
+extern "C" int recSavedAddr;
+extern "C" int arrSavedAddr;
+
+// Lab3
+extern "C++" stack<Env*> envs;
+extern "C++" stack<int> offsets;
+extern "C++" vector<Env*> allEnvs;
+extern "C++" stack<vector<pair<string, TypeDesc*> >* > fieldListStack;
+extern "C++" stack<TypeDesc*> arrayTypeStack;
+extern "C" int recordSeq;
+extern "C" int arraySeq;
+extern "C++" stack<TypeDesc*> expTypeStack;
+extern "C++" stack<int> ifExpIndexStack;
+vector<TypeDesc*>* formalParamList;
+ofstream ruleFile;
+//TypeDesc* varType = NULL;
+
+void yyerror(const char *s);
+static void lookup(char *token_buffer);
+void addSymbol(const char *id, const char *type);
+void addSymbol(const char *id, const string &type);
+void addSymbol(const string &id, const char *type);
+void addSymbol(const char* id, const int type);
+void addSymbol(const string &id, const string &type);
+vector<string> split(char *ids);
+void fixAddress(int addr);
+void freeFieldList(vector<pair<string, TypeDesc*> >* fl); 
+bool checkTypeEquiv(TypeDesc* td1, TypeDesc* td2);
+
+#define YYPRINT
+
+map<string, pair<int, string> > symTable;
+map<int, pair<string, string> > symTableIndexedByAddr;
+string nilStr("nil");
+char recordStr[] = "record";
+char arrayStr[] = "array";
+string rec(recordStr);
+string arr(arrayStr);
+
+%}
+
+%expect 1
+
+%union {
+  int ival;
+  float fval;
+  bool bval;
+  char *sval;
+}
+
+%token-table
+
+%token TOKEN_COMMENT;
+%token <sval> TOKEN_STR
+%token <sval> TOKEN_AND
+%token TOKEN_BEGIN
+%token TOKEN_FORWARD
+%token <sval> TOKEN_DIV
+%token TOKEN_DO
+%token TOKEN_ELSE
+%token TOKEN_END
+%token TOKEN_FOR
+%token TOKEN_FUNCTION
+%token TOKEN_IF
+%token TOKEN_ARRAY
+%token <sval> TOKEN_MOD
+%token <sval> TOKEN_NOT
+%token TOKEN_OF
+%token <sval> TOKEN_OR
+%token TOKEN_PROCEDURE
+%token TOKEN_PROGRAM
+%token TOKEN_RECORD
+%token TOKEN_THEN
+%token TOKEN_TO
+%token TOKEN_TYPE
+%token TOKEN_VAR
+%token TOKEN_WHILE
+%token <sval> TOKEN_PLUS
+%token <sval> TOKEN_MINUS
+%token <sval> TOKEN_MULTIPLY
+%token TOKEN_DIVIDE
+%token <sval> TOKEN_EQ
+%token <sval> TOKEN_LT
+%token <sval> TOKEN_LE
+%token <sval> TOKEN_GT
+%token <sval> TOKEN_GE
+%token <sval> TOKEN_NOTEQ
+%token <sval> TOKEN_ID
+%token <ival> TOKEN_INT
+%token TOKEN_DECIMAL
+%token TOKEN_EXPNUM
+%token TOKEN_DOT
+%token TOKEN_COMMAS
+%token TOKEN_COLON
+%token TOKEN_SEMICOLON
+%token TOKEN_ASSIGN
+%token TOKEN_RANGE
+%token TOKEN_LPAR
+%token TOKEN_RPAR
+%token TOKEN_LBRACKET
+%token TOKEN_RBRACKET
+
+%right TOKEN_ELSE
+%left TOKEN_PLUS TOKEN_MINUS TOKEN_OR
+%left TOKEN_MULTIPLY TOKEN_DIV TOKEN_MOD TOKEN_AND
+%right UPLUS UMINUS
+
+%type <sval> type identifierList resultType componentSelection relationalOp addOp mulOp variable
+%type <ival> formalParamSeq formalParameterList constant actualParameterList expressionList expression
+%%
+
+program: TOKEN_PROGRAM TOKEN_ID {
+      string id($2);
+      Env* envPtr = new Env(NULL, id);
+      envs.push(envPtr);
+      allEnvs.push_back(envPtr);
+
+      Symbol* sym = new Symbol(id, 0, new TypeDesc("program_id"));
+      envs.top()->setSymbol(id, sym);
+    }
+    TOKEN_SEMICOLON groupTypeDefinitions
+    groupVariableDeclarations groupSubprogramDeclarations
+    compoundStatement TOKEN_DOT
+    { ruleFile << "program" << endl;
+      string id($2);
+      symTable[id].first = 0;
+      symTable[id].second = "nil";
+
+    };
+
+groupTypeDefinitions: typeDefinitions |;
+groupVariableDeclarations: variableDeclarations |;
+groupSubprogramDeclarations: subprogramDeclarations |;
+
+typeDefinitions: TOKEN_TYPE typeDefinitionList ;
+
+typeDefinitionList: typeDefinitionList typeDefinition { ruleFile << "type_definition_more" << endl; } 
+    | typeDefinition { ruleFile << "type_definition" << endl; };
+
+variableDeclarations: TOKEN_VAR variableDeclarationList;
+
+variableDeclarationList: variableDeclarationList variableDeclaration { ruleFile << "variable_declaration_more" << endl; }
+    | variableDeclaration {ruleFile << "variable_declaration" << endl; };
+
+subprogramDeclarations: subprogramDeclarationList;
+
+subprogramDeclarationList: subprogramDeclarationList procedureDeclaration { ruleFile << "sub_program_declarations_more" << endl; }
+    | subprogramDeclarationList functionDeclaration { ruleFile << "sub_program_declarations_more" << endl; }
+    | procedureDeclaration { ruleFile << "sub_program_declarations" << endl; }
+    | functionDeclaration { ruleFile << "sub_program_declarations" << endl; };
+
+typeDefinition: TOKEN_ID TOKEN_EQ type TOKEN_SEMICOLON
+    { ruleFile << "type_definition" << endl;
+      //vector<string> strs = split($3);
+      string type($3);
+      if (type.compare(rec) != 0 && type.compare(arr) !=0) {
+        // Type is not literally named record or array.
+        addSymbol($1, $3);
+        addSymbol($3, nilStr);
+
+        // Lab3. Address will be fixed later.
+        string lexime($1);
+        if (envs.top()->getSymbol(lexime) != NULL) {
+          if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+            cout << "Invalid use of keyword " << lexime << endl;
+          else
+            cout << "Duplicated type definition for " << lexime << endl;
+        } else {
+          if (!envs.empty()) {
+            if (type.compare("integer") == 0 ||
+                type.compare("string") == 0 ||
+                type.compare("boolean") == 0) {
+              TypeDesc* td = new TypeDesc(type);
+              Symbol* sym = new Symbol(lexime, 0, td);
+              envs.top()->setSymbol(lexime, sym);
+            } else {
+              if (envs.top()->getSymbol(type) == NULL) {
+                Env* envPtr = envs.top()->getPrevEnv();
+                bool found = false;
+                while (envPtr != NULL) {
+                  if (envPtr->getSymbol(type) != NULL) {
+                    found = true;
+                    // Copy the type descriptor.
+                    TypeDesc* tmpTd = envPtr->getSymbol(type)->getTypeDesc();
+                    TypeDesc* td = new TypeDesc(*tmpTd);
+                    Symbol* sym = new Symbol(lexime, 0, td);
+                    envs.top()->setSymbol(lexime, sym);
+                    break;
+                  }
+                  envPtr = envPtr->getPrevEnv();
+                }
+                if (!found) {
+                  cout << "Error: type " << type << " not defined" << endl;
+                  
+                  // Add this invalid type to the symbol table.
+                  TypeDesc* invalidTd = new TypeDesc("invalid");
+                  Symbol* sym = new Symbol(type, 0, invalidTd);
+                  envs.top()->setSymbol(type, sym);
+                  // Add the defined type to the symbol table with invalid type. 
+                  TypeDesc* td = new TypeDesc(*invalidTd);
+                  sym = new Symbol(lexime, 0, td);
+                  envs.top()->setSymbol(lexime, sym);
+                }
+              } else {
+                TypeDesc* td = envs.top()->getSymbol(type)->getTypeDesc();
+                Symbol* sym = new Symbol(lexime, 0, td);
+                envs.top()->setSymbol(lexime, sym);
+              }
+            }          
+          }
+        }
+      } else if (type.compare(rec) == 0) {
+        // Type is record.
+        string id($1);
+        if (symTable.find(id) == symTable.end()) {
+          symTable[id].first = recSavedAddr;
+          symTable[id].second = string($3); 
+        } else {
+          if (symTable[id].first > recSavedAddr) {
+            int addr = symTable[id].first;
+            fixAddress(addr);
+            symTable[id].first = recSavedAddr;
+          } else {
+            fixAddress(recSavedAddr);
+          }
+          symTable[id].second = string($3); 
+        }
+        
+        // Lab3
+        string lexime($1);
+        if (envs.top()->getSymbol(lexime) != NULL) {
+          if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+            cout << "Invalid use of keyword " << lexime << endl;
+          else
+            cout << "Duplicated type definition for " << lexime << endl;
+        } else {
+          TypeDesc* td = new TypeDesc("record", fieldListStack.top());
+          Symbol* sym = new Symbol(lexime, 0, td);
+          envs.top()->setSymbol(lexime, sym);
+        }
+        //vector<pair<string, TypeDesc*> >* recFl = fieldListStack.top();
+        //fieldListStack.pop();
+        //freeFieldList(fieldListStack.top());
+      } else {
+        // Type is array.
+        string id($1);
+        if (symTable.find(id) == symTable.end()) {
+          symTable[id].first = arrSavedAddr;
+          symTable[id].second = type;
+          
+        } else {
+          if (symTable[id].first > arrSavedAddr) {
+            int addr = symTable[id].first;
+            fixAddress(addr);
+            symTable[id].first = arrSavedAddr;
+          } else {
+            fixAddress(arrSavedAddr);
+          }
+          symTable[id].second = type;
+        }
+        
+        // Lab3
+        if (!envs.empty()) {
+          string lexime($1);
+          if (envs.top()->getSymbol(lexime) != NULL) {
+            if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+              cout << "Invalid use of keyword " << lexime << endl;
+            else
+              cout << "Duplicated type definition for " << lexime << endl;
+          } else {
+            TypeDesc* td = arrayTypeStack.top();
+            Symbol* sym = new Symbol(lexime, 0, td);
+            envs.top()->setSymbol(lexime, sym);
+            arrayTypeStack.pop();
+          }
+        }
+      }
+    };
+
+variableDeclaration: identifierList TOKEN_COLON type TOKEN_SEMICOLON
+    { ruleFile << "variable_declaration" << endl;
+      vector<string> ids = split($1);
+      //vector<string> strs = split($3);
+      string type($3);
+      for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+        addSymbol(*it, type);
+      }
+      if (type.compare(rec) != 0 && type.compare(arr) !=0) {
+        if (symTable.find(type) == symTable.end()) {
+          addSymbol(type, nilStr);
+        }
+      }
+
+      // Lab3. Address will be fixed later.
+      if (type.compare(rec) != 0 && type.compare(arr) !=0) {
+        // Type is not literally named record or array.
+        if (!envs.empty()) {
+          if (type.compare("integer") == 0 ||
+              type.compare("string") == 0 ||
+              type.compare("boolean") == 0) {
+            for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+              string lexime(*it);
+              if (envs.top()->getSymbol(lexime) != NULL) {
+                if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+                  cout << "Invalid use of keyword " << lexime << endl;
+                else
+                  cout << "Duplicated variable declaration for " << lexime << endl;
+              } else {
+                TypeDesc* td = new TypeDesc(type);
+                Symbol* sym = new Symbol(lexime, 0, td);
+                envs.top()->setSymbol(lexime, sym);
+              }
+            }
+          } else {
+            if (envs.top()->getSymbol(type) == NULL) {
+              Env* envPtr = envs.top()->getPrevEnv();
+              bool found = false; while (envPtr != NULL) {
+                if (envPtr->getSymbol(type) != NULL) {
+                  found = true;
+                  for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                    string lexime(*it);
+                    if (envs.top()->getSymbol(lexime) != NULL) {
+                      if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+                        cout << "Invalid use of keyword " << lexime << endl;
+                      else
+                        cout << "Duplicated variable definition for " << lexime << endl;
+                    } else {
+                      TypeDesc* td = new TypeDesc(*(envPtr->getSymbol(type)->getTypeDesc()));
+                      Symbol* sym = new Symbol(lexime, 0, td);
+                      envs.top()->setSymbol(lexime, sym);
+                    }
+                  }
+                  break;
+                }
+                envPtr = envPtr->getPrevEnv();
+              }
+              if (!found) {
+                cout << "Error: type " << type << " not defined" << endl;
+
+                // Add this invalid type to the symbol table.
+                TypeDesc* invalidTd = new TypeDesc("invalid");
+                Symbol* sym = new Symbol(type, 0, invalidTd);
+                envs.top()->setSymbol(type, sym);
+
+                // Add the declared variables to the symbol table with invalid type. 
+                for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                  string lexime(*it);
+                  if (envs.top()->getSymbol(lexime) != NULL) {
+                    if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+                      cout << "Invalid use of keyword " << lexime << endl;
+                    else
+                      cout << "Duplicated variable definition for " << lexime << endl;
+                  } else {
+                    TypeDesc* td = new TypeDesc(*invalidTd);
+                    Symbol* sym = new Symbol(lexime, 0, td);
+                    envs.top()->setSymbol(lexime, sym);
+                  }
+                }
+              }
+            } else {
+              for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                string lexime(*it);
+                if (envs.top()->getSymbol(lexime) != NULL) {
+                  if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+                    cout << "Invalid use of keyword " << lexime << endl;
+                  else
+                    cout << "Duplicated variable definition for " << lexime << endl;
+                } else {
+                  TypeDesc* td = new TypeDesc(*(envs.top()->getSymbol(type)->getTypeDesc()));
+                  Symbol* sym = new Symbol(lexime, 0, td);
+                  envs.top()->setSymbol(lexime, sym);
+                }
+              }
+            }
+          } 
+        }
+      } else if (type.compare(rec) == 0) {
+        // Type is record.
+        
+        // Lab3
+        for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+          string lexime(*it);
+          if (envs.top()->getSymbol(lexime) != NULL) {
+            if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+              cout << "Invalid use of keyword " << lexime << endl;
+            else
+              cout << "Duplicated variable definition for " << lexime << endl;
+          } else {
+            TypeDesc* td = new TypeDesc("record", fieldListStack.top());
+            Symbol* sym = new Symbol(lexime, 0, td);
+            envs.top()->setSymbol(lexime, sym);
+          }
+        }
+        //delete fieldListStack.top();
+        //freeFieldList(fieldListStack.top());
+        fieldListStack.pop();
+      } else {
+        // Type is array.
+
+        // Lab3
+        if (!envs.empty()) {
+          for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+            string lexime(*it);
+            if (envs.top()->getSymbol(lexime) != NULL) {
+              if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+                cout << "Invalid use of keyword " << lexime << endl;
+              else
+                cout << "Duplicated variable definition for " << lexime << endl;
+            } else {
+              TypeDesc* td = arrayTypeStack.top();
+              Symbol* sym = new Symbol(lexime, 0, td);
+              envs.top()->setSymbol(lexime, sym);
+            }
+          }
+          arrayTypeStack.pop();
+        }
+      }
+    };
+
+procedureDeclaration: TOKEN_PROCEDURE TOKEN_ID {
+      Env* prevEnv = envs.top();
+      Env* env = new Env(prevEnv, string($2));
+      envs.push(env);
+      allEnvs.push_back(env);
+    }
+    TOKEN_LPAR formalParameterList
+    { 
+      string id($2);
+      if (symTable.find(id) != symTable.end()) {
+        int addr = symTable[id].first;
+        fixAddress(addr);
+      }
+      symTable[id].first = procSavedAddr;
+      ostringstream convert;
+      convert << $5;
+      symTable[id].second = convert.str(); 
+
+      // Lab3
+      string lexime($2);
+      // Add to the local symbol table.
+      TypeDesc* td1 = new TypeDesc("procedure", formalParamList, NULL);
+      Symbol* sym1 = new Symbol(lexime, 0, td1);
+      envs.top()->setSymbol(lexime, sym1);
+
+      // Add to the global symbol table.
+      Env* globalEnv = envs.top()->getPrevEnv();
+      vector<TypeDesc*>* copyOfFormalParamList;
+      if (formalParamList != NULL) {
+        copyOfFormalParamList = new vector<TypeDesc*>();
+        for (int i = 0; i < formalParamList->size(); ++i) {
+          TypeDesc* oneTd = new TypeDesc(*(formalParamList->at(i)));
+          copyOfFormalParamList->push_back(oneTd);
+        }
+      } else {
+        copyOfFormalParamList = NULL;
+      }
+      TypeDesc* td2 = new TypeDesc("procedure", copyOfFormalParamList, NULL);
+      Symbol* sym2 = new Symbol(lexime, 0, td2);
+      globalEnv->setSymbol(lexime, sym2);
+      
+    }
+    TOKEN_RPAR TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
+    { ruleFile << "procedure_declaration" << endl; envs.pop(); }
+;
+
+functionDeclaration: TOKEN_FUNCTION TOKEN_ID {
+      Env* prevEnv = envs.top();
+      Env* env = new Env(prevEnv, string($2));
+      envs.push(env);
+      allEnvs.push_back(env);
+    }
+    TOKEN_LPAR formalParameterList
+    TOKEN_RPAR TOKEN_COLON resultType
+    { 
+      string id($2);
+      if (symTable.find(id) != symTable.end()) {
+        if (symTable[id].first > funcSavedAddr) {
+          int addr = symTable[id].first;
+          fixAddress(addr);
+          symTable[id].first = funcSavedAddr;
+          ostringstream convert;
+          convert << $5;
+          symTable[id].second = convert.str();
+        } else {
+          fixAddress(funcSavedAddr);
+          ostringstream convert;
+          convert << $5;
+          symTable[id].second = convert.str();
+        }
+      } else {
+        symTable[id].first = funcSavedAddr;
+        ostringstream convert;
+        convert << $5;
+        symTable[id].second = convert.str();
+      }
+
+      // Lab3
+      string lexime($2);
+      string resultType($8);
+
+      // Type is not literally named record or array.
+      if (!envs.empty()) {
+        if (resultType.compare("integer") == 0 ||
+            resultType.compare("string") == 0 ||
+            resultType.compare("boolean") == 0) {
+          // Add to the local symbol table.
+          TypeDesc* rt1 = new TypeDesc(resultType);
+          TypeDesc* td1 = new TypeDesc("function", formalParamList, rt1);
+          Symbol* sym1 = new Symbol(lexime, 0, td1);
+          envs.top()->setSymbol(lexime, sym1);
+
+          // Add to the global symbol table.
+          Env* globalEnv = envs.top()->getPrevEnv();
+          vector<TypeDesc*>* copyOfFormalParamList;
+          if (formalParamList != NULL) {
+            copyOfFormalParamList = new vector<TypeDesc*>();
+            for (int i = 0; i < formalParamList->size(); ++i) {
+              TypeDesc* oneTd = new TypeDesc(*(formalParamList->at(i)));
+              copyOfFormalParamList->push_back(oneTd);
+            }
+          } else {
+            copyOfFormalParamList = NULL;
+          }
+          TypeDesc* rt2 = new TypeDesc(resultType);
+          TypeDesc* td2 = new TypeDesc("function", copyOfFormalParamList, rt2);
+          Symbol* sym2 = new Symbol(lexime, 0, td2);
+          globalEnv->setSymbol(lexime, sym2);
+        } else {
+          if (envs.top()->getPrevEnv()->getSymbol(resultType) == NULL) {
+            cout << "Error: type " << resultType << " not defined" << endl;
+            // Add the invalid result type to the global symbol table.
+            Env* globalEnv = envs.top()->getPrevEnv();
+            TypeDesc* invalidTd = new TypeDesc("invalid");
+            Symbol* sym = new Symbol(resultType, 0, invalidTd); 
+            globalEnv->setSymbol(resultType, sym);
+
+            // Add to the local symbol table.
+            TypeDesc* rt1 = new TypeDesc("invalid");
+            TypeDesc* td1 = new TypeDesc("function", formalParamList, rt1);
+            Symbol* sym1 = new Symbol(lexime, 0, td1);
+            envs.top()->setSymbol(lexime, sym1);
+
+            // Add to the global symbol table.
+            vector<TypeDesc*>* copyOfFormalParamList;
+            if (formalParamList != NULL) {
+              copyOfFormalParamList = new vector<TypeDesc*>();
+              for (int i = 0; i < formalParamList->size(); ++i) {
+                TypeDesc* oneTd = new TypeDesc(*(formalParamList->at(i)));
+                copyOfFormalParamList->push_back(oneTd);
+              }
+            } else {
+              copyOfFormalParamList = NULL;
+            }
+            TypeDesc* rt2 = new TypeDesc("invalid");
+            TypeDesc* td2 = new TypeDesc("function", copyOfFormalParamList, rt2);
+            Symbol* sym2 = new Symbol(lexime, 0, td2);
+            globalEnv->setSymbol(lexime, sym2);
+          } else {
+            // Add to the local symbol table.
+            TypeDesc* rt1 = new TypeDesc(*(envs.top()->getPrevEnv()->getSymbol(resultType)->getTypeDesc()));
+            TypeDesc* td1 = new TypeDesc("function", formalParamList, rt1);
+            Symbol* sym1 = new Symbol(lexime, 0, td1);
+            envs.top()->setSymbol(lexime, sym1);
+
+            // Add to the global symbol table.
+            Env* globalEnv = envs.top()->getPrevEnv();
+            vector<TypeDesc*>* copyOfFormalParamList;
+            if (formalParamList != NULL) {
+              copyOfFormalParamList = new vector<TypeDesc*>();
+              for (int i = 0; i < formalParamList->size(); ++i) {
+                TypeDesc* oneTd = new TypeDesc(*(formalParamList->at(i)));
+                copyOfFormalParamList->push_back(oneTd);
+              }
+            } else {
+              copyOfFormalParamList = NULL;
+            }
+            TypeDesc* rt2 = new TypeDesc(*(envs.top()->getPrevEnv()->getSymbol(resultType)->getTypeDesc()));
+            TypeDesc* td2 = new TypeDesc("function", copyOfFormalParamList, rt2);
+            Symbol* sym2 = new Symbol(lexime, 0, td2);
+            globalEnv->setSymbol(lexime, sym2);
+          }
+        } 
+      }
+    }
+    TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
+    { ruleFile << "function_declaration" << endl; envs.pop(); };
+
+groupBlockForward: block | TOKEN_FORWARD;
+
+formalParameterList: formalParamSeq { ruleFile << "formal_parameter_list" << endl; $$ = $1;}
+    |
+
+    { ruleFile << "formal_parameter_list_empty" << endl; 
+      $$ = 0; 
+
+      // Lab3
+      formalParamList = NULL;
+    };
+
+formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
+    { ruleFile << "identifier_lists_more" << endl;
+      vector<string> ids = split($3);
+      //vector<string> strs = split($5);
+      for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+        addSymbol(*it, $5);
+      }
+      string type($5);
+      if (type.compare(rec) != 0 && type.compare(arr) !=0) {
+        if (symTable.find(type) == symTable.end()) {
+          addSymbol(type, nilStr);
+        }
+      }
+      $$ = $1 + ids.size();
+
+      //vector<string> strs = split($5);
+      if (type.compare(rec) != 0 && type.compare(arr) !=0) {
+        // Type is not literally named record or array.
+        if (!envs.empty()) {
+          if (type.compare("integer") == 0 ||
+              type.compare("string") == 0 ||
+              type.compare("boolean") == 0) {
+            for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+              string lexime(*it);
+              if (envs.top()->getSymbol(lexime) != NULL) {
+                cout << "Error: Duplicated decaration of parameter "
+                    << lexime << " for function" << endl;
+                TypeDesc* td = new TypeDesc("invalid");
+                formalParamList->push_back(td);
+                Symbol* sym = new Symbol(lexime, 0, td);
+                envs.top()->setSymbol(lexime, sym);
+              } else {
+                TypeDesc* td = new TypeDesc(type);
+                formalParamList->push_back(td);
+                Symbol* sym = new Symbol(lexime, 0, td);
+                envs.top()->setSymbol(lexime, sym);
+              }
+            }
+          } else {
+            if (envs.top()->getSymbol(type) == NULL) {
+              Env* envPtr = envs.top()->getPrevEnv();
+              bool found = false;
+              while (envPtr != NULL) {
+                if (envPtr->getSymbol(type) != NULL) {
+                  found = true;
+                  for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                    string lexime(*it);
+                    if (envs.top()->getSymbol(lexime) != NULL) {
+                      cout << "Error: Duplicated decaration of parameter "
+                          << lexime << " for function" << endl;
+                      TypeDesc* td = new TypeDesc("invalid");
+                      formalParamList->push_back(td);
+                      Symbol* sym = new Symbol(lexime, 0, td);
+                      envs.top()->setSymbol(lexime, sym);
+                    } else {
+                      TypeDesc* td = new TypeDesc(*(envPtr->getSymbol(type)->getTypeDesc()));
+                      formalParamList->push_back(td);
+                      Symbol* sym = new Symbol(lexime, 0, td);
+                      envs.top()->setSymbol(lexime, sym);
+                    }
+                  }
+                  break;
+                }
+                envPtr = envPtr->getPrevEnv();
+              }
+              if (!found) {
+                cout << "Error: type " << type << " not defined" << endl;
+
+                // Add this invalid type to the symbol table.
+                TypeDesc* invalidTd = new TypeDesc("invalid");
+                Symbol* sym = new Symbol(type, 0, invalidTd);
+                envs.top()->setSymbol(type, sym);
+
+                // Add the defined parameters to the symbol table with invalid type. 
+                for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                  string lexime(*it);
+                  if (envs.top()->getSymbol(lexime) != NULL) {
+                    cout << "Error: Duplicated decaration of parameter "
+                        << lexime << " for function" << endl;
+                  }
+                  TypeDesc* td = new TypeDesc(*invalidTd);
+                  formalParamList->push_back(td);
+                  Symbol* sym = new Symbol(lexime, 0, td);
+                  envs.top()->setSymbol(lexime, sym);
+                }
+              }
+            } else {
+              for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                string lexime(*it);
+                if (envs.top()->getSymbol(lexime) != NULL) {
+                  cout << "Error: Duplicated decaration of parameter "
+                      << lexime << " for function" << endl;
+                  TypeDesc* td = new TypeDesc("invalid");
+                  formalParamList->push_back(td);
+                  Symbol* sym = new Symbol(lexime, 0, td);
+                  envs.top()->setSymbol(lexime, sym);
+                } else {
+                  TypeDesc* td = new TypeDesc(*(envs.top()->getSymbol(type)->getTypeDesc()));
+                  formalParamList->push_back(td);
+                  Symbol* sym = new Symbol(lexime, 0, td);
+                  envs.top()->setSymbol(lexime, sym);
+                }
+              }
+            }
+          } 
+        }
+      } else if (type.compare(rec) == 0) {
+        // Type is record.
+        
+        // Lab3
+        for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+          string lexime(*it);
+          if (envs.top()->getSymbol(lexime) != NULL) {
+            cout << "Error: Duplicated decaration of parameter "
+                << lexime << " for function" << endl;
+            TypeDesc* td = new TypeDesc("invalid");
+            formalParamList->push_back(td);
+            Symbol* sym = new Symbol(lexime, 0, td);
+            envs.top()->setSymbol(lexime, sym);
+          } else {
+            TypeDesc* td = new TypeDesc("record", fieldListStack.top());
+            formalParamList->push_back(td);
+            Symbol* sym = new Symbol(lexime, 0, td);
+            envs.top()->setSymbol(lexime, sym);
+          }
+        }
+        //delete fieldListStack.top();
+        //freeFieldList(fieldListStack.top());
+        fieldListStack.pop();
+      } else {
+        // Type is array.
+
+        // Lab3
+        if (!envs.empty()) {
+          for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+            string lexime(*it);
+            if (envs.top()->getSymbol(lexime) != NULL) {
+              cout << "Error: Duplicated decaration of parameter "
+                  << lexime << " for function" << endl;
+              TypeDesc* td = new TypeDesc("invalid");
+              formalParamList->push_back(td);
+              Symbol* sym = new Symbol(lexime, 0, td);
+              envs.top()->setSymbol(lexime, sym);
+            } else {
+              TypeDesc* td = arrayTypeStack.top();
+              formalParamList->push_back(td);
+              Symbol* sym = new Symbol(lexime, 0, td);
+              envs.top()->setSymbol(lexime, sym);
+            }
+          }
+          arrayTypeStack.pop();
+        }
+      }
+    }
+    | identifierList TOKEN_COLON type
+      { ruleFile << "identifier_lists" << endl;
+        vector<string> ids = split($1);
+        for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+          addSymbol(*it, $3);
+        }
+        string type($3);
+        if (type.compare(rec) != 0 && type.compare(arr) !=0) {
+          if (symTable.find(type) == symTable.end()) {
+            addSymbol($3, nilStr);
+          }
+        }
+        $$ = ids.size();
+
+        // Lab3. Address will be fixed later.
+        formalParamList = new vector<TypeDesc*>();
+
+        //vector<string> strs = split($3);
+        if (type.compare(rec) != 0 && type.compare(arr) !=0) {
+          // Type is not literally named record or array.
+          if (!envs.empty()) {
+            if (type.compare("integer") == 0 ||
+                type.compare("string") == 0 ||
+                type.compare("boolean") == 0) {
+              for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                string lexime(*it);
+                if (envs.top()->getSymbol(lexime) != NULL) {
+                  cout << "Error: Duplicated decaration of parameter "
+                      << lexime << " for function" << endl;
+                  TypeDesc* td = new TypeDesc("invalid");
+                  formalParamList->push_back(td);
+                  Symbol* sym = new Symbol(lexime, 0, td);
+                  envs.top()->setSymbol(lexime, sym);
+                } else {
+                  TypeDesc* td = new TypeDesc(type);
+                  formalParamList->push_back(td);
+                  Symbol* sym = new Symbol(lexime, 0, td);
+                  envs.top()->setSymbol(lexime, sym);
+                }
+              }
+            } else {
+              if (envs.top()->getSymbol(type) == NULL) {
+                Env* envPtr = envs.top()->getPrevEnv();
+                bool found = false;
+                while (envPtr != NULL) {
+                  if (envPtr->getSymbol(type) != NULL) {
+                    found = true;
+                    for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                      string lexime(*it);
+                      if (envs.top()->getSymbol(lexime) != NULL) {
+                        cout << "Error: Duplicated decaration of parameter "
+                            << lexime << " for function" << endl;
+                        TypeDesc* td = new TypeDesc("invalid");
+                        formalParamList->push_back(td);
+                        Symbol* sym = new Symbol(lexime, 0, td);
+                        envs.top()->setSymbol(lexime, sym);
+                      } else {
+                        TypeDesc* td = new TypeDesc(*(envPtr->getSymbol(type)->getTypeDesc()));
+                        formalParamList->push_back(td);
+                        Symbol* sym = new Symbol(lexime, 0, td);
+                        envs.top()->setSymbol(lexime, sym);
+                      }
+                    }
+                    break;
+                  }
+                  envPtr = envPtr->getPrevEnv();
+                }
+                if (!found) {
+                  cout << "Error: type " << type << " not defined" << endl;
+
+                  // Add this invalid type to the symbol table.
+                  TypeDesc* invalidTd = new TypeDesc("invalid");
+                  Symbol* sym = new Symbol(type, 0, invalidTd);
+                  envs.top()->setSymbol(type, sym);
+
+                  // Add the defined parameters to the symbol table with invalid type. 
+                  for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                    string lexime(*it);
+                    if (envs.top()->getSymbol(lexime) != NULL) {
+                      cout << "Error: Duplicated decaration of parameter "
+                          << lexime << " for function" << endl;
+                    }
+                    TypeDesc* td = new TypeDesc(*invalidTd);
+                    formalParamList->push_back(td);
+                    Symbol* sym = new Symbol(lexime, 0, td);
+                    envs.top()->setSymbol(lexime, sym);
+                  }
+                }
+              } else {
+                for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                  string lexime(*it);
+                  if (envs.top()->getSymbol(lexime) != NULL) {
+                    cout << "Error: Duplicated decaration of parameter "
+                        << lexime << " for function" << endl;
+                    TypeDesc* td = new TypeDesc("invalid");
+                    formalParamList->push_back(td);
+                    Symbol* sym = new Symbol(lexime, 0, td);
+                    envs.top()->setSymbol(lexime, sym);
+                  } else {
+                    TypeDesc* td = new TypeDesc(*(envs.top()->getSymbol(type)->getTypeDesc()));
+                    formalParamList->push_back(td);
+                    Symbol* sym = new Symbol(lexime, 0, td);
+                    envs.top()->setSymbol(lexime, sym);
+                  }
+                }
+              }
+            } 
+          }
+        } else if (type.compare(rec) == 0) {
+          // Type is record.
+          
+          // Lab3
+          for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+            string lexime(*it);
+            if (envs.top()->getSymbol(lexime) != NULL) {
+              cout << "Error: Duplicated decaration of parameter "
+                  << lexime << " for function" << endl;
+              TypeDesc* td = new TypeDesc("invalid");
+              formalParamList->push_back(td);
+              Symbol* sym = new Symbol(lexime, 0, td);
+              envs.top()->setSymbol(lexime, sym);
+            } else {
+              TypeDesc* td = new TypeDesc("record", fieldListStack.top());
+              formalParamList->push_back(td);
+              Symbol* sym = new Symbol(lexime, 0, td);
+              envs.top()->setSymbol(lexime, sym);
+            }
+          }
+          //delete fieldListStack.top();
+          //freeFieldList(fieldListStack.top());
+          fieldListStack.pop();
+        } else {
+          // Type is array.
+
+          // Lab3
+          if (!envs.empty()) {
+            for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+              string lexime(*it);
+              if (envs.top()->getSymbol(lexime) != NULL) {
+                cout << "Error: Duplicated decaration of parameter "
+                    << lexime << " for function" << endl;
+                TypeDesc* td = new TypeDesc("invalid");
+                formalParamList->push_back(td);
+                Symbol* sym = new Symbol(lexime, 0, td);
+                envs.top()->setSymbol(lexime, sym);
+              } else {
+                TypeDesc* td = arrayTypeStack.top();
+                formalParamList->push_back(td);
+                Symbol* sym = new Symbol(lexime, 0, td);
+                envs.top()->setSymbol(lexime, sym);
+              }
+            }
+            arrayTypeStack.pop();
+          }
+        }
+      };
+
+block: groupVariableDeclarations compoundStatement { ruleFile << "block" << endl; };
+
+compoundStatement: TOKEN_BEGIN statementSequence TOKEN_END { ruleFile << "compound_statement" << endl; };
+
+statementSequence: statementSequence TOKEN_SEMICOLON statement { ruleFile << "statement_sequence_more" << endl; }
+    | statement { ruleFile << "statement_sequence" << endl; };
+
+statement: groupSimStruStatement { ruleFile << "statement" << endl; };
+
+groupSimStruStatement: simpleStatement | structuredStatement;
+
+simpleStatement: assignmentStatement { ruleFile << "simple_statement" << endl; }
+    | procedureStatement { ruleFile << "simple_statement" << endl; }
+    | { ruleFile << "simple_statement_empty" << endl; };
+
+assignmentStatement: variable TOKEN_ASSIGN expression { ruleFile << "assignment_statement" << endl;
+      TypeDesc* td2 = expTypeStack.top();
+      expTypeStack.pop();
+      TypeDesc* td1 = expTypeStack.top();
+      expTypeStack.pop();
+      if (checkTypeEquiv(td1, td2)) {
+        if (td1->getType().compare("invalid") != 0 &&
+            td2->getType().compare("invalid") != 0) {
+          TypeDesc* resultTd = new TypeDesc(*td1);
+          expTypeStack.push(resultTd);
+        } else {
+          TypeDesc* resultTd = new TypeDesc("invalid");
+          expTypeStack.push(resultTd);
+        }
+      } else {
+        cout << "Error: types not equivalent for assignment operation on"
+            << " variable " << $1 << ", found "
+            << td1->getType() << " and " << td2->getType() << endl;
+        TypeDesc* resultTd = new TypeDesc("invalid");
+        expTypeStack.push(resultTd);
+      }
+
+      /*
+      cout << "here" << endl;
+      cout << td1->getType() << endl;
+      cout << td2->getType() << endl;
+      td1->setType("string");
+      cout << td1->getType() << endl;
+      cout << td2->getType() << endl;
+      */
+      //delete td1;
+      //td1 = NULL;
+      //delete td2;
+      //td2 = NULL;
+    };
+
+procedureStatement: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
+    { ruleFile << "procedure_statement" << endl;
+      string id($1);
+      if (symTable.find(id) == symTable.end()) {
+        addSymbol($1, nilStr);
+      }
+
+      // Lab3
+      int numOfParams = $3;
+      string procName($1);
+      TypeDesc* procTd = NULL;
+      if (envs.top()->getSymbol(procName) == NULL) {
+        Env* envPtr = envs.top()->getPrevEnv();
+        while (envPtr != NULL) {
+          if (envPtr->getSymbol(procName) != NULL) {
+            procTd = envPtr->getSymbol(procName)->getTypeDesc();
+            break;
+          }
+          envPtr = envPtr->getPrevEnv();
+        }
+      } else {
+        procTd = envs.top()->getSymbol(procName)->getTypeDesc();
+      }
+
+      if (procTd != NULL) {
+        if (procTd->getType().compare("procedure") != 0 &&
+            procTd->getType().compare("invalid") != 0) {
+          cout << "Error: " << procName << " is not a procedure" << endl;
+          for (int i = 0; i < numOfParams; ++i) {
+            expTypeStack.pop();
+          }
+        } else {
+          if (procTd->getType().compare("procedure") != 0) {
+            // Check if the actual parameter list matches the function's
+            // formal parameter list.
+            if (numOfParams == procTd->getNumOfFormalParams()) {
+              for (int i = numOfParams - 1; i >= 0; --i) {
+                TypeDesc* td = expTypeStack.top();
+                expTypeStack.pop();
+                TypeDesc* formalParamTd = procTd->getNthFormalParamType(i);
+                if (checkTypeEquiv(td, formalParamTd)) {
+                  //delete td;
+                  td = NULL;
+                } else {
+                  cout << "Error: Procedure " << procName
+                      << "'s parameter type not matched, expected "
+                      << formalParamTd->getType() << ", given "
+                      << td->getType() << endl;
+                  //delete td;
+                  td = NULL;
+                  // Pop the not checked actual parameters out of the expression
+                  // type stack;
+                  --i;
+                  while (i >= 0) {
+                    //delete expTypeStack.top();
+                    expTypeStack.top() = NULL;
+                    expTypeStack.pop();
+                    --i;
+                  }
+                }
+              }
+            } else {
+              cout << "Error: Procedure " << procName
+                  << "'s parameters number not matching!"
+                  <<" Expected " << procTd->getNumOfFormalParams() << ", given "
+                  << numOfParams << endl;
+              for (int i = 0; i < numOfParams; ++i) {
+                //delete expTypeStack.top();
+                expTypeStack.top() = NULL;
+                expTypeStack.pop();
+              }
+            }
+          } else {
+            for (int i = 0; i < numOfParams; ++i) {
+              //delete expTypeStack.top();
+              expTypeStack.top() = NULL;
+              expTypeStack.pop();
+            }
+          }
+        }
+      } else {
+        // Procedure hasn't been declared.
+        cout << "Error: Procedure " << procName << " hasn't been declared" << endl;
+        for (int i = 0; i < numOfParams; ++i) {
+          //delete expTypeStack.top();
+          expTypeStack.top() = NULL;
+          expTypeStack.pop();
+        }
+        TypeDesc* invalid = new TypeDesc("invalid");
+        Symbol* sym = new Symbol(procName, 0, invalid);
+        envs.top()->setSymbol(procName, sym);
+      }
+    };
+
+structuredStatement: compoundStatement { ruleFile << "compound_statement" << endl; }
+    | TOKEN_IF expression TOKEN_THEN statement { ruleFile << "if_statement" << endl;
+      int ifExpIndex = $2;
+      int currentExpTypeStackSize = expTypeStack.size();
+      stack<TypeDesc*> tmpStack;
+      for (int i = 0; i < currentExpTypeStackSize - ifExpIndex - 1; ++i) {
+        tmpStack.push(expTypeStack.top());
+        expTypeStack.pop();
+      }
+      TypeDesc* ifExpTypeDesc = expTypeStack.top();
+      expTypeStack.pop();
+      if (ifExpTypeDesc->getType().compare("boolean") != 0 &&
+          ifExpTypeDesc->getType().compare("invalid") != 0) {
+        cout << "Error: If construct only accepts boolean conditional "
+            << "expression, " << ifExpTypeDesc->getType() << " found however"
+            << endl;
+      }
+      //delete ifExpTypeDesc;
+      ifExpTypeDesc = NULL;
+      for (int i = 0; i < tmpStack.size(); ++i) {
+        expTypeStack.push(tmpStack.top());
+        tmpStack.pop();
+      }
+    }
+    | TOKEN_IF expression TOKEN_THEN statement TOKEN_ELSE statement { ruleFile << "ifelse_statement" << endl;
+      int ifExpIndex = $2;
+      int currentExpTypeStackSize = expTypeStack.size();
+      stack<TypeDesc*> tmpStack;
+      for (int i = 0; i < currentExpTypeStackSize - ifExpIndex - 1; ++i) {
+        tmpStack.push(expTypeStack.top());
+        expTypeStack.pop();
+      }
+      TypeDesc* ifExpTypeDesc = expTypeStack.top();
+      expTypeStack.pop();
+      if (ifExpTypeDesc->getType().compare("boolean") != 0 &&
+          ifExpTypeDesc->getType().compare("invalid") != 0) {
+        cout << "Error: If construct only accepts boolean conditional "
+            << "expression, " << ifExpTypeDesc->getType() << " found however"
+            << endl;
+      }
+      //delete ifExpTypeDesc;
+      ifExpTypeDesc = NULL;
+      for (int i = 0; i < tmpStack.size(); ++i) {
+        expTypeStack.push(tmpStack.top());
+        tmpStack.pop();
+      }
+    }
+    | TOKEN_WHILE expression 
+      {
+        if (expTypeStack.top()->getType().compare("boolean") != 0 &&
+            expTypeStack.top()->getType().compare("invalid") != 0) {
+          cout << "Error: While construct expects boolean expression, "
+              << expTypeStack.top()->getType() << " found" << endl;
+        }
+        //delete expTypeStack.top();
+        expTypeStack.top() = NULL;
+        expTypeStack.pop();
+      }
+      TOKEN_DO statement { ruleFile << "while_statement" << endl; }
+    | TOKEN_FOR TOKEN_ID TOKEN_ASSIGN expression TOKEN_TO expression
+      {
+        TypeDesc* td2 = expTypeStack.top();
+        expTypeStack.pop();
+        TypeDesc* td1 = expTypeStack.top();
+        expTypeStack.pop();
+        
+        if ((td1->getType().compare("integer") != 0 &&
+             td1->getType().compare("invalid") != 0) ||
+            (td2->getType().compare("integer") != 0 &&
+             td2->getType().compare("invalid") != 0)) {
+          cout << "Error: For construct only expects integer in range"
+            << " specification, found " << td1->getType()
+            << " and " << td2->getType() << " however" << endl;
+        }
+        string lexime($2);
+        Symbol* idSymbol = envs.top()->getSymbol(lexime);
+        if (idSymbol == NULL) {
+          Env* envPtr = envs.top()->getPrevEnv();
+          while (envPtr != NULL) {
+            idSymbol = envPtr->getSymbol(lexime);
+            if (idSymbol != NULL) {
+              if (idSymbol->getTypeDesc()->getType().compare("integer") != 0) {
+                cout << "Error: For construct's ranging variable " << lexime
+                    << " can only be integer, found "
+                    << idSymbol->getTypeDesc()->getType()
+                    << " however" << endl;
+              }
+              break;
+            }
+            envPtr = envPtr->getPrevEnv();
+          }
+          if (idSymbol == NULL) {
+            cout << "Error: For construct's ranging variable " << lexime
+                << " not defined" << endl;
+            TypeDesc* invalidTd = new TypeDesc("invalid");
+            idSymbol = new Symbol(lexime, 0, invalidTd);
+            envs.top()->setSymbol(lexime, idSymbol);
+          }
+        } else {
+          if (idSymbol->getTypeDesc()->getType().compare("integer") != 0) {
+            cout << "Error: For construct's ranging variable " << lexime
+                << " can only be integer, found "
+                << idSymbol->getTypeDesc()->getType()
+                << " however" << endl;
+          }
+        }
+      }
+      TOKEN_DO statement { ruleFile << "for_statement" << endl; };
+
+type: TOKEN_ID { ruleFile << "type_ID" << endl; //addSymbol($1, nilStr);
+                 $$ = (char*) malloc(strlen($1) + 1);
+                 strcpy($$, $1);} 
+    | TOKEN_ARRAY TOKEN_LBRACKET constant TOKEN_RANGE constant TOKEN_RBRACKET TOKEN_OF type
+      { ruleFile << "type_array" << endl;
+        $$ = (char*) malloc(strlen(arrayStr) + 1);;
+        strcpy($$, arrayStr);
+
+        string arrayType($8);
+        // The array's element type is not record or array.
+        if (arrayType.compare(rec) != 0 &&
+            arrayType.compare(arr) != 0) {
+          if (symTable.find(arrayType) == symTable.end()) {
+            addSymbol(arrayType, nilStr);
+          }
+        }
+
+        // Lab3
+        int lower = $3;
+        int upper = $5;
+        if (arrayType.compare(rec) != 0 &&
+            arrayType.compare(arr) != 0) {
+          // Array's element type is not literally named record or array.
+          if (arrayType.compare("integer") == 0 ||
+              arrayType.compare("string") == 0 ||
+              arrayType.compare("boolean") == 0) {
+            // Array's element type is a primitive type.
+            TypeDesc* arrayEleType = new TypeDesc(arrayType);
+            TypeDesc* td = new TypeDesc("array", lower, upper, arrayEleType);
+            arrayTypeStack.push(td);
+          } else {
+            // Array's element type is some customed defined type.
+            if (envs.top()->getSymbol(arrayType) == NULL) {
+              Env* envPtr = envs.top()->getPrevEnv();
+              bool found = false;
+              while (envPtr != NULL) {
+                if (envPtr->getSymbol(arrayType) != NULL) {
+                  found = true;
+                  TypeDesc* arrayEleType = new TypeDesc(*(envPtr->getSymbol(arrayType)->getTypeDesc()));
+                  TypeDesc* td = new TypeDesc("array", lower, upper, arrayEleType);
+                  arrayTypeStack.push(td);
+                  break;
+                }
+                envPtr = envPtr->getPrevEnv();
+              }
+              if (!found) {
+                cout << "Error: type " << arrayType << " undefined" << endl;
+                TypeDesc* invalid = new TypeDesc("invalid");
+                Symbol* sym = new Symbol(arrayType, 0, invalid);
+                envs.top()->setSymbol(arrayType, sym);
+                invalid = new TypeDesc("invalid");
+                TypeDesc* td = new TypeDesc("array", lower, upper, invalid);
+                arrayTypeStack.push(td);
+              }
+            } else {
+              TypeDesc* arrayEleType = new TypeDesc(*(envs.top()->getSymbol(arrayType)->getTypeDesc()));
+              TypeDesc* td = new TypeDesc("array", lower, upper, arrayEleType);
+              arrayTypeStack.push(td);
+            }
+          } 
+        } else if (arrayType.compare(rec) == 0) {
+          // Array's element type is record.
+          TypeDesc* arrayEleType = new TypeDesc("record", fieldListStack.top());
+          TypeDesc* td = new TypeDesc("array", lower, upper, arrayEleType);
+          arrayTypeStack.push(td);
+          //delete fieldListStack.top();
+          //freeFieldList(fieldListStack.top());
+          fieldListStack.pop();
+        } else {
+          // Array's element type is array.
+          TypeDesc* arrayEleType = arrayTypeStack.top();
+          TypeDesc* td = new TypeDesc("array", lower, upper, arrayEleType);
+          arrayTypeStack.pop();
+          arrayTypeStack.push(td);
+        }
+      } 
+    | TOKEN_RECORD 
+      {
+        vector<pair<string, TypeDesc*> >* fieldList = new vector<pair<string, TypeDesc*> >;
+        fieldListStack.push(fieldList);
+      }
+      fieldList TOKEN_END
+      { ruleFile << "type_record" << endl;
+        $$ = (char*) malloc(strlen(recordStr) + 1);;
+        strcpy($$, recordStr); }; 
+
+resultType: TOKEN_ID { ruleFile << "result_type" << endl;
+    $$ = $1;
+    string id($1);
+    if (symTable.find(id) == symTable.end()) {
+      addSymbol($1, nilStr);
+    };
+
+    // Lab3
+    /*
+    Env* globalEnv = envs.top()->getPrevEnv();
+    string lexime($1);
+    if (globalEnv->getSymbol(lexime) == NULL) {
+      
+    }*/
+    };
+
+fieldList: fieldListSeq { ruleFile << "field_list" << endl; }
+    | { ruleFile << "field_list_empty" << endl;
+        //vector<pair<string, TypeDesc*> >* fieldList = NULL;
+        //fieldListStack.push(fieldList);
+      };
+
+fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
+    { ruleFile << "identifier_lists_more" << endl;
+      vector<string> ids = split($3);
+      for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+        addSymbol(*it, $5);
+      }
+      string type($5);
+      if (type.compare(rec) != 0 && type.compare(arr) !=0) {
+        if (symTable.find(type) == symTable.end()) {
+          addSymbol($5, nilStr);
+        }
+      }
+      
+      // Lab3
+      if (type.compare(rec) != 0 && type.compare(arr) !=0) {
+        // Lab3. Address will be fixed later.
+        if (!envs.empty()) {
+          if (type.compare("integer") == 0 ||
+              type.compare("string") == 0 ||
+              type.compare("boolean") == 0) {
+            for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+              string lexime(*it);
+              if (envs.top()->getSymbol(lexime) != NULL) {
+                if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+                  cout << "Invalid use of keyword " << lexime << endl;
+                else
+                  cout << "Duplicated variable declaration for " << lexime << endl;
+              } else {
+                TypeDesc* td = new TypeDesc(type);
+                fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
+                //Symbol* sym = new Symbol(lexime, 0, td);
+                //envs.top()->setSymbol(lexime, sym);
+              }
+            }
+          } else {
+            if (envs.top()->getSymbol(type) == NULL) {
+              Env* envPtr = envs.top()->getPrevEnv();
+              bool found = false;
+              while (envPtr != NULL) {
+                if (envPtr->getSymbol(type) != NULL) {
+                  found = true;
+                  for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                    string lexime(*it);
+                    if (envs.top()->getSymbol(lexime) != NULL) {
+                      if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+                        cout << "Invalid use of keyword " << lexime << endl;
+                      else
+                        cout << "Duplicated variable declaration for " << lexime << endl;
+                    } else {
+                      TypeDesc* td = new TypeDesc(*(envPtr->getSymbol(type)->getTypeDesc()));
+                      fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
+                      //Symbol* sym = new Symbol(lexime, 0, td);
+                      //envs.top()->setSymbol(lexime, sym);
+                    }
+                  }
+                  break;
+                }
+                envPtr = envPtr->getPrevEnv();
+              }
+              if (!found) {
+                cout << "Error: type " << type << " not defined" << endl;
+
+                // Add this invalid type to the symbol table? Or not?
+                //TypeDesc* invalidTd = new TypeDesc("invalid");
+                //Symbol* sym = new Symbol(strs[0], 0, invalidTd);
+                //envs.top()->setSymbol(strs[0], sym);
+
+                // Add the defined identifier of invalid type to the fieldList of the record. 
+                for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                  string lexime(*it);
+                  if (envs.top()->getSymbol(lexime) != NULL) {
+                    if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+                      cout << "Invalid use of keyword " << lexime << endl;
+                    else
+                      cout << "Duplicated variable declaration for " << lexime << endl;
+                  } else {
+                    TypeDesc* td = new TypeDesc("invalid");
+                    fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
+                    //Symbol* sym = new Symbol(lexime, 0, td);
+                    //envs.top()->setSymbol(lexime, sym);
+                  }
+                }
+              }
+            } else {
+              for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                string lexime(*it);
+                if (envs.top()->getSymbol(lexime) != NULL) {
+                  if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+                    cout << "Invalid use of keyword " << lexime << endl;
+                  else
+                    cout << "Duplicated variable declaration for " << lexime << endl;
+                } else {
+                  TypeDesc* td = new TypeDesc(*(envs.top()->getSymbol(type)->getTypeDesc()));
+                  fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
+                  //Symbol* sym = new Symbol(lexime, 0, td);
+                  //envs.top()->setSymbol(lexime, sym);
+                }
+              }
+            }
+          } 
+        }
+      } else if (type.compare(rec) == 0) {
+        // Type is record.
+        
+        // Lab3
+        vector<pair<string, TypeDesc*> >* recFl = fieldListStack.top();
+        //cout << "fl stack size: " << fieldListStack.size() << endl;
+        fieldListStack.pop();
+        //cout << "fl stack size: " << fieldListStack.size() << endl;
+        for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+          string lexime(*it);
+          if (envs.top()->getSymbol(lexime) != NULL) {
+            if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+              cout << "Invalid use of keyword " << lexime << endl;
+            else
+              cout << "Duplicated variable declaration for " << lexime << endl;
+          } else {
+            //TypeDesc* td = new TypeDesc("record", fieldListStack.top());
+            TypeDesc* td = new TypeDesc("record", recFl);
+            fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
+            //Symbol* sym = new Symbol(lexime, 0, td);
+            //envs.top()->setSymbol(lexime, sym);
+          }
+        }
+        //delete recFl;
+        //freeFieldList(recFl);
+        //fieldListStack.pop();
+      } else {
+        // Type is array.
+
+        // Lab3
+        if (!envs.empty()) {
+          for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+            string lexime(*it);
+            if (envs.top()->getSymbol(lexime) != NULL) {
+              if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+                cout << "Invalid use of keyword " << lexime << endl;
+              else
+                cout << "Duplicated variable declaration for " << lexime << endl;
+            } else {
+              TypeDesc* td = arrayTypeStack.top();
+              fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
+              //Symbol* sym = new Symbol(lexime, 0, td);
+              //envs.top()->setSymbol(lexime, sym);
+            }
+          }
+          arrayTypeStack.pop();
+        }
+      }
+    }
+    | identifierList TOKEN_COLON type
+    { ruleFile << "identifier_lists" << endl;
+      vector<string> ids = split($1);
+      for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+        addSymbol(*it, $3);
+      }
+      string type($3);
+      if (type.compare(rec) != 0 && type.compare(arr) !=0) {
+        if (symTable.find(type) == symTable.end()) {
+          addSymbol($3, nilStr);
+        }
+      }
+
+      // Lab3
+      //vector<string> strs = split($3);
+      if (type.compare(rec) != 0 && type.compare(arr) !=0) {
+        // Lab3. Address will be fixed later.
+        if (!envs.empty()) {
+          if (type.compare("integer") == 0 ||
+              type.compare("string") == 0 ||
+              type.compare("boolean") == 0) {
+            for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+              string lexime(*it);
+              if (envs.top()->getSymbol(lexime) != NULL) {
+                if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+                  cout << "Invalid use of keyword " << lexime << endl;
+                else
+                  cout << "Duplicated variable declaration for " << lexime << endl;
+              } else {
+                TypeDesc* td = new TypeDesc(type);
+                fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
+                //Symbol* sym = new Symbol(lexime, 0, td);
+                //envs.top()->setSymbol(lexime, sym);
+              }
+            }
+          } else {
+            if (envs.top()->getSymbol(type) == NULL) {
+              Env* envPtr = envs.top()->getPrevEnv();
+              bool found = false;
+              while (envPtr != NULL) {
+                if (envPtr->getSymbol(type) != NULL) {
+                  found = true;
+                  for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                    string lexime(*it);
+                    if (envs.top()->getSymbol(lexime) != NULL) {
+                      if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+                        cout << "Invalid use of keyword " << lexime << endl;
+                      else
+                        cout << "Duplicated variable declaration for " << lexime << endl;
+                    } else {
+                      TypeDesc* td = new TypeDesc(*(envPtr->getSymbol(type)->getTypeDesc()));
+                      fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
+                      //Symbol* sym = new Symbol(lexime, 0, td);
+                      //envs.top()->setSymbol(lexime, sym);
+                    }
+                  }
+                  break;
+                }
+                envPtr = envPtr->getPrevEnv();
+              }
+              if (!found) {
+                cout << "Error: type " << type << " not defined" << endl;
+
+                // Add this invalid type to the symbol table? Or not?
+                //TypeDesc* invalidTd = new TypeDesc("invalid");
+                //Symbol* sym = new Symbol(strs[0], 0, invalidTd);
+                //envs.top()->setSymbol(strs[0], sym);
+
+                // Add the defined identifiers of invalid type to the fieldList of the record. 
+                for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                  string lexime(*it);
+                  if (envs.top()->getSymbol(lexime) != NULL) {
+                    if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+                      cout << "Invalid use of keyword " << lexime << endl;
+                    else
+                      cout << "Duplicated variable declaration for " << lexime << endl;
+                  } else {
+                    TypeDesc* td = new TypeDesc("invalid");
+                    fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
+                    //Symbol* sym = new Symbol(lexime, 0, td);
+                    //envs.top()->setSymbol(lexime, sym);
+                  }
+                }
+              }
+            } else {
+              for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+                string lexime(*it);
+                if (envs.top()->getSymbol(lexime) != NULL) {
+                  if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+                    cout << "Invalid use of keyword " << lexime << endl;
+                  else
+                    cout << "Duplicated variable declaration for " << lexime << endl;
+                } else {
+                  TypeDesc* td = new TypeDesc(*(envs.top()->getSymbol(type)->getTypeDesc()));
+                  fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
+                  //Symbol* sym = new Symbol(lexime, 0, td);
+                  //envs.top()->setSymbol(lexime, sym);
+                }
+              }
+            }
+          } 
+        }
+      } else if (type.compare(rec) == 0) {
+        // Type is record.
+        
+        // Lab3
+        vector<pair<string, TypeDesc*> >* recFl = fieldListStack.top();
+        fieldListStack.pop();
+        for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+          string lexime(*it);
+          if (envs.top()->getSymbol(lexime) != NULL) {
+            if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+              cout << "Invalid use of keyword " << lexime << endl;
+            else
+              cout << "Duplicated variable declaration for " << lexime << endl;
+          } else {
+            TypeDesc* td = new TypeDesc("record", recFl);
+            fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
+            //Symbol* sym = new Symbol(lexime, 0, td);
+            //envs.top()->setSymbol(lexime, sym);
+          }
+        }
+        //delete recFl;
+        //freeFieldList(recFl);
+        //fieldListStack.pop();
+      } else {
+        // Type is array.
+
+        // Lab3
+        if (!envs.empty()) {
+          for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
+            string lexime(*it);
+            if (envs.top()->getSymbol(lexime) != NULL) {
+              if (envs.top()->getSymbol(lexime)->getTypeDesc()->getType().compare("nil") == 0)
+                cout << "Invalid use of keyword " << lexime << endl;
+              else
+                cout << "Duplicated variable declaration for " << lexime << endl;
+            } else {
+              TypeDesc* td = arrayTypeStack.top();
+              fieldListStack.top()->push_back(pair<string, TypeDesc*>(lexime, td));
+              //Symbol* sym = new Symbol(lexime, 0, td);
+              //envs.top()->setSymbol(lexime, sym);
+            }
+          }
+          arrayTypeStack.pop();
+        }
+      }
+    };
+
+constant: TOKEN_INT { ruleFile << "constant" << endl; $$ = $1;}
+    | sign TOKEN_INT { ruleFile << "constant" << endl; $$ = $2;};
+
+expression: simpleExpression groupRelOpSimExpr { ruleFile << "expression" << endl; $$ = expTypeStack.size() - 1;};
+
+groupRelOpSimExpr: relationalOp simpleExpression {
+      // Lab3
+      string op($1);
+      TypeDesc* td2 = expTypeStack.top();
+      expTypeStack.pop();
+      TypeDesc* td1 = expTypeStack.top();
+      expTypeStack.pop();
+      if (op.compare("=") == 0 || op.compare("<>") == 0) {
+        if (checkTypeEquiv(td1, td2)) {
+          if (td1->getType().compare("invalid") != 0 &&
+              td2->getType().compare("invalid") != 0) {
+            TypeDesc* resultTd = new TypeDesc("boolean");
+            expTypeStack.push(resultTd);
+          } else {
+            TypeDesc* resultTd = new TypeDesc("invalid");
+            expTypeStack.push(resultTd);
+          }
+        } else {
+          cout << "Error: Types not equivalent for " << td1->getType()
+              << " and " << td2->getType() << " for operator " << op << endl;
+          TypeDesc* resultTd = new TypeDesc("invalid");
+          expTypeStack.push(resultTd);
+        }
+      } else {
+        if (td1->getType().compare("integer") == 0 &&
+            td2->getType().compare("integer") == 0) {
+          TypeDesc* resultTd = new TypeDesc("boolean");
+          expTypeStack.push(resultTd);
+        /*
+        } else if (td1->getType().compare("integer") == 0 &&
+              td2->getType().compare("invalid") == 0) {
+          TypeDesc* resultTd = new TypeDesc("invalid");
+          expTypeStack.push(resultTd);
+        } else if (td1->getType().compare("invalid") == 0 &&
+              td2->getType().compare("integer") == 0) {
+          TypeDesc* resultTd = new TypeDesc("invalid");
+          expTypeStack.push(resultTd);
+        */
+        } else {
+          cout << "Error: Operator " << op
+              << " only valid for integer equivalents, "
+              << td1->getType() << " and " << td2->getType()
+              << " found however" << endl;
+          TypeDesc* resultTd = new TypeDesc("invalid");
+          expTypeStack.push(resultTd);
+        }
+      }
+      //delete td1;
+      td1 = NULL;
+      //delete td2;
+      td2 = NULL;
+    }
+    |;
+
+relationalOp: TOKEN_LT { ruleFile << "relational_op" << endl; 
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    }
+    | TOKEN_LE { ruleFile << "relational_op" << endl;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    }
+    | TOKEN_GT { ruleFile << "relational_op" << endl;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    }
+    | TOKEN_GE { ruleFile << "relational_op" << endl;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    }
+    | TOKEN_NOTEQ { ruleFile << "relational_op" << endl;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    }
+    | TOKEN_EQ { ruleFile << "relational_op" << endl;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    };
+
+simpleExpression: sign term { ruleFile << "simple_expression" << endl; 
+      TypeDesc* td = expTypeStack.top();
+      if (td->getType().compare("integer") != 0) {
+        cout << "Error: Unary operator can only be applied to integer type, "
+            << td->getType() << " found however." << endl;
+        //delete td;
+        td = NULL;
+        expTypeStack.pop();
+        TypeDesc* resultTd = new TypeDesc("invalid");
+        expTypeStack.push(resultTd);
+      }
+    }
+    | term { ruleFile << "simple_expression" << endl; }
+    | simpleExpression addOp term { ruleFile << "simple_expression_more" << endl;
+
+      // Lab3
+      TypeDesc* td2 = expTypeStack.top();
+      expTypeStack.pop();
+      TypeDesc* td1 = expTypeStack.top();
+      expTypeStack.pop();
+      string op($2);
+      if (checkTypeEquiv(td1, td2)) {
+        if (td1->getType().compare("invalid") != 0 &&
+            td2->getType().compare("invalid") != 0) {
+          if (op.compare("or") == 0) {
+            // If the operator is or, check if the types are booleans.
+            if (td1->getType().compare("boolean") == 0) {
+              TypeDesc* resultTd = new TypeDesc(*td1);
+              expTypeStack.push(resultTd);
+            } else {
+              cout << "Error: Operator " << op << " can only be applied to"
+                  << " booleans, " << td1->getType() << " and "
+                  << td2->getType() << " found however" << endl;
+              TypeDesc* resultTd = new TypeDesc("invalid");
+              expTypeStack.push(resultTd);
+            } 
+          } else {
+            if (td1->getType().compare("integer") == 0) {
+              TypeDesc* resultTd = new TypeDesc(*td1);
+              expTypeStack.push(resultTd);
+            } else {
+              cout << "Error: Operator " << op << " can only be applied to"
+                  << " integers, " << td1->getType() << " and "
+                  << td2->getType() << " found however" << endl;
+              TypeDesc* resultTd = new TypeDesc("invalid");
+              expTypeStack.push(resultTd);
+            }
+          }
+        } else {
+          TypeDesc* resultTd = new TypeDesc("invalid");
+          expTypeStack.push(resultTd);
+        }
+      } else {
+        cout << "Error: types not equivalent for " << td1->getType()
+            << " and " << td2->getType() << endl;
+        TypeDesc* resultTd = new TypeDesc("invalid");
+        expTypeStack.push(resultTd);
+      }
+      
+      //delete td1;
+      td1 = NULL;
+      //delete td2;
+      td2 = NULL;
+    };
+
+addOp: TOKEN_PLUS { ruleFile << "addop" << endl; $$ == NULL;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    }
+    | TOKEN_MINUS { ruleFile << "addop" << endl; $$ == NULL;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    }
+    | TOKEN_OR { ruleFile << "addop" << endl;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    };
+
+term: term mulOp factor { ruleFile << "term_more" << endl;
+
+      // Lab3
+      TypeDesc* td2 = expTypeStack.top();
+      expTypeStack.pop();
+      TypeDesc* td1 = expTypeStack.top();
+      expTypeStack.pop();
+      /*
+      if (checkTypeEquiv(td1, td2)) {
+        TypeDesc* resultTd = new TypeDesc(*td1);
+        expTypeStack.push(resultTd);
+      } else {
+        cout << "Error: type not equivalent" << endl;
+        TypeDesc* resultTd = new TypeDesc("invalid");
+        expTypeStack.push(resultTd);
+      }
+      */
+      string op($2);
+      if (checkTypeEquiv(td1, td2)) {
+        if (td1->getType().compare("invalid") != 0 &&
+            td2->getType().compare("invalid") != 0) {
+          if (op.compare("and") == 0) {
+            // If the operator is and, check if the types are booleans.
+            if (td1->getType().compare("boolean") == 0) {
+              TypeDesc* resultTd = new TypeDesc(*td1);
+              expTypeStack.push(resultTd);
+            } else {
+              cout << "Error: Operator " << op << " can only be applied to"
+                  << " booleans, " << td1->getType() << " and "
+                  << td2->getType() << " found however" << endl;
+              TypeDesc* resultTd = new TypeDesc("invalid");
+              expTypeStack.push(resultTd);
+            } 
+          } else {
+            if (td1->getType().compare("integer") == 0) {
+              TypeDesc* resultTd = new TypeDesc(*td1);
+              expTypeStack.push(resultTd);
+            } else {
+              cout << "Error: Operator " << op << " can only be applied to"
+                  << " integers, " << td1->getType() << " and "
+                  << td2->getType() << " found however" << endl;
+              TypeDesc* resultTd = new TypeDesc("invalid");
+              expTypeStack.push(resultTd);
+            }
+          }
+        } else {
+          TypeDesc* resultTd = new TypeDesc("invalid");
+          expTypeStack.push(resultTd);
+        }
+      } else {
+        cout << "Error: types not equivalent for " << op << ", found "
+            << td1->getType() << " and " << td2->getType() << endl;
+        TypeDesc* resultTd = new TypeDesc("invalid");
+        expTypeStack.push(resultTd);
+      }
+      
+      //delete td1;
+      td1 = NULL;
+      //delete td2;
+      td2 = NULL;
+    }
+    | factor { ruleFile << "term" << endl; } ;
+
+mulOp: TOKEN_MULTIPLY { ruleFile << "mulop" << endl; $$ = NULL;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    }
+  | TOKEN_DIV { ruleFile << "mulop" << endl; $$ = NULL;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    } 
+  | TOKEN_MOD { ruleFile << "mulop" << endl; $$ = NULL;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    }
+  | TOKEN_AND { ruleFile << "mulop" << endl;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    };
+
+factor: TOKEN_INT { ruleFile << "factor" << endl; 
+      // Lab3
+      TypeDesc* td = new TypeDesc("integer");
+      expTypeStack.push(td);
+    }
+    | TOKEN_STR { ruleFile << "factor" << endl;
+      TypeDesc* td = new TypeDesc("string");
+      expTypeStack.push(td);
+    }
+    | variable { ruleFile << "factor" << endl; 
+      //TypeDesc* td = new TypeDesc(*varType);
+      //delete varType;
+      //varType = NULL;
+      //expTypeStack.push(td);
+    }
+    | functionReference { ruleFile << "factor" << endl; }
+    | TOKEN_NOT factor { ruleFile << "factor" << endl;
+      TypeDesc* td = expTypeStack.top();
+      expTypeStack.pop();
+      if (td->getType().compare("boolean") != 0) {
+        cout << "Error: Boolean operator 'not' applied to non-boolean type" << endl;
+        TypeDesc* resultTd = new TypeDesc("invalid");
+        expTypeStack.push(resultTd);
+      } else {
+        TypeDesc* resultTd = new TypeDesc("boolean");
+        expTypeStack.push(resultTd);
+      }
+      //delete td;
+      td = NULL;
+    }
+    | TOKEN_LPAR expression TOKEN_RPAR { ruleFile << "factor" << endl; };
+
+functionReference: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
+    { ruleFile << "function_reference" << endl;
+      string id($1);
+      if (symTable.find(id) == symTable.end()) {
+        addSymbol($1, nilStr);
+      }
+
+      // Lab3
+      int numOfParams = $3;
+      string funcName($1);
+      bool found = false;
+      TypeDesc* funcTd = NULL;
+      if (envs.top()->getSymbol(funcName) == NULL) {
+        Env* envPtr = envs.top()->getPrevEnv();
+        while (envPtr != NULL) {
+          if (envPtr->getSymbol(funcName) != NULL) {
+            funcTd = envPtr->getSymbol(funcName)->getTypeDesc();
+            break;
+          }
+          envPtr = envPtr->getPrevEnv();
+        }
+      } else {
+        funcTd = envs.top()->getSymbol(funcName)->getTypeDesc();
+      }
+
+      if (funcTd != NULL) {
+        if (funcTd->getType().compare("function") != 0 &&
+            funcTd->getType().compare("invalid") != 0) {
+          cout << "Error: " << funcName << " is not a function" << endl;
+          for (int i = 0; i < numOfParams; ++i) {
+            expTypeStack.pop();
+          }
+          TypeDesc* td = new TypeDesc("invalid");
+          expTypeStack.push(td);
+        } else {
+          if (funcTd->getType().compare("function") == 0) {
+            // Check if the actual parameter list matches the function's
+            // formal parameter list.
+            if (numOfParams == funcTd->getNumOfFormalParams()) {
+              bool isMatched = true;
+              for (int i = numOfParams - 1; i >= 0; --i) {
+                TypeDesc* td = expTypeStack.top();
+                expTypeStack.pop();
+                TypeDesc* formalParamTd = funcTd->getNthFormalParamType(i);
+                if (checkTypeEquiv(td, formalParamTd)) {
+                  //delete td;
+                } else {
+                  cout << "Error: Function " << funcName
+                      << "'s parameter type not matched, expected "
+                      << formalParamTd->getType() << ", given " 
+                      << td->getType() << endl; 
+                  //delete td;
+                  td = NULL;
+                  isMatched = false;
+                  // Pop the not checked actual parameters out of the expression
+                  // type stack;
+                  --i;
+                  while (i >= 0) {
+                    //delete expTypeStack.top();
+                    expTypeStack.top() = NULL;
+                    expTypeStack.pop();
+                    --i;
+                  }
+                }
+              }
+
+              if (isMatched) {
+                TypeDesc* resultTd = new TypeDesc(*(funcTd->getResultType()));
+                expTypeStack.push(resultTd);
+              } else {
+                TypeDesc* resultTd = new TypeDesc("invalid");
+                expTypeStack.push(resultTd);
+              }
+            } else {
+              cout << "Error: Function " << funcName
+                  << "'s parameters number not matching!"
+                  <<" Expected " << funcTd->getNumOfFormalParams() << ", given "
+                  << numOfParams << endl;
+              for (int i = 0; i < numOfParams; ++i) {
+                //delete expTypeStack.top();
+                expTypeStack.top() = NULL;
+                expTypeStack.pop();
+              }
+              TypeDesc* td = new TypeDesc("invalid");
+              expTypeStack.push(td);
+            }
+          } else {
+            TypeDesc* td = new TypeDesc("invalid");
+            expTypeStack.push(td);
+          }
+        }
+      } else {
+        // Function hasn't been declared.
+        cout << "Error: Function " << funcName << " hasn't been declared" << endl;
+        for (int i = 0; i < numOfParams; ++i) {
+          //delete expTypeStack.top();
+          expTypeStack.top() = NULL;
+          expTypeStack.pop();
+        }
+        
+        TypeDesc* td = new TypeDesc("invalid");
+        Symbol* sym = new Symbol(funcName, 0, td);
+        envs.top()->setSymbol(funcName, sym);
+        td = new TypeDesc("invalid");
+        expTypeStack.push(td);
+      }
+    };
+
+variable: TOKEN_ID componentSelection { ruleFile << "variable " << endl;
+    $$ = (char*) malloc(strlen($1) + 1);
+    $$ = strcpy($$, $1);
+    string id($1);
+    if (symTable.find(id) == symTable.end()) {
+      addSymbol($1, nilStr);
+    }
+
+    // Lab3
+    string lexime($1);
+    TypeDesc* outterMostTd = NULL;
+    if (envs.top()->getSymbol(lexime) == NULL) {
+      Env* envPtr = envs.top()->getPrevEnv();
+      while (envPtr != NULL) {
+        if (envPtr->getSymbol(lexime) != NULL) {
+          outterMostTd = envPtr->getSymbol(lexime)->getTypeDesc();
+          break;
+        }
+        envPtr = envPtr->getPrevEnv();
+      }
+    } else {
+      outterMostTd = envs.top()->getSymbol(lexime)->getTypeDesc();
+    }
+
+    if (outterMostTd == NULL) {
+      cout << "Error: variable " << lexime << " hasn't been declared" << endl;
+      //varType = new TypeDesc("invalid");
+      TypeDesc* td = new TypeDesc("invalid");
+      Symbol* sym = new Symbol(lexime, 0, td);
+      envs.top()->setSymbol(lexime, sym);
+      td = new TypeDesc("invalid");
+      expTypeStack.push(td);
+    } else {
+      // Validate component selection.
+      if ($2 != NULL) {
+        string compSelStr($2);
+        if (compSelStr.find("invalid") != string::npos) {
+          TypeDesc* td = new TypeDesc("invalid");
+          expTypeStack.push(td);
+        } else {
+          vector<string> components = split($2);
+          TypeDesc* currentTd = outterMostTd;
+          TypeDesc* prevTd = currentTd;
+          bool valid = true;
+          for (int i = 0; i < components.size(); ++i) {
+            if (components[i].find("[") != string::npos) {
+              if (prevTd->getType().compare("array") == 0) {
+                prevTd = prevTd->getArrayEleType();
+                currentTd = prevTd;
+              } else {
+                /*
+                string name;
+                if (i == 0) {
+                  name = lexime;
+                } else {
+                  stringstream ss;
+                  ss.str(string());
+                  int j = i - 1;
+                  while (j >= 0 && components[j].compare("[]") == 0) {
+                    string tmp = ss.str();
+                    ss.str(string());
+                    ss << components[j] << tmp;
+                    --j;
+                  }
+                  if ( j < 0) {
+                    string tmp = ss.str();
+                    ss.str(string());
+                    ss << lexime << tmp;
+                  } else {
+                    string tmp = ss.str();
+                    ss.str(string());
+                    ss << components[j] << tmp;
+                  }
+                  //name = components[i - 1];
+                  name = ss.str();
+                }
+                */
+                cout << "Error: Trying to index a non-array variable ("
+                    << lexime << " or one of its component selection)" << endl;
+                valid = false;
+                break;
+              }
+            } else {
+              if (prevTd->getType().compare(rec) == 0) {
+                currentTd = prevTd->getTypeDescFromFieldList(components[i]);
+                if (currentTd == NULL) {
+                  string name;
+                  if (i == 0) {
+                    name = lexime;
+                  } else {
+                    name = components[i - 1];
+                  }
+                  cout << "Error: Variable " << components[i] << " hasn't been defined in record "
+                      << name << endl;
+                  valid = false;
+                  break;
+                } else {
+                  prevTd = currentTd;
+                }
+              } else {
+                string name;
+                if (i == 0) {
+                  name = lexime;
+                } else {
+                  name = components[i - 1];
+                }
+                cout << "Error: Variable " << name << " is not a record" << endl;
+                valid = false;
+                break;
+              }
+            }
+            /*
+            if (prevTd->getType().compare(rec) == 0) {
+              currentTd = prevTd->getTypeDescFromFieldList(components[i]);
+              if (currentTd == NULL) {
+                string name;
+                if (i == 0) {
+                  name = lexime;
+                } else {
+                  name = components[i - 1];
+                }
+                cout << "Error: Variable " << components[i] << " hasn't been defined in record "
+                    << name << endl;
+                valid = false;
+                break;
+              } else {
+                prevTd = currentTd;
+              }
+            } else {
+              string name;
+              if (i == 0) {
+                name = lexime;
+              } else {
+                name = components[i - 1];
+              }
+              cout << "Error: Variable " << name << " is not a record" << endl;
+              valid = false;
+              break;
+            }
+            */
+          }
+          if (valid) {
+            //varType = new TypeDesc(*currentTd);
+            TypeDesc* td = new TypeDesc(*currentTd);
+            expTypeStack.push(td);
+          } else {
+            //varType = new TypeDesc("invalid");
+            TypeDesc* td = new TypeDesc("invalid");
+            expTypeStack.push(td);
+          }
+        }
+      } else {
+        //varType = new TypeDesc(*outterMostTd);
+        TypeDesc* td = new TypeDesc(*outterMostTd);
+        expTypeStack.push(td);
+      }
+    }
+    };
+
+componentSelection: TOKEN_DOT TOKEN_ID componentSelection
+    {
+      // Lab3
+      stringstream ss;
+      if ($3 != NULL) {
+        ss << $2 << " " << $3;
+        $$ = (char*) malloc(ss.str().length() + 1);
+        strcpy($$, ss.str().c_str());
+      } else {
+        $$ = (char*) malloc(strlen($2) + 1);
+        strcpy($$, $2);
+      }
+    }
+    | TOKEN_LBRACKET expression TOKEN_RBRACKET componentSelection
+      {
+        // Lab3
+        /*
+        if ($4 == NULL) {
+          $$ = NULL;
+        }
+        else {
+          $$ = (char*) malloc(strlen($4) + 1);
+          strcpy($$, $4);
+        }
+        */
+
+        stringstream ss;
+        if (expTypeStack.top()->getType().compare("integer") != 0) {
+          cout << "Error: array's index can only be integer, found "
+              << expTypeStack.top()->getType() << endl;
+          expTypeStack.pop();
+          
+          if ($4 != NULL) {
+            ss << "[invalid]" << " " << $4;
+            $$ = (char*) malloc(ss.str().length() + 1);
+            strcpy($$, ss.str().c_str());
+          } else {
+            ss << "[invalid]";
+            $$ = (char*) malloc(ss.str().length() + 1);
+            strcpy($$, ss.str().c_str());
+          }
+        } else {
+          if ($4 != NULL) {
+            ss << "[]" << " " << $4;
+            $$ = (char*) malloc(ss.str().length() + 1);
+            strcpy($$, ss.str().c_str());
+          } else {
+            ss << "[]";
+            $$ = (char*) malloc(ss.str().length() + 1);
+            strcpy($$, ss.str().c_str());
+          }
+          expTypeStack.pop();
+        }
+      }
+    | { ruleFile << "component_selection_empty" << endl;
+        // Lab3
+        $$ = NULL;};
+
+actualParameterList: expressionList { ruleFile << "actual_parameter_list" << endl; $$ = $1; }
+    | { ruleFile << "actual_parameter_list_empty" << endl; $$ = 0; };
+
+expressionList: expressionList TOKEN_COMMAS expression
+    { ruleFile << "expressions_more" << endl; $$ = $1 + 1; }
+    | expression { ruleFile << "expressions" << endl; $$ = 1; };
+
+identifierList: identifierList TOKEN_COMMAS TOKEN_ID
+    { ruleFile << "identifier_list_more" << endl;
+      $$ = (char*) malloc (strlen($1) + strlen($3) + 2);
+      int i = 0;
+      while ($1[i] != '\0') {
+        $$[i] = $1[i];
+        ++i;
+      }
+      $$[i++] = ' ';
+      int j = 0;
+      while ($3[j] != '\0') {
+        $$[i++] = $3[j++];
+      }
+      $$[i] = '\0';
+    }
+    | TOKEN_ID
+    { ruleFile << "identifier_list" << endl;
+      $$ = (char*) malloc (strlen($1) + 1);
+      strcpy($$, $1);};
+
+sign: TOKEN_PLUS %prec UPLUS | TOKEN_MINUS %prec UMINUS
+
+%%
+main(int argc, char **argv) {
+  FILE *myfile = fopen(argv[1], "r");
+  ruleFile.open("rules.out");
+  //freopen ("rules.out", "w", stdout);
+  if (!myfile) {
+    cout << "Error in openning test.pas!" << endl;
+    return -1;
+  }
+  
+  yyin = myfile;
+
+  //yydebug = 1;
+  do {
+    yyparse();
+  } while (!feof(yyin));
+  
+  map<string, pair<int, string> >::iterator it;
+  for (it = symTable.begin(); it != symTable.end(); ++it) {
+    symTableIndexedByAddr[it->second.first] = make_pair(it->first, it->second.second);
+  }
+
+  map<int, pair<string, string> >::iterator it2;
+  stringstream ss; 
+  ofstream symFile;
+  symFile.open("symtable.out");
+  //envs.top()->outputSymTable(symFile);
+  //freopen("symtable.out", "w", stdout);
+  /*
+  for (it2 = symTableIndexedByAddr.begin(); it2 != symTableIndexedByAddr.end(); ++it2) {
+    ss.str(string());
+    ss << "address: " << it2->first;
+    symFile << setw(14) << std::left << ss.str();
+    ss.str(string());
+    ss << ", identifier: " << it2->second.first;
+    symFile << setw(29) << std::left << ss.str();
+    ss.str(string());
+    ss << ", type: " << it2->second.second;
+    symFile << setw(18) << std::left << ss.str();
+    symFile << endl;
+  }
+  */
+
+  //envs.top()->displayTable();
+  for (int i = allEnvs.size() - 1; i >= 0; --i) {
+    //cout << "Environment symbol table size: " << allEnvs[i]->getTableSize() << endl;
+    //allEnvs[i]->displayTable();
+    allEnvs[i]->outputSymTable(symFile);
+  } 
+  //cout << envs.size() << endl;
+  for (int i = allEnvs.size() - 1; i >= 0; --i) {
+    //cout << "Env " << i << endl;
+    //delete allEnvs[i];
+  } 
+
+  ruleFile.close();
+  symFile.close();
+  fclose(myfile);
+
+}
+
+void yyerror(const char *s) {
+  cout << "EEK, parse error!  Message: " << s << endl;
+  // might as well halt now:
+  exit(-1);
+}
+
+/* Lookup literal names. */
+static void lookup(char *token_buffer) {
+  int i;
+  for (i = 0; i < YYNTOKENS; i++) {
+    if (!strncmp(yytname[i], token_buffer, strlen(token_buffer))) {
+      cout << yytname[i] << endl;
+    }
+  }
+}
+
+void addSymbol(const char* id, const char *type) {
+  string idName(id);
+  string typeName(type);
+  addSymbol(idName, typeName);
+}
+
+void addSymbol(const char* id, const string &type) {
+  string idName(id);
+  addSymbol(idName, type);
+}
+
+void addSymbol(const string &id, const char *type) {
+  string typeName(type);
+  addSymbol(id, typeName);
+}
+
+void addSymbol(const char* id, const int type) {
+  std::ostringstream convert;
+  convert << type;
+  string typeName = convert.str();
+  string idName(id); 
+  addSymbol(id, typeName);
+}
+
+void addSymbol(const string &id, const string &type) {
+  if (symTable.find(id) != symTable.end()) {
+    symTable[id].second = type;
+  } else {
+    symTable[id].first = address;
+    symTable[id].second = type;
+    ++address;
+  }
+}
+
+/* Function to fix the addresses for symbols. */
+void fixAddress(int addr) {
+  --address;
+  map<string, pair<int, string> >::iterator it;
+  for (it = symTable.begin(); it != symTable.end(); ++it) {
+    if (it->second.first > addr) {
+      it->second.first = it->second.first - 1;
+    }
+  }
+}
+
+/* Function to split an identifier list into identifiers.*/
+vector<string> split(char* ids) {
+  vector<string> result;
+  int i = 0;
+  int j = 0;
+  while (true) {
+    if (ids[j] == '\0') {
+      char* str = (char*) malloc(j - i + 1);
+      for (int k = i; k <= j - 1; ++k) {
+        str[k - i] = ids[k];
+      }
+      str[j - i] = '\0';
+      string id(str);
+      result.push_back(id);
+      break;
+    }
+    if (ids[j] == ' ') {
+      char* str = (char*) malloc(j - i + 1);
+      for (int k = i; k <= j - 1; ++k) {
+        str[k - i] = ids[k];
+      }
+      str[j - i] = '\0';
+      string id(str);
+      result.push_back(id);
+      i = j + 1;
+    }
+    ++j;
+  }
+  return result;
+}
+
+void freeFieldList(vector<pair<string, TypeDesc*> >* fl) {
+  if (fl != NULL) {
+    for(int i = 0; i < fl->size(); ++i) {
+      cout << "freeing field " << fl->at(i).first << endl;
+      delete fl->at(i).second;
+      fl->at(i).second = NULL;
+    }
+  }
+
+    delete fl;
+    fl = NULL;
+}
+
+bool checkTypeEquiv(TypeDesc* td1, TypeDesc* td2) {
+  string name1 = td1->getType();
+  string name2 = td2->getType();
+
+  if (name1.compare("invalid") == 0 || name2.compare("invalid") == 0) {
+    return true;
+  } else {
+    if (name1.compare(name2) == 0) {
+      if (name1.compare("integer") == 0 ||
+          name1.compare("string") == 0 ||
+          name1.compare("boolean") == 0) {
+        return true;
+      } else if (name1.compare("array") == 0) {
+        if (td1->getLower() == td2->getLower() && td1->getUpper() == td2->getUpper()) {
+          return checkTypeEquiv(td1->getArrayEleType(), td2->getArrayEleType());
+        } else {
+          return false;
+        }
+      } else {
+        vector<pair<string, TypeDesc*> >* fl1 = td1->getFieldList();
+        vector<pair<string, TypeDesc*> >* fl2 = td2->getFieldList();
+        if (fl1->size() == fl2->size()) {
+          bool equiv = true;
+          for (int i = 0; i < fl1->size(); ++i) {
+            if (fl1->at(i).first.compare(fl2->at(i).first) == 0) {
+              if (!checkTypeEquiv(fl1->at(i).second, fl2->at(i).second)) {
+                equiv = false;
+                break; 
+              }
+            } else {
+              equiv = false;
+              break;
+            }
+          }
+          return equiv;
+        } else {
+          return false;
+        }
+      }
+    } else {
+      return false;
+    } 
+  }
+}
