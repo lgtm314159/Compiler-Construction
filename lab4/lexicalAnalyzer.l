@@ -115,16 +115,28 @@ return TOKEN_MULTIPLY;}
 "/" {//printf("DIVIDE\n");
 return TOKEN_DIVIDE;}
 "=" {//printf("RELOP %s\n", yytext);
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
 return TOKEN_EQ;}
 "<" {//printf("RELOP %s\n", yytext);
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
 return TOKEN_LT;}
 "<=" {//printf("RELOP %s\n", yytext);
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
 return TOKEN_LE;}
 ">" {//printf("RELOP %s\n", yytext);
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
 return TOKEN_GT;}
 ">=" {//printf("RELOP %s\n", yytext);
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
 return TOKEN_GE;}
 "<>" {//printf("RELOP %s\n", yytext);
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
 return TOKEN_NOTEQ;}
 {ID}        {//printf("IDENTIFIER %s\n", yytext);
              yylval.sval = (char*) malloc(strlen(yytext) + 1);

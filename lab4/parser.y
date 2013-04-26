@@ -89,12 +89,12 @@ string arr(arrayStr);
 %token <sval> TOKEN_MINUS
 %token <sval> TOKEN_MULTIPLY
 %token TOKEN_DIVIDE
-%token TOKEN_EQ
-%token TOKEN_LT
-%token TOKEN_LE
-%token TOKEN_GT
-%token TOKEN_GE
-%token TOKEN_NOTEQ
+%token <sval> TOKEN_EQ
+%token <sval> TOKEN_LT
+%token <sval> TOKEN_LE
+%token <sval> TOKEN_GT
+%token <sval> TOKEN_GE
+%token <sval> TOKEN_NOTEQ
 %token <sval> TOKEN_ID
 %token <ival> TOKEN_INT
 %token TOKEN_DECIMAL
@@ -118,6 +118,7 @@ string arr(arrayStr);
 %type <sval> type identifierList sign term factor factorElement
 %type <sval> componentSelection variable expression groupComponentSelection
 %type <sval> functionReference mulOp addOp simpleExpression assignmentStatement
+%type <sval> relationalOp groupRelOpSimExpr procedureStatement simpleStatement
 %type <ival> formalParamSeq formalParameterList
 %%
 
@@ -273,15 +274,32 @@ statement: groupSimStruStatement { cout << "statement" << endl; };
 
 groupSimStruStatement: simpleStatement | structuredStatement;
 
-simpleStatement: assignmentStatement { cout << "simple_statement" << endl; }
-    | procedureStatement { cout << "simple_statement" << endl; }
-    | { cout << "simple_statement_empty" << endl; };
+simpleStatement: assignmentStatement {
+    cout << "simple_statement" << endl;
+    $$ = (char*) malloc(strlen($1) + 1);
+    strcpy($$, $1);
+    }
+    | procedureStatement {
+    cout << "simple_statement" << endl;
+    $$ = (char*) malloc(strlen($1) + 1);
+    strcpy($$, $1);
+    }
+    | { cout << "simple_statement_empty" << endl;
+    stringstream ss;
+    ss << quadruples.size() - 1 << " " << quadruples.size() - 1; 
+    $$ = (char*) malloc(ss.str().length() + 1);
+    strcpy($$, ss.str().c_str());
+    };
 
 assignmentStatement: variable TOKEN_ASSIGN expression {
     cout << "assignment_statement" << endl;
 
     // lab4
     addQuadruple(string($2), string($3), string("NULL"), string($1));
+    stringstream ss;
+    ss << quadruples.size() - 1 << " " << quadruples.size() - 1; 
+    $$ = (char*) malloc(ss.str().length() + 1);
+    strcpy($$, ss.str().c_str());
     };
 
 procedureStatement: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR {
@@ -294,6 +312,10 @@ procedureStatement: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR {
     // lab4
     addQuadruple("call", string($1), "NULL", "NULL");
     addQuadruple("return", "NULL", "NULL", "NULL"); 
+    stringstream ss;
+    ss << quadruples.size() - 2 << " " << quadruples.size() - 1; 
+    $$ = (char*) malloc(ss.str().length() + 1);
+    strcpy($$, ss.str().c_str());
     };
 
 structuredStatement: compoundStatement { cout << "compound_statement" << endl; }
@@ -355,16 +377,55 @@ fieldListSeq: fieldListSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
 constant: TOKEN_INT { cout << "constant" << endl; }
     | sign TOKEN_INT { cout << "constant" << endl; };
 
-expression: simpleExpression groupRelOpSimExpr { cout << "expression" << endl; };
+expression: simpleExpression groupRelOpSimExpr {
+    cout << "expression" << endl;
+    if ($2 == NULL) {
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    } else {
+      vector<string> opAndArg = split($2);
+      ++counter;
+      stringstream ss;
+      ss << "t" << counter;
+      string newTemp = ss.str();
+      addQuadruple(opAndArg[0], string($1), opAndArg[1], newTemp);
+      $$ = (char*) malloc(newTemp.length() + 1);
+      strcpy($$, newTemp.c_str());
+    }
+    };
 
-groupRelOpSimExpr: relationalOp simpleExpression |;
+groupRelOpSimExpr: relationalOp simpleExpression {
+    stringstream ss;
+    ss << $1 << " " << $2;
+    $$ = (char*) malloc(ss.str().length() + 1);
+    strcpy($$, ss.str().c_str());
+    } 
+    | { $$ = NULL; };
 
-relationalOp: TOKEN_LT { cout << "relational_op" << endl; }
-    | TOKEN_LE { cout << "relational_op" << endl; }
-    | TOKEN_GT { cout << "relational_op" << endl; }
-    | TOKEN_GE { cout << "relational_op" << endl; }
-    | TOKEN_NOTEQ { cout << "relational_op" << endl; }
-    | TOKEN_EQ { cout << "relational_op" << endl; };
+relationalOp: TOKEN_LT { cout << "relational_op" << endl;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    }
+    | TOKEN_LE { cout << "relational_op" << endl;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    }
+    | TOKEN_GT { cout << "relational_op" << endl;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    }
+    | TOKEN_GE { cout << "relational_op" << endl;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    }
+    | TOKEN_NOTEQ { cout << "relational_op" << endl;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    }
+    | TOKEN_EQ { cout << "relational_op" << endl;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    };
 
 simpleExpression: sign term { cout << "simple_expression" << endl;
     ++counter;
