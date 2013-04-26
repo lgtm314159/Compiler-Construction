@@ -1,0 +1,7 @@
+:= 0 NULL a
+call bar NULL NULL
+return NULL NULL NULL
+param 3 NULL NULL
+:= funcall foo3 t1
+funreturn t1 NULL NULL
+:= t1 NULL z

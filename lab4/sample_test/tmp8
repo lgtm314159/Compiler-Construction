@@ -1,0 +1,109 @@
+identifier_list
+identifier_list_more
+type_ID
+identifier_lists
+identifier_list
+type_ID
+identifier_lists_more
+field_list
+type_record
+type_definition
+type_definition
+constant
+constant
+type_ID
+type_array
+type_definition
+type_definition_more
+type_ID
+type_definition
+type_definition_more
+identifier_list
+type_ID
+variable_declaration
+variable_declaration
+identifier_list
+type_ID
+identifier_lists
+formal_parameter_list
+result_type
+component_selection_empty
+variable
+factor
+term
+simple_expression
+expression
+assignment_statement
+simple_statement
+statement
+statement_sequence
+compound_statement
+block
+function_declaration
+sub_program_declarations
+identifier_list
+type_ID
+identifier_lists
+identifier_list
+type_ID
+identifier_lists_more
+formal_parameter_list
+result_type
+component_selection_empty
+variable
+factor
+term
+simple_expression
+expression
+actual_parameter_list_empty
+procedure_statement
+simple_statement
+statement
+while_statement
+statement
+statement_sequence
+compound_statement
+block
+function_declaration
+sub_program_declarations_more
+identifier_list
+identifier_list_more
+type_ID
+identifier_lists
+formal_parameter_list
+result_type
+function_declaration
+sub_program_declarations_more
+component_selection_empty
+variable
+factor
+term
+simple_expression
+expression
+expressions
+actual_parameter_list
+function_reference
+factor
+term
+simple_expression
+expression
+assignment_statement
+simple_statement
+statement
+statement_sequence
+compound_statement
+program
+address: 0, id:errorfree type:nil
+address: 1, id:r type:record
+address: 2, id:y type:array
+address: 3, id:s type:nil
+address: 4, id:string type:nil
+address: 5, id:z type:s
+address: 6, id:foo1 type:0
+address: 7, id:a type:integer
+address: 8, id:integer type:nil
+address: 9, id:foo2 type:0
+address: 10, id:c type:string
+address: 11, id:bar type:nil
+address: 12, id:foo3 type:0
+address: 13, id:b type:integer

@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <map>
 #include <vector>
+#include <assert.h>
 #define YYDEBUG 1
 
 using namespace std;
@@ -20,6 +21,10 @@ extern "C" int procSavedAddr;
 extern "C" int recSavedAddr;
 extern "C" int arrSavedAddr;
 
+// Lab4
+vector<string> quadruples;
+int counter = 0;
+
 void yyerror(const char *s);
 static void lookup(char *token_buffer);
 void addSymbol(const char *id, const char *type);
@@ -29,6 +34,9 @@ void addSymbol(const char* id, const int type);
 void addSymbol(const string &id, const string &type);
 vector<string> split(char *ids);
 void fixAddress(int addr);
+string processVarWithCompSel(string varStr);
+void addQuadruple(const string& op, const string& arg1, const string& arg2,
+    const string& result);
 
 #define YYPRINT
 
@@ -54,10 +62,10 @@ string arr(arrayStr);
 
 %token TOKEN_COMMENT;
 %token <sval> TOKEN_STR
-%token TOKEN_AND
+%token <sval> TOKEN_AND
 %token TOKEN_BEGIN
 %token TOKEN_FORWARD
-%token TOKEN_DIV
+%token <sval> TOKEN_DIV
 %token TOKEN_DO
 %token TOKEN_ELSE
 %token TOKEN_END
@@ -65,10 +73,10 @@ string arr(arrayStr);
 %token TOKEN_FUNCTION
 %token TOKEN_IF
 %token TOKEN_ARRAY
-%token TOKEN_MOD
-%token TOKEN_NOT
+%token <sval> TOKEN_MOD
+%token <sval> TOKEN_NOT
 %token TOKEN_OF
-%token TOKEN_OR
+%token <sval> TOKEN_OR
 %token TOKEN_PROCEDURE
 %token TOKEN_PROGRAM
 %token TOKEN_RECORD
@@ -78,8 +86,8 @@ string arr(arrayStr);
 %token TOKEN_VAR
 %token TOKEN_WHILE
 %token <sval> TOKEN_PLUS
-%token TOKEN_MINUS
-%token TOKEN_MULTIPLY
+%token <sval> TOKEN_MINUS
+%token <sval> TOKEN_MULTIPLY
 %token TOKEN_DIVIDE
 %token TOKEN_EQ
 %token TOKEN_LT
@@ -91,23 +99,25 @@ string arr(arrayStr);
 %token <ival> TOKEN_INT
 %token TOKEN_DECIMAL
 %token TOKEN_EXPNUM
-%token TOKEN_DOT
+%token <sval> TOKEN_DOT
 %token TOKEN_COMMAS
 %token TOKEN_COLON
 %token TOKEN_SEMICOLON
-%token TOKEN_ASSIGN
+%token <sval> TOKEN_ASSIGN
 %token TOKEN_RANGE
 %token TOKEN_LPAR
 %token TOKEN_RPAR
-%token TOKEN_LBRACKET
-%token TOKEN_RBRACKET
+%token <sval> TOKEN_LBRACKET
+%token <sval> TOKEN_RBRACKET
 
 %right TOKEN_ELSE
 %left TOKEN_PLUS TOKEN_MINUS TOKEN_OR
 %left TOKEN_MULTIPLY TOKEN_DIV TOKEN_MOD TOKEN_AND
 %right UPLUS UMINUS
 
-%type <sval> type identifierList
+%type <sval> type identifierList sign term factor factorElement
+%type <sval> componentSelection variable expression groupComponentSelection
+%type <sval> functionReference mulOp addOp simpleExpression assignmentStatement
 %type <ival> formalParamSeq formalParameterList
 %%
 
@@ -267,14 +277,23 @@ simpleStatement: assignmentStatement { cout << "simple_statement" << endl; }
     | procedureStatement { cout << "simple_statement" << endl; }
     | { cout << "simple_statement_empty" << endl; };
 
-assignmentStatement: variable TOKEN_ASSIGN expression { cout << "assignment_statement" << endl; };
+assignmentStatement: variable TOKEN_ASSIGN expression {
+    cout << "assignment_statement" << endl;
 
-procedureStatement: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
-    { cout << "procedure_statement" << endl;
-      string id($1);
-      if (symTable.find(id) == symTable.end()) {
-        addSymbol($1, nilStr);
-      };
+    // lab4
+    addQuadruple(string($2), string($3), string("NULL"), string($1));
+    };
+
+procedureStatement: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR {
+    cout << "procedure_statement" << endl;
+    string id($1);
+    if (symTable.find(id) == symTable.end()) {
+      addSymbol($1, nilStr);
+    };
+
+    // lab4
+    addQuadruple("call", string($1), "NULL", "NULL");
+    addQuadruple("return", "NULL", "NULL", "NULL"); 
     };
 
 structuredStatement: compoundStatement { cout << "compound_statement" << endl; }
@@ -347,53 +366,194 @@ relationalOp: TOKEN_LT { cout << "relational_op" << endl; }
     | TOKEN_NOTEQ { cout << "relational_op" << endl; }
     | TOKEN_EQ { cout << "relational_op" << endl; };
 
-simpleExpression: sign term { cout << "simple_expression" << endl; }
-    | term { cout << "simple_expression" << endl; }
-    | simpleExpression addOp term { cout << "simple_expression_more" << endl; };
-
-addOp: TOKEN_PLUS { cout << "addop" << endl; }
-    | TOKEN_MINUS { cout << "addop" << endl; }
-    | TOKEN_OR { cout << "addop" << endl; };
-
-term: term mulOp factor { cout << "term_more" << endl; }
-    | factor { cout << "term" << endl; } ;
-
-mulOp: TOKEN_MULTIPLY { cout << "mulop" << endl; }
-  | TOKEN_DIV { cout << "mulop" << endl; } 
-  | TOKEN_MOD { cout << "mulop" << endl; }
-  | TOKEN_AND { cout << "mulop" << endl; };
-
-factor: TOKEN_INT { cout << "factor" << endl; }
-    | TOKEN_STR { cout << "factor" << endl; }
-    | variable { cout << "factor" << endl; }
-    | functionReference { cout << "factor" << endl; }
-    | TOKEN_NOT factor { cout << "factor" << endl; }
-    | TOKEN_LPAR expression TOKEN_RPAR { cout << "factor" << endl; };
-
-functionReference: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR
-    { cout << "function_reference" << endl;
-      string id($1);
-      if (symTable.find(id) == symTable.end()) {
-        addSymbol($1, nilStr);
-      }
+simpleExpression: sign term { cout << "simple_expression" << endl;
+    ++counter;
+    stringstream ss;
+    ss << "t" << counter;
+    string newTemp = ss.str();
+    addQuadruple(string($1), string($2), string("NULL"), newTemp);
+    $$ = (char*) malloc(newTemp.length() + 1);
+    strcpy($$, newTemp.c_str());
+    }
+    | term { cout << "simple_expression" << endl;
+    $$ = (char*) malloc(strlen($1) + 1);
+    strcpy($$, $1);
+    }
+    | simpleExpression addOp term { cout << "simple_expression_more" << endl;
+    ++counter;
+    stringstream ss;
+    ss << "t" << counter;
+    string newTemp = ss.str();
+    addQuadruple(string($2), string($1), string($3), newTemp);
+    $$ = (char*) malloc(newTemp.length() + 1);
+    strcpy($$, newTemp.c_str());
     };
 
-variable: TOKEN_ID componentSelection { cout << "variable" << endl;
+addOp: TOKEN_PLUS { cout << "addop" << endl;
+    $$ = (char*) malloc(strlen($1) + 1);
+    strcpy($$, $1);
+    }
+    | TOKEN_MINUS { cout << "addop" << endl;
+    $$ = (char*) malloc(strlen($1) + 1);
+    strcpy($$, $1);
+    }
+    | TOKEN_OR { cout << "addop" << endl;
+    $$ = (char*) malloc(strlen($1) + 1);
+    strcpy($$, $1);
+    };
+
+term: term mulOp factor { cout << "term_more" << endl;
+    ++counter;
+    stringstream ss;
+    ss << "t" << counter;
+    string newTemp = ss.str();
+    addQuadruple(string($2), string($1), string($3), newTemp);
+    $$ = (char*) malloc(newTemp.length() + 1);
+    strcpy($$, newTemp.c_str());
+    }
+    | factor { cout << "term" << endl;
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+      };
+
+mulOp: TOKEN_MULTIPLY { cout << "mulop" << endl;
+    $$ = (char*) malloc(strlen($1) + 1);
+    strcpy($$, $1);
+    }
+  | TOKEN_DIV { cout << "mulop" << endl;
+    $$ = (char*) malloc(strlen($1) + 1);
+    strcpy($$, $1);
+    } 
+  | TOKEN_MOD { cout << "mulop" << endl;
+    $$ = (char*) malloc(strlen($1) + 1);
+    strcpy($$, $1);
+    }
+  | TOKEN_AND { cout << "mulop" << endl;
+    $$ = (char*) malloc(strlen($1) + 1);
+    strcpy($$, $1);
+    };
+
+factor: factorElement { cout << "factor" << endl;
+    $$ = (char*) malloc(strlen($1) + 1);
+    strcpy($$, $1);
+    }
+    | TOKEN_NOT factorElement { cout << "factor" << endl;
+      // lab4
+      ++counter;
+      stringstream ss;
+      ss << "t" << counter;
+      string newTemp = ss.str();
+      addQuadruple(string($1), string($2), string("NULL"), newTemp);
+      $$ = (char*) malloc(newTemp.length() + 1);
+      strcpy($$, newTemp.c_str());
+    }
+
+factorElement: TOKEN_INT {
+    // Lab4
+    stringstream ss;
+    ss << $1;
+    $$ = (char*) malloc(ss.str().length() + 1);
+    strcpy($$, ss.str().c_str());
+    }
+    | TOKEN_STR {
+      // Lab4
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+      }
+    | variable {
+      // lab4
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    }
+    | functionReference {
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    }
+    | TOKEN_LPAR expression TOKEN_RPAR {
+      $$ = (char*) malloc(strlen($2) + 1);
+      strcpy($$, $2);
+    };
+
+functionReference: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR {
+    cout << "function_reference" << endl;
     string id($1);
     if (symTable.find(id) == symTable.end()) {
       addSymbol($1, nilStr);
     }
+
+    // lab4
+    ++counter;
+    stringstream ss;
+    ss << "t" << counter;
+    string newTemp = ss.str();
+    addQuadruple(":=", "funcall", string($1), newTemp);
+    addQuadruple("funreturn", newTemp, "NULL", "NULL");
+    $$ = (char*) malloc(newTemp.length() + 1);
+    strcpy($$, newTemp.c_str());
     };
 
-componentSelection: TOKEN_DOT TOKEN_ID componentSelection | TOKEN_LBRACKET expression TOKEN_RBRACKET componentSelection
-    | { cout << "component_selection_empty" << endl; };
+variable: TOKEN_ID groupComponentSelection { cout << "variable" << endl;
+    string id($1);
+    if (symTable.find(id) == symTable.end()) {
+      addSymbol($1, nilStr);
+    }
+
+    // lab4
+    if ($2 == NULL) {
+      $$ = (char*) malloc(strlen($1) + 1);
+      strcpy($$, $1);
+    } else {
+      stringstream ss;
+      ss << $1 << " " << $2;
+      string newTemp = processVarWithCompSel(ss.str());
+      $$ = (char*) malloc(newTemp.length() + 1);
+      strcpy($$, newTemp.c_str());
+    }
+    };
+
+groupComponentSelection: componentSelection {
+    $$ = (char*) malloc(strlen($1) + 1);
+    strcpy($$, $1);
+    }
+    | { cout << "component_selection_empty" << endl; $$ = NULL; };
+
+componentSelection: TOKEN_DOT TOKEN_ID { cout << "component_selection" << endl;
+    // lab4
+    stringstream ss;
+    ss << $1 << " " << $2;
+    $$ = (char*) malloc(ss.str().length() + 1);
+    strcpy($$, ss.str().c_str());
+    } |
+    TOKEN_LBRACKET expression TOKEN_RBRACKET { cout << "component_selection" << endl;
+    // lab4
+    stringstream ss;
+    ss << $1 << $2 << $3;
+    $$ = (char*) malloc(ss.str().length() + 1);
+    strcpy($$, ss.str().c_str());
+    } |
+    componentSelection TOKEN_DOT TOKEN_ID { cout << "component_selection_more" << endl;
+    stringstream ss;
+    ss << $1 << " " << $2 << " " << $3;
+    $$ = (char*) malloc(ss.str().length() + 1);
+    strcpy($$, ss.str().c_str());
+    } |
+    componentSelection TOKEN_LBRACKET expression TOKEN_RBRACKET { cout << "component_selection_more" << endl;
+    stringstream ss;
+    ss << $1 << " " << $2 << $3 << $4;
+    $$ = (char*) malloc(ss.str().length() + 1);
+    strcpy($$, ss.str().c_str());
+    }; 
 
 actualParameterList: expressionList { cout << "actual_parameter_list" << endl; }
     | { cout << "actual_parameter_list_empty" << endl; };
 
-expressionList: expressionList TOKEN_COMMAS expression
-    { cout << "expressions_more" << endl; }
-    | expression { cout << "expressions" << endl; };
+expressionList: expressionList TOKEN_COMMAS expression {
+    cout << "expressions_more" << endl;
+    addQuadruple("param", string($3), string("NULL"), string("NULL"));
+    }
+    | expression { cout << "expressions" << endl;
+    addQuadruple("param", string($1), string("NULL"), string("NULL"));
+    };
 
 identifierList: identifierList TOKEN_COMMAS TOKEN_ID
     { cout << "identifier_list_more" << endl;
@@ -415,7 +575,18 @@ identifierList: identifierList TOKEN_COMMAS TOKEN_ID
       $$ = (char*) malloc (strlen($1) + 1);
       strcpy($$, $1);};
 
-sign: TOKEN_PLUS %prec UPLUS | TOKEN_MINUS %prec UMINUS
+sign: TOKEN_PLUS %prec UPLUS {
+      // Lab4
+      $$ = (char*) malloc(2);
+      *$$ = '+';
+      *($$ + 1) = '\0';
+      }
+    | TOKEN_MINUS %prec UMINUS {
+      // Lab4
+      $$ = (char*) malloc(2);
+      *$$ = '-';
+      *($$ + 1) = '\0';
+      }
 
 %%
 main(int argc, char **argv) {
@@ -425,19 +596,18 @@ main(int argc, char **argv) {
     cout << "Error in openning test.pas!" << endl;
     return -1;
   }
-  
   yyin = myfile;
-
   //yydebug = 1;
   do {
     yyparse();
   } while (!feof(yyin));
-  
+  fclose(stdout);
+  fclose(myfile);
+
   map<string, pair<int, string> >::iterator it;
   for (it = symTable.begin(); it != symTable.end(); ++it) {
     symTableIndexedByAddr[it->second.first] = make_pair(it->first, it->second.second);
   }
-
   map<int, pair<string, string> >::iterator it2;
   stringstream ss; 
   freopen("symtable.out", "w", stdout);
@@ -454,7 +624,12 @@ main(int argc, char **argv) {
     cout << endl;
   }
   fclose(stdout);
-  fclose(myfile);
+
+  freopen("a.txt", "w", stdout);
+  for (int i = 0; i < quadruples.size(); ++i) {
+    cout << quadruples[i] << endl;
+  }
+  fclose(stdout);
 }
 
 void yyerror(const char *s) {
@@ -549,3 +724,35 @@ vector<string> split(char* ids) {
   return result;
 }
 
+string processVarWithCompSel(string varStr) {
+  vector<string> fields = split((char*)varStr.c_str());
+  string prevVar = fields[0];
+  for (int i = 1; i < fields.size(); ++i) {
+    if (fields[i].compare(".") == 0) {
+      ++i;
+      ++counter;
+      stringstream ss;
+      ss << "t" << counter;
+      string newTemp = ss.str();
+      addQuadruple(string("record_field_select"), prevVar, fields[i], newTemp);
+      prevVar = newTemp;
+    } else {
+      assert(fields[i].find("[") != string::npos);
+      ++counter;
+      stringstream ss;
+      ss << "t" << counter;
+      string newTemp = ss.str();
+      addQuadruple(string("array_element_select"), prevVar,
+          fields[i].substr(0, fields[i].length() - 2), newTemp);
+      prevVar = newTemp;
+    }
+  }
+  return prevVar;
+}
+
+void addQuadruple(const string& op, const string& arg1, const string& arg2,
+    const string& result) {
+  stringstream ss;
+  ss << op << " " << arg1 << " " << arg2 << " " << result;
+  quadruples.push_back(ss.str());
+} 

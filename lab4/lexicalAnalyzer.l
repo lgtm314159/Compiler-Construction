@@ -37,12 +37,16 @@ ERROR   [^{DELIM}{WS}{NEWLINE}{LETTER}{DIGIT}{ID}{INTEGER}{DECIMAL}{EXPNUM}{STR}
                 //return TOKEN_COMMENT;
               }
 and         {//printf("KEYWORD %s\n", yytext);
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
 return TOKEN_AND;}
 begin     {//printf("KEYWORD %s\n", yytext);
 return TOKEN_BEGIN;}
 forward     {//printf("KEYWORD %s\n", yytext);
 return TOKEN_FORWARD;}
 div     {//printf("KEYWORD %s\n", yytext);
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
 return TOKEN_DIV;}
 do     {//printf("KEYWORD %s\n", yytext);
 return TOKEN_DO;}
@@ -63,12 +67,18 @@ arrSavedAddr = address;
 ++address;
 return TOKEN_ARRAY;}
 mod     {//printf("KEYWORD %s\n", yytext);
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
 return TOKEN_MOD;}
 not     {//printf("KEYWORD %s\n", yytext);
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
 return TOKEN_NOT;}
 of     {//printf("KEYWORD %s\n", yytext);
 return TOKEN_OF;}
 or     {//printf("KEYWORD %s\n", yytext);
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
 return TOKEN_OR;}
 procedure     {//printf("KEYWORD %s\n", yytext);
 procSavedAddr = address;
@@ -91,10 +101,16 @@ return TOKEN_VAR;}
 while     {//printf("KEYWORD %s\n", yytext); 
 return TOKEN_WHILE;}
 "+" {//printf("PLUS\n");
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
 return TOKEN_PLUS;}
 "-" {//printf("MINUS\n");
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
 return TOKEN_MINUS;}
 "*" {//printf("MULT\n");
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
 return TOKEN_MULTIPLY;}
 "/" {//printf("DIVIDE\n");
 return TOKEN_DIVIDE;}
@@ -125,6 +141,8 @@ return TOKEN_EXPNUM;}
              strcpy(yylval.sval, yytext);
              return TOKEN_STR;}
 "." {//printf("DOT\n");
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
 return TOKEN_DOT;}
 "," {//printf("COMMA\n"); 
 return TOKEN_COMMAS;}
@@ -133,6 +151,8 @@ return TOKEN_COLON;}
 ";" {//printf("SEMICOLON\n"); 
 return TOKEN_SEMICOLON;}
 ":=" {//printf("ASSIGN\n"); 
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
 return TOKEN_ASSIGN;}
 ".." {//printf("RANGE\n"); 
 return TOKEN_RANGE;}
@@ -141,8 +161,12 @@ return TOKEN_LPAR;}
 ")" {//printf("RPAR\n"); 
 return TOKEN_RPAR;}
 "[" {//printf("LBRACKET\n"); 
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
 return TOKEN_LBRACKET;}
 "]" {//printf("RBRACKET\n");
+yylval.sval = (char*) malloc(strlen(yytext) + 1);
+strcpy(yylval.sval, yytext);
 return TOKEN_RBRACKET;}
 {ERROR} {printf("ERROR(%d): Unrecognized Symbol \"%s\"\n", line, yytext);}
 %%
