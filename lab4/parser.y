@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <map>
 #include <vector>
+#include <stack>
 #include <assert.h>
 #define YYDEBUG 1
 
@@ -24,6 +25,7 @@ extern "C" int arrSavedAddr;
 // Lab4
 vector<string> quadruples;
 int counter = 0;
+int labelCounter = 0;
 
 void yyerror(const char *s);
 static void lookup(char *token_buffer);
@@ -32,11 +34,15 @@ void addSymbol(const char *id, const string &type);
 void addSymbol(const string &id, const char *type);
 void addSymbol(const char* id, const int type);
 void addSymbol(const string &id, const string &type);
-vector<string> split(char *ids);
+vector<string> split(const char *ids);
 void fixAddress(int addr);
 string processVarWithCompSel(string varStr);
 void addQuadruple(const string& op, const string& arg1, const string& arg2,
     const string& result);
+int getQuadrupleIndex(const string& result);
+void modifyQuadResult(int index, const string& result);
+void flipQuadRelOp(int index);
+void addLabelToQuad(int index, const string& label);
 
 #define YYPRINT
 
@@ -119,6 +125,7 @@ string arr(arrayStr);
 %type <sval> componentSelection variable expression groupComponentSelection
 %type <sval> functionReference mulOp addOp simpleExpression assignmentStatement
 %type <sval> relationalOp groupRelOpSimExpr procedureStatement simpleStatement
+%type <sval> statement compoundStatement statementSequence structuredStatement
 %type <ival> formalParamSeq formalParameterList
 %%
 
@@ -265,14 +272,27 @@ formalParamSeq: formalParamSeq TOKEN_SEMICOLON identifierList TOKEN_COLON type
 
 block: groupVariableDeclarations compoundStatement { cout << "block" << endl; };
 
-compoundStatement: TOKEN_BEGIN statementSequence TOKEN_END { cout << "compound_statement" << endl; };
+compoundStatement: TOKEN_BEGIN statementSequence TOKEN_END {
+    cout << "compound_statement" << endl;
+    $$ = (char*) malloc(strlen($2) + 1);
+    strcpy($$, $2);
+    };
 
-statementSequence: statementSequence TOKEN_SEMICOLON statement { cout << "statement_sequence_more" << endl; }
-    | statement { cout << "statement_sequence" << endl; };
+statementSequence: statementSequence TOKEN_SEMICOLON statement {
+    cout << "statement_sequence_more" << endl;
+    stringstream ss;
+    ss << $1 << " " << $3;
+    $$ = (char*) malloc(ss.str().length() + 1);
+    strcpy($$, ss.str().c_str());
+    }
+    | statement {
+    cout << "statement_sequence" << endl;
+    $$ = (char*) malloc(strlen($1) + 1);
+    strcpy($$, $1);
+    };
 
-statement: groupSimStruStatement { cout << "statement" << endl; };
-
-groupSimStruStatement: simpleStatement | structuredStatement;
+statement: simpleStatement { cout << "statement" << endl; }
+    | structuredStatement { cout << "statement" << endl; };
 
 simpleStatement: assignmentStatement {
     cout << "simple_statement" << endl;
@@ -318,15 +338,110 @@ procedureStatement: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR {
     strcpy($$, ss.str().c_str());
     };
 
-structuredStatement: compoundStatement { cout << "compound_statement" << endl; }
-    | TOKEN_IF expression TOKEN_THEN statement { cout << "if_statement" << endl; }
-    | TOKEN_IF expression TOKEN_THEN statement TOKEN_ELSE statement { cout << "ifelse_statement" << endl; }
-    | TOKEN_WHILE expression TOKEN_DO statement { cout << "while_statement" << endl; }
-    | TOKEN_FOR TOKEN_ID TOKEN_ASSIGN expression TOKEN_TO expression TOKEN_DO statement { cout << "for_statement" << endl; };
+structuredStatement: compoundStatement {
+    cout << "compound_statement" << endl;
+    $$ = (char*) malloc(strlen($1) + 1);
+    strcpy($$, $1);
+    }
+    | TOKEN_IF expression TOKEN_THEN statement {
+    cout << "if_statement" << endl;
+    int beginIndex = getQuadrupleIndex(string($2));
+    vector<string> indexes = split($4);
+    stringstream ss;
+    ss << beginIndex << " " << indexes.back();
+    $$ = (char*) malloc(ss.str().length() + 1);
+    strcpy($$, ss.str().c_str());
+
+    ++labelCounter;
+    ss.str(string());
+    ss << "L" << labelCounter;
+    string newLabel = ss.str();
+    addQuadruple("NULL", "NULL", "NULL", "NULL");
+    addLabelToQuad(quadruples.size() - 1, newLabel);
+    modifyQuadResult(beginIndex, newLabel);
+    }
+    | TOKEN_IF expression TOKEN_THEN statement TOKEN_ELSE statement {
+    cout << "ifelse_statement" << endl;
+    int beginIndex = getQuadrupleIndex(string($2));
+    vector<string> indexes = split($6);
+    stringstream ss;
+    ss << beginIndex << " " << indexes.back();
+    $$ = (char*) malloc(ss.str().length() + 1);
+    strcpy($$, ss.str().c_str());
+
+    ++labelCounter;
+    ss.str(string());
+    ss << "L" << labelCounter;
+    string newLabel = ss.str();
+    flipQuadRelOp(beginIndex);
+    modifyQuadResult(beginIndex, newLabel);
+    indexes = split($4);
+    int labelQuadIndex = atoi(indexes.back().c_str()) + 1; 
+    if (labelQuadIndex >= quadruples.size()) {
+      addQuadruple("NULL", "NULL", "NULL", "NULL");
+      addLabelToQuad(labelQuadIndex, newLabel);
+    } else {
+      addLabelToQuad(labelQuadIndex, newLabel);
+    }
+    }
+    | TOKEN_WHILE expression TOKEN_DO statement {
+    cout << "while_statement" << endl;
+    int beginIndex = getQuadrupleIndex(string($2));
+    vector<string> indexes = split($4);
+    stringstream ss;
+    ss << beginIndex << " " << indexes.back();
+    $$ = (char*) malloc(ss.str().length() + 1);
+    strcpy($$, ss.str().c_str());
+
+    ++labelCounter;
+    ss.str(string());
+    ss << "L" << labelCounter;
+    string newLabel = ss.str();
+    flipQuadRelOp(beginIndex);
+    addLabelToQuad(beginIndex, newLabel);
+    addQuadruple("NULL", "NULL", "NULL", newLabel);
+    ++labelCounter;
+    ss.str(string());
+    ss << "L" << labelCounter;
+    newLabel = ss.str();
+    addQuadruple("NULL", "NULL", "NULL", "NULL");
+    addLabelToQuad(quadruples.size() - 1, newLabel);
+    modifyQuadResult(beginIndex, newLabel);
+    }
+    | TOKEN_FOR TOKEN_ID TOKEN_ASSIGN expression TOKEN_TO expression {
+    addQuadruple(":=", string($4), "NULL", string($2));
+    addQuadruple(">", string($2), string($6), "NULL");
+    $<ival>$ = quadruples.size() - 1;
+    }
+    TOKEN_DO statement {
+    cout << "for_statement" << endl;
+    int beginIndex = getQuadrupleIndex(string($4));
+    vector<string> indexes = split($9);
+    stringstream ss;
+    ss << beginIndex << " " << indexes.back();
+    $$ = (char*) malloc(ss.str().length() + 1);
+    strcpy($$, ss.str().c_str());
+
+    ++labelCounter;
+    ss.str(string());
+    ss << "L" << labelCounter;
+    string newLabel = ss.str();
+    int forCondQuadIndex = $<ival>7;
+    addLabelToQuad(forCondQuadIndex, newLabel);
+    addQuadruple("+", string($2), "1", string($2));
+    addQuadruple("goto", "NULL", "NULL", newLabel);
+    ++labelCounter;
+    ss.str(string());
+    ss << "L" << labelCounter;
+    newLabel = ss.str();
+    addQuadruple("NULL", "NULL", "NULL", "NULL");
+    addLabelToQuad(quadruples.size() - 1, newLabel);
+    modifyQuadResult(forCondQuadIndex, newLabel);
+    };
 
 type: TOKEN_ID { cout << "type_ID" << endl; //addSymbol($1, nilStr);
                  $$ = (char*) malloc(strlen($1) + 1);
-                 strcpy($$, $1);} 
+                 strcpy($$, $1); } 
     | TOKEN_ARRAY TOKEN_LBRACKET constant TOKEN_RANGE constant TOKEN_RBRACKET TOKEN_OF type
       { cout << "type_array" << endl;
         $$ = (char*) malloc(sizeof(arrayStr));;
@@ -755,7 +870,7 @@ void fixAddress(int addr) {
 }
 
 /* Function to split an identifier list into identifiers.*/
-vector<string> split(char* ids) {
+vector<string> split(const char* ids) {
   vector<string> result;
   int i = 0;
   int j = 0;
@@ -817,3 +932,76 @@ void addQuadruple(const string& op, const string& arg1, const string& arg2,
   ss << op << " " << arg1 << " " << arg2 << " " << result;
   quadruples.push_back(ss.str());
 } 
+
+int getQuadrupleIndex(const string& result) {
+  int index = -1;
+  for (int i = 0; i < quadruples.size(); ++i) {
+    vector<string> fields = split(quadruples[i].c_str());
+    if (fields[3].compare(result) == 0)
+      index = i; 
+  } 
+  return index;
+}
+
+void modifyQuadResult(int index, const string& result) {
+  vector<string> fields = split(quadruples[index].c_str());
+  if (fields.size() == 4) {
+    stringstream ss;
+    ss << fields[0] << " " << fields[1] << " " << fields[2] << " " << result;
+    quadruples[index] = ss.str();
+  } else {
+    assert(fields.size() == 5);
+    stringstream ss;
+    ss << fields[0] << " " << fields[1] << " " << fields[2] << " "
+        << fields[3] << " " << result;
+    quadruples[index] = ss.str();
+  }
+}
+
+void flipQuadRelOp(int index) {
+  vector<string> fields = split(quadruples[index].c_str());
+  stringstream ss;
+  if (fields.size() == 4) {
+    if (fields[0].compare("<") == 0)
+      fields[0] = ">=";
+    else if (fields[0].compare(">") == 0)
+      fields[0] = "<=";
+    else if (fields[0].compare("<=") == 0)
+      fields[0] = ">";
+    else if (fields[0].compare(">=") == 0)
+      fields[0] = "<";
+    else if (fields[0].compare("=") == 0)
+      fields[0] = "<>";
+    else {
+      assert(fields[0].compare("<>") == 0);
+      fields[0] = "=";
+    }
+    ss << fields[0] << " " << fields[1] << " " << fields[2] << " " << fields[3];
+  } else {
+    assert(fields.size() == 5);
+    if (fields[1].compare("<") == 0)
+      fields[1] = ">=";
+    else if (fields[1].compare(">") == 0)
+      fields[1] = "<=";
+    else if (fields[1].compare("<=") == 0)
+      fields[1] = ">";
+    else if (fields[1].compare(">=") == 0)
+      fields[1] = "<";
+    else if (fields[1].compare("=") == 0)
+      fields[1] = "<>";
+    else {
+      assert(fields[1].compare("<>") == 0);
+      fields[1] = "=";
+    }
+    ss << fields[0] << " " << fields[1] << " " << fields[2] << " " << fields[3]
+        << " " << fields[4];
+  }
+  quadruples[index] = ss.str();
+}
+
+void addLabelToQuad(int index, const string& label) {
+  stringstream ss;
+  ss << label << ": " << quadruples[index]; 
+  quadruples[index] = ss.str();
+}
+
