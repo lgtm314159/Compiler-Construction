@@ -43,6 +43,9 @@ int getQuadrupleIndex(const string& result);
 void modifyQuadResult(int index, const string& result);
 void flipQuadRelOp(int index);
 void addLabelToQuad(int index, const string& label);
+bool isQuadOpAssign(int index);
+void changeQuadToCondExp(int index, const string& op, const string& arg2,
+    const string& result);
 
 #define YYPRINT
 
@@ -194,7 +197,12 @@ variableDeclaration: identifierList TOKEN_COLON type TOKEN_SEMICOLON
       }
     };
 
-procedureDeclaration: TOKEN_PROCEDURE TOKEN_ID TOKEN_LPAR formalParameterList
+procedureDeclaration: TOKEN_PROCEDURE TOKEN_ID {
+    stringstream ss;
+    ss << $2 << ": NULL";
+    addQuadruple(ss.str(), "NULL", "NULL", "NULL");
+    }
+    TOKEN_LPAR formalParameterList
     TOKEN_RPAR TOKEN_SEMICOLON groupBlockForward TOKEN_SEMICOLON
     { cout << "procedure_declaration" << endl;
       string id($2);
@@ -204,11 +212,17 @@ procedureDeclaration: TOKEN_PROCEDURE TOKEN_ID TOKEN_LPAR formalParameterList
       }
       symTable[id].first = procSavedAddr;
       ostringstream convert;
-      convert << $4;
+      convert << $5;
       symTable[id].second = convert.str(); 
+
+      addQuadruple("return", "NULL", "NULL", "NULL"); 
     };
 
-functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList
+functionDeclaration: TOKEN_FUNCTION TOKEN_ID {
+    stringstream ss;
+    ss << $2 << ": NULL";
+    addQuadruple(ss.str(), "NULL", "NULL", "NULL");
+    } TOKEN_LPAR formalParameterList
     TOKEN_RPAR TOKEN_COLON resultType TOKEN_SEMICOLON groupBlockForward 
     TOKEN_SEMICOLON
     { cout << "function_declaration" << endl;
@@ -220,20 +234,26 @@ functionDeclaration: TOKEN_FUNCTION TOKEN_ID TOKEN_LPAR formalParameterList
           fixAddress(addr);
           symTable[id].first = funcSavedAddr;
           ostringstream convert;
-          convert << $4;
+          convert << $5;
           symTable[id].second = convert.str();
         } else {
           fixAddress(funcSavedAddr);
           ostringstream convert;
-          convert << $4;
+          convert << $5;
           symTable[id].second = convert.str();
         }
       } else {
         symTable[id].first = funcSavedAddr;
         ostringstream convert;
-        convert << $4;
+        convert << $5;
         symTable[id].second = convert.str();
       }
+
+      ++counter; 
+      stringstream ss;
+      ss << "t" << counter;
+      string newTemp = ss.str();
+      addQuadruple("funreturn", newTemp, "NULL", "NULL");
     };
 
 groupBlockForward: block | TOKEN_FORWARD;
@@ -331,9 +351,8 @@ procedureStatement: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR {
 
     // lab4
     addQuadruple("call", string($1), "NULL", "NULL");
-    addQuadruple("return", "NULL", "NULL", "NULL"); 
     stringstream ss;
-    ss << quadruples.size() - 2 << " " << quadruples.size() - 1; 
+    ss << quadruples.size() - 1 << " " << quadruples.size() - 1; 
     $$ = (char*) malloc(ss.str().length() + 1);
     strcpy($$, ss.str().c_str());
     };
@@ -358,7 +377,12 @@ structuredStatement: compoundStatement {
     string newLabel = ss.str();
     addQuadruple("NULL", "NULL", "NULL", "NULL");
     addLabelToQuad(quadruples.size() - 1, newLabel);
-    modifyQuadResult(beginIndex, newLabel);
+    if (isQuadOpAssign(beginIndex)) {
+      changeQuadToCondExp(beginIndex, "=", "false", newLabel);
+    } else {
+      flipQuadRelOp(beginIndex);
+      modifyQuadResult(beginIndex, newLabel);
+    }
     }
     | TOKEN_IF expression TOKEN_THEN statement TOKEN_ELSE statement {
     cout << "ifelse_statement" << endl;
@@ -373,8 +397,12 @@ structuredStatement: compoundStatement {
     ss.str(string());
     ss << "L" << labelCounter;
     string newLabel = ss.str();
-    flipQuadRelOp(beginIndex);
-    modifyQuadResult(beginIndex, newLabel);
+    if (isQuadOpAssign(beginIndex)) {
+      changeQuadToCondExp(beginIndex, "=", "false", newLabel);
+    } else {
+      flipQuadRelOp(beginIndex);
+      modifyQuadResult(beginIndex, newLabel);
+    }
     indexes = split($4);
     int labelQuadIndex = atoi(indexes.back().c_str()) + 1; 
     if (labelQuadIndex >= quadruples.size()) {
@@ -397,16 +425,20 @@ structuredStatement: compoundStatement {
     ss.str(string());
     ss << "L" << labelCounter;
     string newLabel = ss.str();
-    flipQuadRelOp(beginIndex);
     addLabelToQuad(beginIndex, newLabel);
-    addQuadruple("NULL", "NULL", "NULL", newLabel);
+    addQuadruple("goto", "NULL", "NULL", newLabel);
     ++labelCounter;
     ss.str(string());
     ss << "L" << labelCounter;
     newLabel = ss.str();
     addQuadruple("NULL", "NULL", "NULL", "NULL");
     addLabelToQuad(quadruples.size() - 1, newLabel);
-    modifyQuadResult(beginIndex, newLabel);
+    if (isQuadOpAssign(beginIndex)) {
+      changeQuadToCondExp(beginIndex, "=", "false", newLabel);
+    } else {
+      flipQuadRelOp(beginIndex);
+      modifyQuadResult(beginIndex, newLabel);
+    }
     }
     | TOKEN_FOR TOKEN_ID TOKEN_ASSIGN expression TOKEN_TO expression {
     addQuadruple(":=", string($4), "NULL", string($2));
@@ -626,20 +658,35 @@ factor: factorElement { cout << "factor" << endl;
 
 factorElement: TOKEN_INT {
     // Lab4
+    ++counter;
     stringstream ss;
+    ss << "t" << counter;
+    string newTemp = ss.str();
+    ss.str(string());
     ss << $1;
-    $$ = (char*) malloc(ss.str().length() + 1);
-    strcpy($$, ss.str().c_str());
+    addQuadruple(":=", ss.str(), "NULL", newTemp);
+    $$ = (char*) malloc(newTemp.length() + 1);
+    strcpy($$, newTemp.c_str());
     }
     | TOKEN_STR {
       // Lab4
-      $$ = (char*) malloc(strlen($1) + 1);
-      strcpy($$, $1);
+      ++counter;
+      stringstream ss;
+      ss << "t" << counter;
+      string newTemp = ss.str();
+      addQuadruple(":=", string($1), string("NULL"), newTemp);
+      $$ = (char*) malloc(newTemp.length() + 1);
+      strcpy($$, newTemp.c_str());
       }
     | variable {
       // lab4
-      $$ = (char*) malloc(strlen($1) + 1);
-      strcpy($$, $1);
+      ++counter;
+      stringstream ss;
+      ss << "t" << counter;
+      string newTemp = ss.str();
+      addQuadruple(":=", string($1), string("NULL"), newTemp);
+      $$ = (char*) malloc(newTemp.length() + 1);
+      strcpy($$, newTemp.c_str());
     }
     | functionReference {
       $$ = (char*) malloc(strlen($1) + 1);
@@ -663,7 +710,6 @@ functionReference: TOKEN_ID TOKEN_LPAR actualParameterList TOKEN_RPAR {
     ss << "t" << counter;
     string newTemp = ss.str();
     addQuadruple(":=", "funcall", string($1), newTemp);
-    addQuadruple("funreturn", newTemp, "NULL", "NULL");
     $$ = (char*) malloc(newTemp.length() + 1);
     strcpy($$, newTemp.c_str());
     };
@@ -1003,5 +1049,29 @@ void addLabelToQuad(int index, const string& label) {
   stringstream ss;
   ss << label << ": " << quadruples[index]; 
   quadruples[index] = ss.str();
+}
+
+void changeQuadToCondExp(int index, const string& op, const string& arg2,
+    const string& result) {
+  stringstream ss;
+  vector<string> fields = split(quadruples[index].c_str());
+  if (fields.size() == 4) {
+    ss << op << " " << fields[1] << " " << arg2 << " " << result;
+  } else {
+    assert(fields.size() == 5);
+    ss << fields[0] << " " << op << " " << fields[2] << " " << arg2 << " "
+        << result;
+  }
+  quadruples[index] = ss.str();
+}
+
+bool isQuadOpAssign(int index) {
+  vector<string> fields = split(quadruples[index].c_str());
+  if (fields.size() == 4) {
+    return fields[0].compare(":=") == 0;
+  } else {
+    assert(fields.size() == 5);
+    return fields[1].compare(":=") == 0;
+  }
 }
 
