@@ -435,7 +435,8 @@ structuredStatement: compoundStatement {
         addQuadruple("NULL", "NULL", "NULL", "NULL");
         addLabelToQuad(quadruples.size() - 1, newLabel);
       } else {
-        addLabelToQuad(atoi(fields2.back().c_str()) + 1, newLabel);
+        // +2 because the quadruple vector has been shifted by 1.
+        addLabelToQuad(atoi(fields2.back().c_str()) + 2, newLabel);
       }
     }
 
