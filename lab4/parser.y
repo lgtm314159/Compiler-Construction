@@ -56,6 +56,9 @@ char recordStr[] = "record";
 char arrayStr[] = "array";
 string rec(recordStr);
 string arr(arrayStr);
+stack<vector<int> > trueListStack;
+stack<vector<int> > falseListStack;
+
 %}
 
 %expect 1
@@ -377,12 +380,13 @@ structuredStatement: compoundStatement {
     string newLabel = ss.str();
     addQuadruple("NULL", "NULL", "NULL", "NULL");
     addLabelToQuad(quadruples.size() - 1, newLabel);
+    /*
     if (isQuadOpAssign(beginIndex)) {
       changeQuadToCondExp(beginIndex, "=", "false", newLabel);
     } else {
       flipQuadRelOp(beginIndex);
       modifyQuadResult(beginIndex, newLabel);
-    }
+    }*/
     }
     | TOKEN_IF expression TOKEN_THEN statement TOKEN_ELSE statement {
     cout << "ifelse_statement" << endl;
@@ -587,14 +591,49 @@ simpleExpression: sign term { cout << "simple_expression" << endl;
     $$ = (char*) malloc(strlen($1) + 1);
     strcpy($$, $1);
     }
-    | simpleExpression addOp term { cout << "simple_expression_more" << endl;
-    ++counter;
-    stringstream ss;
-    ss << "t" << counter;
-    string newTemp = ss.str();
-    addQuadruple(string($2), string($1), string($3), newTemp);
-    $$ = (char*) malloc(newTemp.length() + 1);
-    strcpy($$, newTemp.c_str());
+    | simpleExpression addOp {
+    if (string($2).compare("or") == 0) {
+      addQuadruple("=", string($1), "true", "NULL");
+      $<ival>$ = quadruples.size() - 1;
+    }
+    } term { cout << "simple_expression_more" << endl;
+
+    if (string($2).compare("or") == 0) {
+      addQuadruple("=", string($2), "true", "NULL");
+      ++counter;
+      stringstream ss;
+      ss << "t" << counter;
+      string newTemp = ss.str();
+      addQuadruple(":=", "false", "NULL", newTemp);
+      addQuadruple("goto", "NULL", "NULL", "NULL");
+      addQuadruple(":=", "true", "NULL", newTemp);
+
+      ++labelCounter;
+      ss.str(string());
+      ss << "L" << labelCounter;
+      string newLabel = ss.str();
+      addLabelToQuad(quadruples.size() - 1, newLabel);
+      modifyQuadResult($<ival>3, newLabel);
+      modifyQuadResult(quadruples.size() - 4, newLabel);
+      
+      ++labelCounter;
+      ss.str(string());
+      ss << "L" << labelCounter;
+      newLabel = ss.str();
+      addQuadruple("NULL", "NULL", "NULL", "NULL");
+      addLabelToQuad(quadruples.size() - 1, newLabel);
+      modifyQuadResult(quadruples.size() - 3, newLabel);
+      $$ = (char*) malloc(newTemp.length() + 1);
+      strcpy($$, newTemp.c_str());
+    } else {
+      ++counter;
+      stringstream ss;
+      ss << "t" << counter;
+      string newTemp = ss.str();
+      addQuadruple(string($2), string($1), string($4), newTemp);
+      $$ = (char*) malloc(newTemp.length() + 1);
+      strcpy($$, newTemp.c_str());
+    }
     };
 
 addOp: TOKEN_PLUS { cout << "addop" << endl;
@@ -610,14 +649,48 @@ addOp: TOKEN_PLUS { cout << "addop" << endl;
     strcpy($$, $1);
     };
 
-term: term mulOp factor { cout << "term_more" << endl;
-    ++counter;
-    stringstream ss;
-    ss << "t" << counter;
-    string newTemp = ss.str();
-    addQuadruple(string($2), string($1), string($3), newTemp);
-    $$ = (char*) malloc(newTemp.length() + 1);
-    strcpy($$, newTemp.c_str());
+term: term mulOp {
+    if (string($2).compare("and") == 0) {
+      addQuadruple("=", string($1), "false", "NULL");
+      $<ival>$ = quadruples.size() - 1;
+    }
+    } factor { cout << "term_more" << endl;
+    if (string($2).compare("and") == 0) {
+      addQuadruple("=", string($4), "false", "NULL");
+      ++counter;
+      stringstream ss;
+      ss << "t" << counter;
+      string newTemp = ss.str();
+      addQuadruple(":=", "true", "NULL", newTemp);
+      addQuadruple("goto", "NULL", "NULL", "NULL");
+      addQuadruple(":=", "false", "NULL", newTemp);
+
+      ++labelCounter;
+      ss.str(string());
+      ss << "L" << labelCounter;
+      string newLabel = ss.str();
+      addLabelToQuad(quadruples.size() - 1, newLabel);
+      modifyQuadResult($<ival>3, newLabel);
+      modifyQuadResult(quadruples.size() - 4, newLabel);
+      
+      ++labelCounter;
+      ss.str(string());
+      ss << "L" << labelCounter;
+      newLabel = ss.str();
+      addQuadruple("NULL", "NULL", "NULL", "NULL");
+      addLabelToQuad(quadruples.size() - 1, newLabel);
+      modifyQuadResult(quadruples.size() - 3, newLabel);
+      $$ = (char*) malloc(newTemp.length() + 1);
+      strcpy($$, newTemp.c_str());
+    } else { 
+      ++counter;
+      stringstream ss;
+      ss << "t" << counter;
+      string newTemp = ss.str();
+      addQuadruple(string($2), string($1), string($4), newTemp);
+      $$ = (char*) malloc(newTemp.length() + 1);
+      strcpy($$, newTemp.c_str());
+    }
     }
     | factor { cout << "term" << endl;
       $$ = (char*) malloc(strlen($1) + 1);
