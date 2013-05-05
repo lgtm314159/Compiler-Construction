@@ -1,16 +1,36 @@
-foo1: NULL NULL NULL NULL
-:= 0 NULL t1
-:= t1 NULL a
-funreturn t2 NULL NULL
-foo2: NULL NULL NULL NULL
-L1: = a false L2
-call bar NULL NULL
-goto NULL NULL L1
-L2: NULL NULL NULL NULL
-funreturn t4 NULL NULL
-foo3: NULL NULL NULL NULL
-funreturn t5 NULL NULL
-:= 3 NULL t6
-param t6 NULL NULL
-:= funcall foo3 t7
-:= t7 NULL z
+:= a NULL t1
+:= 0 NULL t2
+< t1 t2 t3
+= t3 false L1
+:= a NULL t4
+:= 1 NULL t5
+L1: := t5 NULL t4
+:= a NULL t6
+:= 2 NULL t7
+:= t7 NULL t6
+:= a NULL t8
+:= 0 NULL t9
+< t8 t9 t10
+= t10 false L2
+:= a NULL t11
+:= 1 NULL t12
+:= t12 NULL t11
+:= a NULL t13
+:= 2 NULL t14
+L2: := t14 NULL t13
+:= a NULL t15
+:= 2 NULL t16
+:= t16 NULL t15
+:= a NULL t17
+:= 0 NULL t18
+> t17 t18 t19
+L3: = t19 false L4
+goto NULL NULL L3
+L4: NULL NULL NULL NULL
+:= 0 NULL t20
+:= 10 NULL t21
+:= t20 NULL a
+L5: > a t21 L6
++ a 1 a
+goto NULL NULL L5
+L6: NULL NULL NULL NULL

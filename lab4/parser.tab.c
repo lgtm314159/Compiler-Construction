@@ -112,9 +112,12 @@ int getQuadrupleIndex(const string& result);
 void modifyQuadResult(int index, const string& result);
 void flipQuadRelOp(int index);
 void addLabelToQuad(int index, const string& label);
+void addQuadrupleWithIndex(const string& op, const string& arg1, const string& arg2,
+    const string& result, int index);
 bool isQuadOpAssign(int index);
 void changeQuadToCondExp(int index, const string& op, const string& arg2,
     const string& result);
+void shiftQuads(int index);
 
 #define YYPRINT
 
@@ -131,7 +134,7 @@ stack<vector<int> > falseListStack;
 
 
 /* Line 268 of yacc.c  */
-#line 135 "parser.tab.c"
+#line 138 "parser.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -219,7 +222,7 @@ typedef union YYSTYPE
 {
 
 /* Line 293 of yacc.c  */
-#line 66 "parser.y"
+#line 69 "parser.y"
 
   int ival;
   float fval;
@@ -229,7 +232,7 @@ typedef union YYSTYPE
 
 
 /* Line 293 of yacc.c  */
-#line 233 "parser.tab.c"
+#line 236 "parser.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -241,7 +244,7 @@ typedef union YYSTYPE
 
 
 /* Line 343 of yacc.c  */
-#line 245 "parser.tab.c"
+#line 248 "parser.tab.c"
 
 #ifdef short
 # undef short
@@ -572,17 +575,17 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   138,   138,   147,   147,   148,   148,   149,   149,   151,
-     153,   154,   156,   158,   159,   161,   163,   164,   165,   166,
-     168,   189,   203,   203,   224,   224,   262,   262,   264,   265,
-     267,   281,   296,   298,   304,   311,   317,   318,   320,   325,
-     330,   337,   348,   363,   368,   391,   419,   447,   447,   478,
-     481,   485,   490,   497,   498,   500,   514,   528,   529,   531,
-     548,   554,   556,   560,   564,   568,   572,   576,   581,   590,
-     594,   594,   639,   643,   647,   652,   652,   695,   700,   704,
-     708,   712,   717,   721,   732,   744,   754,   764,   768,   773,
-     790,   809,   813,   815,   822,   829,   835,   842,   843,   845,
-     849,   853,   868,   873,   879
+       0,   141,   141,   150,   150,   151,   151,   152,   152,   154,
+     156,   157,   159,   161,   162,   164,   166,   167,   168,   169,
+     171,   192,   206,   206,   227,   227,   265,   265,   267,   268,
+     270,   284,   299,   301,   307,   314,   320,   321,   323,   328,
+     333,   340,   353,   375,   380,   411,   447,   488,   488,   524,
+     527,   531,   536,   543,   544,   546,   560,   574,   575,   577,
+     598,   604,   606,   610,   614,   618,   622,   626,   631,   644,
+     648,   648,   702,   706,   710,   715,   715,   768,   773,   777,
+     781,   785,   790,   794,   809,   827,   843,   861,   865,   870,
+     896,   922,   926,   928,   935,   942,   948,   955,   959,   965,
+     975,   984,   999,  1004,  1010
 };
 #endif
 
@@ -1653,7 +1656,7 @@ yyreduce:
         case 2:
 
 /* Line 1806 of yacc.c  */
-#line 141 "parser.y"
+#line 144 "parser.y"
     { cout << "program" << endl;
       string id((yyvsp[(2) - (8)].sval));
       symTable[id].first = 0;
@@ -1664,63 +1667,63 @@ yyreduce:
   case 10:
 
 /* Line 1806 of yacc.c  */
-#line 153 "parser.y"
+#line 156 "parser.y"
     { cout << "type_definition_more" << endl; }
     break;
 
   case 11:
 
 /* Line 1806 of yacc.c  */
-#line 154 "parser.y"
+#line 157 "parser.y"
     { cout << "type_definition" << endl; }
     break;
 
   case 13:
 
 /* Line 1806 of yacc.c  */
-#line 158 "parser.y"
+#line 161 "parser.y"
     { cout << "variable_declaration_more" << endl; }
     break;
 
   case 14:
 
 /* Line 1806 of yacc.c  */
-#line 159 "parser.y"
+#line 162 "parser.y"
     {cout << "variable_declaration" << endl; }
     break;
 
   case 16:
 
 /* Line 1806 of yacc.c  */
-#line 163 "parser.y"
+#line 166 "parser.y"
     { cout << "sub_program_declarations_more" << endl; }
     break;
 
   case 17:
 
 /* Line 1806 of yacc.c  */
-#line 164 "parser.y"
+#line 167 "parser.y"
     { cout << "sub_program_declarations_more" << endl; }
     break;
 
   case 18:
 
 /* Line 1806 of yacc.c  */
-#line 165 "parser.y"
+#line 168 "parser.y"
     { cout << "sub_program_declarations" << endl; }
     break;
 
   case 19:
 
 /* Line 1806 of yacc.c  */
-#line 166 "parser.y"
+#line 169 "parser.y"
     { cout << "sub_program_declarations" << endl; }
     break;
 
   case 20:
 
 /* Line 1806 of yacc.c  */
-#line 169 "parser.y"
+#line 172 "parser.y"
     { cout << "type_definition" << endl;
       string type((yyvsp[(3) - (4)].sval));
       if (type.compare(rec) != 0 && type.compare(arr) !=0) {
@@ -1745,7 +1748,7 @@ yyreduce:
   case 21:
 
 /* Line 1806 of yacc.c  */
-#line 190 "parser.y"
+#line 193 "parser.y"
     { cout << "variable_declaration" << endl;
       vector<string> ids = split((yyvsp[(1) - (4)].sval));
       for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
@@ -1763,7 +1766,7 @@ yyreduce:
   case 22:
 
 /* Line 1806 of yacc.c  */
-#line 203 "parser.y"
+#line 206 "parser.y"
     {
     stringstream ss;
     ss << (yyvsp[(2) - (2)].sval) << ": NULL";
@@ -1774,7 +1777,7 @@ yyreduce:
   case 23:
 
 /* Line 1806 of yacc.c  */
-#line 210 "parser.y"
+#line 213 "parser.y"
     { cout << "procedure_declaration" << endl;
       string id((yyvsp[(2) - (9)].sval));
       if (symTable.find(id) != symTable.end()) {
@@ -1793,7 +1796,7 @@ yyreduce:
   case 24:
 
 /* Line 1806 of yacc.c  */
-#line 224 "parser.y"
+#line 227 "parser.y"
     {
     stringstream ss;
     ss << (yyvsp[(2) - (2)].sval) << ": NULL";
@@ -1804,7 +1807,7 @@ yyreduce:
   case 25:
 
 /* Line 1806 of yacc.c  */
-#line 231 "parser.y"
+#line 234 "parser.y"
     { cout << "function_declaration" << endl;
       string id((yyvsp[(2) - (11)].sval));
       // This might have flaws.
@@ -1840,21 +1843,21 @@ yyreduce:
   case 28:
 
 /* Line 1806 of yacc.c  */
-#line 264 "parser.y"
+#line 267 "parser.y"
     { cout << "formal_parameter_list" << endl; (yyval.ival) = (yyvsp[(1) - (1)].ival); }
     break;
 
   case 29:
 
 /* Line 1806 of yacc.c  */
-#line 265 "parser.y"
+#line 268 "parser.y"
     { (yyval.ival) = 0; }
     break;
 
   case 30:
 
 /* Line 1806 of yacc.c  */
-#line 268 "parser.y"
+#line 271 "parser.y"
     { cout << "identifier_lists_more" << endl;
       vector<string> ids = split((yyvsp[(3) - (5)].sval));
       for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
@@ -1873,7 +1876,7 @@ yyreduce:
   case 31:
 
 /* Line 1806 of yacc.c  */
-#line 282 "parser.y"
+#line 285 "parser.y"
     { cout << "identifier_lists" << endl;
         vector<string> ids = split((yyvsp[(1) - (3)].sval));
         for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
@@ -1892,14 +1895,14 @@ yyreduce:
   case 32:
 
 /* Line 1806 of yacc.c  */
-#line 296 "parser.y"
+#line 299 "parser.y"
     { cout << "block" << endl; }
     break;
 
   case 33:
 
 /* Line 1806 of yacc.c  */
-#line 298 "parser.y"
+#line 301 "parser.y"
     {
     cout << "compound_statement" << endl;
     (yyval.sval) = (char*) malloc(strlen((yyvsp[(2) - (3)].sval)) + 1);
@@ -1910,7 +1913,7 @@ yyreduce:
   case 34:
 
 /* Line 1806 of yacc.c  */
-#line 304 "parser.y"
+#line 307 "parser.y"
     {
     cout << "statement_sequence_more" << endl;
     stringstream ss;
@@ -1923,7 +1926,7 @@ yyreduce:
   case 35:
 
 /* Line 1806 of yacc.c  */
-#line 311 "parser.y"
+#line 314 "parser.y"
     {
     cout << "statement_sequence" << endl;
     (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
@@ -1934,21 +1937,21 @@ yyreduce:
   case 36:
 
 /* Line 1806 of yacc.c  */
-#line 317 "parser.y"
+#line 320 "parser.y"
     { cout << "statement" << endl; }
     break;
 
   case 37:
 
 /* Line 1806 of yacc.c  */
-#line 318 "parser.y"
+#line 321 "parser.y"
     { cout << "statement" << endl; }
     break;
 
   case 38:
 
 /* Line 1806 of yacc.c  */
-#line 320 "parser.y"
+#line 323 "parser.y"
     {
     cout << "simple_statement" << endl;
     (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
@@ -1959,7 +1962,7 @@ yyreduce:
   case 39:
 
 /* Line 1806 of yacc.c  */
-#line 325 "parser.y"
+#line 328 "parser.y"
     {
     cout << "simple_statement" << endl;
     (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
@@ -1970,7 +1973,7 @@ yyreduce:
   case 40:
 
 /* Line 1806 of yacc.c  */
-#line 330 "parser.y"
+#line 333 "parser.y"
     { cout << "simple_statement_empty" << endl;
     stringstream ss;
     ss << quadruples.size() - 1 << " " << quadruples.size() - 1; 
@@ -1982,14 +1985,16 @@ yyreduce:
   case 41:
 
 /* Line 1806 of yacc.c  */
-#line 337 "parser.y"
+#line 340 "parser.y"
     {
     cout << "assignment_statement" << endl;
 
     // lab4
-    addQuadruple(string((yyvsp[(2) - (3)].sval)), string((yyvsp[(3) - (3)].sval)), string("NULL"), string((yyvsp[(1) - (3)].sval)));
+    vector<string> fields1 = split((yyvsp[(1) - (3)].sval));
+    vector<string> fields2 = split((yyvsp[(3) - (3)].sval));
+    addQuadruple(string((yyvsp[(2) - (3)].sval)), fields2[0], string("NULL"), fields1[0]);
     stringstream ss;
-    ss << quadruples.size() - 1 << " " << quadruples.size() - 1; 
+    ss << fields1[1] << " " << quadruples.size() - 1;
     (yyval.sval) = (char*) malloc(ss.str().length() + 1);
     strcpy((yyval.sval), ss.str().c_str());
     }
@@ -1998,7 +2003,7 @@ yyreduce:
   case 42:
 
 /* Line 1806 of yacc.c  */
-#line 348 "parser.y"
+#line 353 "parser.y"
     {
     cout << "procedure_statement" << endl;
     string id((yyvsp[(1) - (4)].sval));
@@ -2008,8 +2013,15 @@ yyreduce:
 
     // lab4
     addQuadruple("call", string((yyvsp[(1) - (4)].sval)), "NULL", "NULL");
+
     stringstream ss;
-    ss << quadruples.size() - 1 << " " << quadruples.size() - 1; 
+    ss.str(string());
+    if (string((yyvsp[(3) - (4)].sval)).find("empty") != string::npos) {
+      ss << quadruples.size() - 1 << " " << quadruples.size() - 1;
+    } else {
+      vector<string> fields = split((yyvsp[(3) - (4)].sval));
+      ss << fields[0] << " " << quadruples.size() - 1;
+    }
     (yyval.sval) = (char*) malloc(ss.str().length() + 1);
     strcpy((yyval.sval), ss.str().c_str());
     }
@@ -2018,7 +2030,7 @@ yyreduce:
   case 43:
 
 /* Line 1806 of yacc.c  */
-#line 363 "parser.y"
+#line 375 "parser.y"
     {
     cout << "compound_statement" << endl;
     (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
@@ -2029,107 +2041,138 @@ yyreduce:
   case 44:
 
 /* Line 1806 of yacc.c  */
-#line 368 "parser.y"
+#line 380 "parser.y"
     {
     cout << "if_statement" << endl;
-    int beginIndex = getQuadrupleIndex(string((yyvsp[(2) - (4)].sval)));
-    vector<string> indexes = split((yyvsp[(4) - (4)].sval));
-    stringstream ss;
-    ss << beginIndex << " " << indexes.back();
-    (yyval.sval) = (char*) malloc(ss.str().length() + 1);
-    strcpy((yyval.sval), ss.str().c_str());
 
+    vector<string> fields1 = split((yyvsp[(2) - (4)].sval)); 
+    vector<string> fields2 = split((yyvsp[(4) - (4)].sval)); 
+    
     ++labelCounter;
-    ss.str(string());
+    stringstream ss;
     ss << "L" << labelCounter;
     string newLabel = ss.str();
-    addQuadruple("NULL", "NULL", "NULL", "NULL");
-    addLabelToQuad(quadruples.size() - 1, newLabel);
-    /*
-    if (isQuadOpAssign(beginIndex)) {
-      changeQuadToCondExp(beginIndex, "=", "false", newLabel);
+    if (fields1.back() != fields2.back()) {
+      // If the statement is not empty.
+      int indexToInsert = atoi(fields1.back().c_str()) + 1;
+      shiftQuads(indexToInsert);
+      addQuadrupleWithIndex("=", fields1[0], "false", "NULL", indexToInsert);
+      modifyQuadResult(indexToInsert, newLabel);
+      addQuadruple("NULL", "NULL", "NULL", "NULL");
+      addLabelToQuad(quadruples.size() - 1, newLabel);
     } else {
-      flipQuadRelOp(beginIndex);
-      modifyQuadResult(beginIndex, newLabel);
-    }*/
+      // If the statement is empty.
+      addQuadruple("=", fields1[0], "false", "NULL");
+      modifyQuadResult(quadruples.size() - 1, newLabel);
+      addQuadruple("NULL", "NULL", "NULL", "NULL");
+      addLabelToQuad(quadruples.size() - 1, newLabel);
+    }
+    
+    ss.str(string());
+    ss << fields1[1] << " " << quadruples.size() - 1;
+    (yyval.sval) = (char*) malloc(ss.str().length() + 1);
+    strcpy((yyval.sval), ss.str().c_str());
     }
     break;
 
   case 45:
 
 /* Line 1806 of yacc.c  */
-#line 391 "parser.y"
+#line 411 "parser.y"
     {
     cout << "ifelse_statement" << endl;
-    int beginIndex = getQuadrupleIndex(string((yyvsp[(2) - (6)].sval)));
-    vector<string> indexes = split((yyvsp[(6) - (6)].sval));
-    stringstream ss;
-    ss << beginIndex << " " << indexes.back();
-    (yyval.sval) = (char*) malloc(ss.str().length() + 1);
-    strcpy((yyval.sval), ss.str().c_str());
+
+    vector<string> fields1 = split((yyvsp[(2) - (6)].sval)); 
+    vector<string> fields2 = split((yyvsp[(4) - (6)].sval)); 
+    vector<string> fields3 = split((yyvsp[(6) - (6)].sval)); 
 
     ++labelCounter;
-    ss.str(string());
+    stringstream ss;
     ss << "L" << labelCounter;
     string newLabel = ss.str();
-    if (isQuadOpAssign(beginIndex)) {
-      changeQuadToCondExp(beginIndex, "=", "false", newLabel);
-    } else {
-      flipQuadRelOp(beginIndex);
-      modifyQuadResult(beginIndex, newLabel);
-    }
-    indexes = split((yyvsp[(4) - (6)].sval));
-    int labelQuadIndex = atoi(indexes.back().c_str()) + 1; 
-    if (labelQuadIndex >= quadruples.size()) {
+    if (fields1.back() == fields2.back() && fields1.back() == fields3.back()) {
+      // If both statements are empty.
+      addQuadruple("=", fields1[0], "false", "NULL");
+      modifyQuadResult(quadruples.size() - 1, newLabel);
       addQuadruple("NULL", "NULL", "NULL", "NULL");
-      addLabelToQuad(labelQuadIndex, newLabel);
+      addLabelToQuad(quadruples.size() - 1, newLabel);
     } else {
-      addLabelToQuad(labelQuadIndex, newLabel);
+      int indexToInsert = atoi(fields1.back().c_str()) + 1;
+      shiftQuads(indexToInsert);
+      addQuadrupleWithIndex("=", fields1[0], "false", "NULL", indexToInsert);
+      modifyQuadResult(indexToInsert, newLabel);
+      if (fields1.back() == fields3.back()) {
+        // If only the second statement is empty.
+        addQuadruple("NULL", "NULL", "NULL", "NULL");
+        addLabelToQuad(quadruples.size() - 1, newLabel);
+      } else {
+        addLabelToQuad(atoi(fields2.back().c_str()) + 1, newLabel);
+      }
     }
+
+    ss.str(string());
+    ss << fields1[1] << " " << quadruples.size() - 1;
+    (yyval.sval) = (char*) malloc(ss.str().length() + 1);
+    strcpy((yyval.sval), ss.str().c_str());
     }
     break;
 
   case 46:
 
 /* Line 1806 of yacc.c  */
-#line 419 "parser.y"
+#line 447 "parser.y"
     {
     cout << "while_statement" << endl;
-    int beginIndex = getQuadrupleIndex(string((yyvsp[(2) - (4)].sval)));
-    vector<string> indexes = split((yyvsp[(4) - (4)].sval));
-    stringstream ss;
-    ss << beginIndex << " " << indexes.back();
-    (yyval.sval) = (char*) malloc(ss.str().length() + 1);
-    strcpy((yyval.sval), ss.str().c_str());
 
+    vector<string> fields1 = split((yyvsp[(2) - (4)].sval));
+    vector<string> fields2 = split((yyvsp[(4) - (4)].sval));
     ++labelCounter;
-    ss.str(string());
+    stringstream ss; 
     ss << "L" << labelCounter;
     string newLabel = ss.str();
-    addLabelToQuad(beginIndex, newLabel);
-    addQuadruple("goto", "NULL", "NULL", newLabel);
-    ++labelCounter;
-    ss.str(string());
-    ss << "L" << labelCounter;
-    newLabel = ss.str();
-    addQuadruple("NULL", "NULL", "NULL", "NULL");
-    addLabelToQuad(quadruples.size() - 1, newLabel);
-    if (isQuadOpAssign(beginIndex)) {
-      changeQuadToCondExp(beginIndex, "=", "false", newLabel);
+    if (fields1.back() == fields2.back()) {
+      // If the statement is empty.
+      addQuadruple("=", fields1[0], "false", "NULL");
+      addLabelToQuad(quadruples.size() - 1, newLabel);
+      addQuadruple("goto", "NULL", "NULL", newLabel);
+      ++labelCounter;
+      ss.str(string()); 
+      ss << "L" << labelCounter;
+      newLabel = ss.str();
+      addQuadruple("NULL", "NULL", "NULL", "NULL");
+      addLabelToQuad(quadruples.size() - 1, newLabel);
+      modifyQuadResult(quadruples.size() - 3, newLabel);
     } else {
-      flipQuadRelOp(beginIndex);
-      modifyQuadResult(beginIndex, newLabel);
+      int indexToInsert = atoi(fields1.back().c_str()) + 1;
+      shiftQuads(indexToInsert);
+      addQuadrupleWithIndex("=", fields1[0], "false", "NULL", indexToInsert);
+      addLabelToQuad(indexToInsert, newLabel);
+      addQuadruple("goto", "NULL", "NULL", newLabel);
+      ++labelCounter;
+      ss.str(string());
+      ss << "L" << labelCounter;
+      newLabel = ss.str();
+      addQuadruple("NULL", "NULL", "NULL", "NULL");
+      addLabelToQuad(quadruples.size() - 1, newLabel);
+      modifyQuadResult(indexToInsert, newLabel);
     }
+
+    ss.str(string());
+    ss << fields1[1] << " " << quadruples.size() - 1;
+    (yyval.sval) = (char*) malloc(ss.str().length() + 1);
+    strcpy((yyval.sval), ss.str().c_str());
     }
     break;
 
   case 47:
 
 /* Line 1806 of yacc.c  */
-#line 447 "parser.y"
+#line 488 "parser.y"
     {
-    addQuadruple(":=", string((yyvsp[(4) - (6)].sval)), "NULL", string((yyvsp[(2) - (6)].sval)));
-    addQuadruple(">", string((yyvsp[(2) - (6)].sval)), string((yyvsp[(6) - (6)].sval)), "NULL");
+    vector<string> fields1 = split((yyvsp[(4) - (6)].sval));
+    vector<string> fields2 = split((yyvsp[(6) - (6)].sval));
+    addQuadruple(":=", fields1[0], "NULL", string((yyvsp[(2) - (6)].sval)));
+    addQuadruple(">", string((yyvsp[(2) - (6)].sval)), fields2[0], "NULL");
     (yyval.ival) = quadruples.size() - 1;
     }
     break;
@@ -2137,18 +2180,16 @@ yyreduce:
   case 48:
 
 /* Line 1806 of yacc.c  */
-#line 452 "parser.y"
+#line 495 "parser.y"
     {
     cout << "for_statement" << endl;
-    int beginIndex = getQuadrupleIndex(string((yyvsp[(4) - (9)].sval)));
-    vector<string> indexes = split((yyvsp[(9) - (9)].sval));
-    stringstream ss;
-    ss << beginIndex << " " << indexes.back();
-    (yyval.sval) = (char*) malloc(ss.str().length() + 1);
-    strcpy((yyval.sval), ss.str().c_str());
 
+    vector<string> fields1 = split((yyvsp[(4) - (9)].sval));
+    vector<string> fields2 = split((yyvsp[(6) - (9)].sval));
+    vector<string> fields3 = split((yyvsp[(9) - (9)].sval));
+    
     ++labelCounter;
-    ss.str(string());
+    stringstream ss;
     ss << "L" << labelCounter;
     string newLabel = ss.str();
     int forCondQuadIndex = (yyvsp[(7) - (9)].ival);
@@ -2162,13 +2203,18 @@ yyreduce:
     addQuadruple("NULL", "NULL", "NULL", "NULL");
     addLabelToQuad(quadruples.size() - 1, newLabel);
     modifyQuadResult(forCondQuadIndex, newLabel);
+
+    ss.str(string());
+    ss << fields1[1] << " " << quadruples.size() - 1;
+    (yyval.sval) = (char*) malloc(ss.str().length() + 1);
+    strcpy((yyval.sval), ss.str().c_str());
     }
     break;
 
   case 49:
 
 /* Line 1806 of yacc.c  */
-#line 478 "parser.y"
+#line 524 "parser.y"
     { cout << "type_ID" << endl; //addSymbol($1, nilStr);
                  (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
                  strcpy((yyval.sval), (yyvsp[(1) - (1)].sval)); }
@@ -2177,7 +2223,7 @@ yyreduce:
   case 50:
 
 /* Line 1806 of yacc.c  */
-#line 482 "parser.y"
+#line 528 "parser.y"
     { cout << "type_array" << endl;
         (yyval.sval) = (char*) malloc(sizeof(arrayStr));;
         strcpy((yyval.sval), arrayStr); }
@@ -2186,7 +2232,7 @@ yyreduce:
   case 51:
 
 /* Line 1806 of yacc.c  */
-#line 486 "parser.y"
+#line 532 "parser.y"
     { cout << "type_record" << endl;
         (yyval.sval) = (char*) malloc(sizeof(recordStr));;
         strcpy((yyval.sval), recordStr); }
@@ -2195,7 +2241,7 @@ yyreduce:
   case 52:
 
 /* Line 1806 of yacc.c  */
-#line 490 "parser.y"
+#line 536 "parser.y"
     { cout << "result_type" << endl;
     string id((yyvsp[(1) - (1)].sval));
     if (symTable.find(id) == symTable.end()) {
@@ -2207,21 +2253,21 @@ yyreduce:
   case 53:
 
 /* Line 1806 of yacc.c  */
-#line 497 "parser.y"
+#line 543 "parser.y"
     { cout << "field_list" << endl; }
     break;
 
   case 54:
 
 /* Line 1806 of yacc.c  */
-#line 498 "parser.y"
+#line 544 "parser.y"
     { cout << "field_list_empty" << endl; }
     break;
 
   case 55:
 
 /* Line 1806 of yacc.c  */
-#line 501 "parser.y"
+#line 547 "parser.y"
     { cout << "identifier_lists_more" << endl;
       vector<string> ids = split((yyvsp[(3) - (5)].sval));
       for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
@@ -2240,7 +2286,7 @@ yyreduce:
   case 56:
 
 /* Line 1806 of yacc.c  */
-#line 515 "parser.y"
+#line 561 "parser.y"
     { cout << "identifier_lists" << endl;
       vector<string> ids = split((yyvsp[(1) - (3)].sval));
       for (vector<string>::iterator it = ids.begin(); it != ids.end(); ++it) {
@@ -2258,35 +2304,39 @@ yyreduce:
   case 57:
 
 /* Line 1806 of yacc.c  */
-#line 528 "parser.y"
+#line 574 "parser.y"
     { cout << "constant" << endl; }
     break;
 
   case 58:
 
 /* Line 1806 of yacc.c  */
-#line 529 "parser.y"
+#line 575 "parser.y"
     { cout << "constant" << endl; }
     break;
 
   case 59:
 
 /* Line 1806 of yacc.c  */
-#line 531 "parser.y"
+#line 577 "parser.y"
     {
     cout << "expression" << endl;
     if ((yyvsp[(2) - (2)].sval) == NULL) {
       (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (2)].sval)) + 1);
       strcpy((yyval.sval), (yyvsp[(1) - (2)].sval));
     } else {
+      vector<string> fields = split((yyvsp[(1) - (2)].sval));
       vector<string> opAndArg = split((yyvsp[(2) - (2)].sval));
       ++counter;
       stringstream ss;
       ss << "t" << counter;
       string newTemp = ss.str();
-      addQuadruple(opAndArg[0], string((yyvsp[(1) - (2)].sval)), opAndArg[1], newTemp);
-      (yyval.sval) = (char*) malloc(newTemp.length() + 1);
-      strcpy((yyval.sval), newTemp.c_str());
+      addQuadruple(opAndArg[0], fields[0], opAndArg[1], newTemp);
+
+      ss.str(string());
+      ss << newTemp << " " << fields[1] << " " << quadruples.size() - 1;
+      (yyval.sval) = (char*) malloc(ss.str().length() + 1);
+      strcpy((yyval.sval), ss.str().c_str());
     }
     }
     break;
@@ -2294,7 +2344,7 @@ yyreduce:
   case 60:
 
 /* Line 1806 of yacc.c  */
-#line 548 "parser.y"
+#line 598 "parser.y"
     {
     stringstream ss;
     ss << (yyvsp[(1) - (2)].sval) << " " << (yyvsp[(2) - (2)].sval);
@@ -2306,14 +2356,14 @@ yyreduce:
   case 61:
 
 /* Line 1806 of yacc.c  */
-#line 554 "parser.y"
+#line 604 "parser.y"
     { (yyval.sval) = NULL; }
     break;
 
   case 62:
 
 /* Line 1806 of yacc.c  */
-#line 556 "parser.y"
+#line 606 "parser.y"
     { cout << "relational_op" << endl;
       (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
       strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
@@ -2323,7 +2373,7 @@ yyreduce:
   case 63:
 
 /* Line 1806 of yacc.c  */
-#line 560 "parser.y"
+#line 610 "parser.y"
     { cout << "relational_op" << endl;
       (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
       strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
@@ -2333,7 +2383,7 @@ yyreduce:
   case 64:
 
 /* Line 1806 of yacc.c  */
-#line 564 "parser.y"
+#line 614 "parser.y"
     { cout << "relational_op" << endl;
       (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
       strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
@@ -2343,7 +2393,7 @@ yyreduce:
   case 65:
 
 /* Line 1806 of yacc.c  */
-#line 568 "parser.y"
+#line 618 "parser.y"
     { cout << "relational_op" << endl;
       (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
       strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
@@ -2353,7 +2403,7 @@ yyreduce:
   case 66:
 
 /* Line 1806 of yacc.c  */
-#line 572 "parser.y"
+#line 622 "parser.y"
     { cout << "relational_op" << endl;
       (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
       strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
@@ -2363,7 +2413,7 @@ yyreduce:
   case 67:
 
 /* Line 1806 of yacc.c  */
-#line 576 "parser.y"
+#line 626 "parser.y"
     { cout << "relational_op" << endl;
       (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
       strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
@@ -2373,22 +2423,26 @@ yyreduce:
   case 68:
 
 /* Line 1806 of yacc.c  */
-#line 581 "parser.y"
+#line 631 "parser.y"
     { cout << "simple_expression" << endl;
     ++counter;
     stringstream ss;
     ss << "t" << counter;
     string newTemp = ss.str();
-    addQuadruple(string((yyvsp[(1) - (2)].sval)), string((yyvsp[(2) - (2)].sval)), string("NULL"), newTemp);
-    (yyval.sval) = (char*) malloc(newTemp.length() + 1);
-    strcpy((yyval.sval), newTemp.c_str());
+    vector<string> fields = split((yyvsp[(2) - (2)].sval));
+    addQuadruple(string((yyvsp[(1) - (2)].sval)), fields[0], string("NULL"), newTemp);
+
+    ss.str(string());
+    ss << newTemp << " " << fields[1] << " " << quadruples.size() - 1;
+    (yyval.sval) = (char*) malloc(ss.str().length() + 1);
+    strcpy((yyval.sval), ss.str().c_str());
     }
     break;
 
   case 69:
 
 /* Line 1806 of yacc.c  */
-#line 590 "parser.y"
+#line 644 "parser.y"
     { cout << "simple_expression" << endl;
     (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
     strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
@@ -2398,10 +2452,11 @@ yyreduce:
   case 70:
 
 /* Line 1806 of yacc.c  */
-#line 594 "parser.y"
+#line 648 "parser.y"
     {
     if (string((yyvsp[(2) - (2)].sval)).compare("or") == 0) {
-      addQuadruple("=", string((yyvsp[(1) - (2)].sval)), "true", "NULL");
+      vector<string> fields = split((yyvsp[(1) - (2)].sval));
+      addQuadruple("=", fields[0], "true", "NULL");
       (yyval.ival) = quadruples.size() - 1;
     }
     }
@@ -2410,11 +2465,13 @@ yyreduce:
   case 71:
 
 /* Line 1806 of yacc.c  */
-#line 599 "parser.y"
+#line 654 "parser.y"
     { cout << "simple_expression_more" << endl;
 
+    vector<string> fields1 = split((yyvsp[(1) - (4)].sval));
+    vector<string> fields2 = split((yyvsp[(4) - (4)].sval));
     if (string((yyvsp[(2) - (4)].sval)).compare("or") == 0) {
-      addQuadruple("=", string((yyvsp[(2) - (4)].sval)), "true", "NULL");
+      addQuadruple("=", fields2[0], "true", "NULL");
       ++counter;
       stringstream ss;
       ss << "t" << counter;
@@ -2438,16 +2495,22 @@ yyreduce:
       addQuadruple("NULL", "NULL", "NULL", "NULL");
       addLabelToQuad(quadruples.size() - 1, newLabel);
       modifyQuadResult(quadruples.size() - 3, newLabel);
-      (yyval.sval) = (char*) malloc(newTemp.length() + 1);
-      strcpy((yyval.sval), newTemp.c_str());
+
+      ss.str(string());
+      ss << newTemp << " " << fields1[1] << " " << quadruples.size() - 1;
+      (yyval.sval) = (char*) malloc(ss.str().length() + 1);
+      strcpy((yyval.sval), ss.str().c_str());
     } else {
       ++counter;
       stringstream ss;
       ss << "t" << counter;
       string newTemp = ss.str();
-      addQuadruple(string((yyvsp[(2) - (4)].sval)), string((yyvsp[(1) - (4)].sval)), string((yyvsp[(4) - (4)].sval)), newTemp);
-      (yyval.sval) = (char*) malloc(newTemp.length() + 1);
-      strcpy((yyval.sval), newTemp.c_str());
+      addQuadruple(string((yyvsp[(2) - (4)].sval)), fields1[0], fields2[0], newTemp);
+
+      ss.str(string());
+      ss << newTemp << " " << fields1[1] << " " << quadruples.size() - 1;
+      (yyval.sval) = (char*) malloc(ss.str().length() + 1);
+      strcpy((yyval.sval), ss.str().c_str());
     }
     }
     break;
@@ -2455,7 +2518,7 @@ yyreduce:
   case 72:
 
 /* Line 1806 of yacc.c  */
-#line 639 "parser.y"
+#line 702 "parser.y"
     { cout << "addop" << endl;
     (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
     strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
@@ -2465,7 +2528,7 @@ yyreduce:
   case 73:
 
 /* Line 1806 of yacc.c  */
-#line 643 "parser.y"
+#line 706 "parser.y"
     { cout << "addop" << endl;
     (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
     strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
@@ -2475,7 +2538,7 @@ yyreduce:
   case 74:
 
 /* Line 1806 of yacc.c  */
-#line 647 "parser.y"
+#line 710 "parser.y"
     { cout << "addop" << endl;
     (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
     strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
@@ -2485,10 +2548,11 @@ yyreduce:
   case 75:
 
 /* Line 1806 of yacc.c  */
-#line 652 "parser.y"
+#line 715 "parser.y"
     {
     if (string((yyvsp[(2) - (2)].sval)).compare("and") == 0) {
-      addQuadruple("=", string((yyvsp[(1) - (2)].sval)), "false", "NULL");
+      vector<string> fields = split((yyvsp[(1) - (2)].sval));
+      addQuadruple("=", fields[0], "false", "NULL");
       (yyval.ival) = quadruples.size() - 1;
     }
     }
@@ -2497,10 +2561,13 @@ yyreduce:
   case 76:
 
 /* Line 1806 of yacc.c  */
-#line 657 "parser.y"
+#line 721 "parser.y"
     { cout << "term_more" << endl;
+    
+    vector<string> fields1 = split((yyvsp[(1) - (4)].sval));
+    vector<string> fields2 = split((yyvsp[(4) - (4)].sval));
     if (string((yyvsp[(2) - (4)].sval)).compare("and") == 0) {
-      addQuadruple("=", string((yyvsp[(4) - (4)].sval)), "false", "NULL");
+      addQuadruple("=", fields2[0], "false", "NULL");
       ++counter;
       stringstream ss;
       ss << "t" << counter;
@@ -2524,16 +2591,22 @@ yyreduce:
       addQuadruple("NULL", "NULL", "NULL", "NULL");
       addLabelToQuad(quadruples.size() - 1, newLabel);
       modifyQuadResult(quadruples.size() - 3, newLabel);
-      (yyval.sval) = (char*) malloc(newTemp.length() + 1);
-      strcpy((yyval.sval), newTemp.c_str());
+
+      ss.str(string());
+      ss << newTemp << " " << fields1[1] << " " << quadruples.size() - 1;
+      (yyval.sval) = (char*) malloc(ss.str().length() + 1);
+      strcpy((yyval.sval), ss.str().c_str());
     } else { 
       ++counter;
       stringstream ss;
       ss << "t" << counter;
       string newTemp = ss.str();
-      addQuadruple(string((yyvsp[(2) - (4)].sval)), string((yyvsp[(1) - (4)].sval)), string((yyvsp[(4) - (4)].sval)), newTemp);
-      (yyval.sval) = (char*) malloc(newTemp.length() + 1);
-      strcpy((yyval.sval), newTemp.c_str());
+      addQuadruple(string((yyvsp[(2) - (4)].sval)), fields1[0], fields2[0], newTemp);
+
+      ss.str(string());
+      ss << newTemp << " " << fields1[1] << " " << quadruples.size() - 1;
+      (yyval.sval) = (char*) malloc(ss.str().length() + 1);
+      strcpy((yyval.sval), ss.str().c_str());
     }
     }
     break;
@@ -2541,7 +2614,7 @@ yyreduce:
   case 77:
 
 /* Line 1806 of yacc.c  */
-#line 695 "parser.y"
+#line 768 "parser.y"
     { cout << "term" << endl;
       (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
       strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
@@ -2551,7 +2624,7 @@ yyreduce:
   case 78:
 
 /* Line 1806 of yacc.c  */
-#line 700 "parser.y"
+#line 773 "parser.y"
     { cout << "mulop" << endl;
     (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
     strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
@@ -2561,7 +2634,7 @@ yyreduce:
   case 79:
 
 /* Line 1806 of yacc.c  */
-#line 704 "parser.y"
+#line 777 "parser.y"
     { cout << "mulop" << endl;
     (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
     strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
@@ -2571,7 +2644,7 @@ yyreduce:
   case 80:
 
 /* Line 1806 of yacc.c  */
-#line 708 "parser.y"
+#line 781 "parser.y"
     { cout << "mulop" << endl;
     (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
     strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
@@ -2581,7 +2654,7 @@ yyreduce:
   case 81:
 
 /* Line 1806 of yacc.c  */
-#line 712 "parser.y"
+#line 785 "parser.y"
     { cout << "mulop" << endl;
     (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
     strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
@@ -2591,7 +2664,7 @@ yyreduce:
   case 82:
 
 /* Line 1806 of yacc.c  */
-#line 717 "parser.y"
+#line 790 "parser.y"
     { cout << "factor" << endl;
     (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
     strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
@@ -2601,23 +2674,27 @@ yyreduce:
   case 83:
 
 /* Line 1806 of yacc.c  */
-#line 721 "parser.y"
+#line 794 "parser.y"
     { cout << "factor" << endl;
       // lab4
       ++counter;
       stringstream ss;
       ss << "t" << counter;
       string newTemp = ss.str();
-      addQuadruple(string((yyvsp[(1) - (2)].sval)), string((yyvsp[(2) - (2)].sval)), string("NULL"), newTemp);
-      (yyval.sval) = (char*) malloc(newTemp.length() + 1);
-      strcpy((yyval.sval), newTemp.c_str());
+      vector<string> fields = split((yyvsp[(2) - (2)].sval));
+      addQuadruple(string((yyvsp[(1) - (2)].sval)), fields[0], string("NULL"), newTemp);
+
+      ss.str(string());
+      ss << newTemp << " " << fields[1] << " " << quadruples.size() - 1;
+      (yyval.sval) = (char*) malloc(ss.str().length() + 1);
+      strcpy((yyval.sval), ss.str().c_str());
     }
     break;
 
   case 84:
 
 /* Line 1806 of yacc.c  */
-#line 732 "parser.y"
+#line 809 "parser.y"
     {
     // Lab4
     ++counter;
@@ -2627,15 +2704,21 @@ yyreduce:
     ss.str(string());
     ss << (yyvsp[(1) - (1)].ival);
     addQuadruple(":=", ss.str(), "NULL", newTemp);
-    (yyval.sval) = (char*) malloc(newTemp.length() + 1);
-    strcpy((yyval.sval), newTemp.c_str());
+
+    ss.str(string());
+    ss << newTemp << " " << quadruples.size() - 1 << " "
+        << quadruples.size() - 1;
+    (yyval.sval) = (char*) malloc(ss.str().length() + 1);
+    strcpy((yyval.sval), ss.str().c_str());
+    //$$ = (char*) malloc(newTemp.length() + 1);
+    //strcpy($$, newTemp.c_str());
     }
     break;
 
   case 85:
 
 /* Line 1806 of yacc.c  */
-#line 744 "parser.y"
+#line 827 "parser.y"
     {
       // Lab4
       ++counter;
@@ -2643,31 +2726,45 @@ yyreduce:
       ss << "t" << counter;
       string newTemp = ss.str();
       addQuadruple(":=", string((yyvsp[(1) - (1)].sval)), string("NULL"), newTemp);
-      (yyval.sval) = (char*) malloc(newTemp.length() + 1);
-      strcpy((yyval.sval), newTemp.c_str());
+
+      ss.str(string());
+      ss << newTemp << " " << quadruples.size() - 1 << " "
+          << quadruples.size() - 1;
+      (yyval.sval) = (char*) malloc(ss.str().length() + 1);
+      strcpy((yyval.sval), ss.str().c_str());
+      //$$ = (char*) malloc(newTemp.length() + 1);
+      //strcpy($$, newTemp.c_str());
       }
     break;
 
   case 86:
 
 /* Line 1806 of yacc.c  */
-#line 754 "parser.y"
+#line 843 "parser.y"
     {
       // lab4
+      /*
       ++counter;
       stringstream ss;
       ss << "t" << counter;
       string newTemp = ss.str();
-      addQuadruple(":=", string((yyvsp[(1) - (1)].sval)), string("NULL"), newTemp);
-      (yyval.sval) = (char*) malloc(newTemp.length() + 1);
-      strcpy((yyval.sval), newTemp.c_str());
+
+      vector<string> fields = split($1);
+      addQuadruple(":=", fields[0], string("NULL"), newTemp);
+      ss.str(string()); 
+      ss << newTemp << " " << fields[1] << " " << quadruples.size() - 1;
+      $$ = (char*) malloc(ss.str().length() + 1);
+      strcpy($$, ss.str().c_str());
+      */
+      (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
+      strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
     }
     break;
 
   case 87:
 
 /* Line 1806 of yacc.c  */
-#line 764 "parser.y"
+#line 861 "parser.y"
     {
       (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
       strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
@@ -2677,7 +2774,7 @@ yyreduce:
   case 88:
 
 /* Line 1806 of yacc.c  */
-#line 768 "parser.y"
+#line 865 "parser.y"
     {
       (yyval.sval) = (char*) malloc(strlen((yyvsp[(2) - (3)].sval)) + 1);
       strcpy((yyval.sval), (yyvsp[(2) - (3)].sval));
@@ -2687,7 +2784,7 @@ yyreduce:
   case 89:
 
 /* Line 1806 of yacc.c  */
-#line 773 "parser.y"
+#line 870 "parser.y"
     {
     cout << "function_reference" << endl;
     string id((yyvsp[(1) - (4)].sval));
@@ -2701,15 +2798,24 @@ yyreduce:
     ss << "t" << counter;
     string newTemp = ss.str();
     addQuadruple(":=", "funcall", string((yyvsp[(1) - (4)].sval)), newTemp);
-    (yyval.sval) = (char*) malloc(newTemp.length() + 1);
-    strcpy((yyval.sval), newTemp.c_str());
+
+    ss.str(string());
+    if (string((yyvsp[(3) - (4)].sval)).find("empty") != string::npos) {
+      ss << newTemp << " " << quadruples.size() - 1 << " "
+          << quadruples.size() - 1;
+    } else {
+      vector<string> fields = split((yyvsp[(3) - (4)].sval));
+      ss << newTemp << " " << fields[0] << " " << quadruples.size() - 1;
+    }
+    (yyval.sval) = (char*) malloc(ss.str().length() + 1);
+    strcpy((yyval.sval), ss.str().c_str());
     }
     break;
 
   case 90:
 
 /* Line 1806 of yacc.c  */
-#line 790 "parser.y"
+#line 896 "parser.y"
     { cout << "variable" << endl;
     string id((yyvsp[(1) - (2)].sval));
     if (symTable.find(id) == symTable.end()) {
@@ -2718,14 +2824,21 @@ yyreduce:
 
     // lab4
     if ((yyvsp[(2) - (2)].sval) == NULL) {
-      (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (2)].sval)) + 1);
-      strcpy((yyval.sval), (yyvsp[(1) - (2)].sval));
+      ++counter;
+      stringstream ss;
+      ss << "t" << counter;
+      string newTemp = ss.str();
+      addQuadruple(":=", string((yyvsp[(1) - (2)].sval)), string("NULL"), newTemp);
+      ss.str(string()); 
+      ss << newTemp << " " << quadruples.size() - 1 << " " << quadruples.size() - 1;
+      (yyval.sval) = (char*) malloc(ss.str().length() + 1);
+      strcpy((yyval.sval), ss.str().c_str());
     } else {
       stringstream ss;
       ss << (yyvsp[(1) - (2)].sval) << " " << (yyvsp[(2) - (2)].sval);
-      string newTemp = processVarWithCompSel(ss.str());
-      (yyval.sval) = (char*) malloc(newTemp.length() + 1);
-      strcpy((yyval.sval), newTemp.c_str());
+      string fields = processVarWithCompSel(ss.str());
+      (yyval.sval) = (char*) malloc(fields.length() + 1);
+      strcpy((yyval.sval), fields.c_str());
     }
     }
     break;
@@ -2733,7 +2846,7 @@ yyreduce:
   case 91:
 
 /* Line 1806 of yacc.c  */
-#line 809 "parser.y"
+#line 922 "parser.y"
     {
     (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
     strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
@@ -2743,14 +2856,14 @@ yyreduce:
   case 92:
 
 /* Line 1806 of yacc.c  */
-#line 813 "parser.y"
+#line 926 "parser.y"
     { cout << "component_selection_empty" << endl; (yyval.sval) = NULL; }
     break;
 
   case 93:
 
 /* Line 1806 of yacc.c  */
-#line 815 "parser.y"
+#line 928 "parser.y"
     { cout << "component_selection" << endl;
     // lab4
     stringstream ss;
@@ -2763,7 +2876,7 @@ yyreduce:
   case 94:
 
 /* Line 1806 of yacc.c  */
-#line 822 "parser.y"
+#line 935 "parser.y"
     { cout << "component_selection" << endl;
     // lab4
     stringstream ss;
@@ -2776,7 +2889,7 @@ yyreduce:
   case 95:
 
 /* Line 1806 of yacc.c  */
-#line 829 "parser.y"
+#line 942 "parser.y"
     { cout << "component_selection_more" << endl;
     stringstream ss;
     ss << (yyvsp[(1) - (3)].sval) << " " << (yyvsp[(2) - (3)].sval) << " " << (yyvsp[(3) - (3)].sval);
@@ -2788,7 +2901,7 @@ yyreduce:
   case 96:
 
 /* Line 1806 of yacc.c  */
-#line 835 "parser.y"
+#line 948 "parser.y"
     { cout << "component_selection_more" << endl;
     stringstream ss;
     ss << (yyvsp[(1) - (4)].sval) << " " << (yyvsp[(2) - (4)].sval) << (yyvsp[(3) - (4)].sval) << (yyvsp[(4) - (4)].sval);
@@ -2800,40 +2913,58 @@ yyreduce:
   case 97:
 
 /* Line 1806 of yacc.c  */
-#line 842 "parser.y"
-    { cout << "actual_parameter_list" << endl; }
+#line 955 "parser.y"
+    { cout << "actual_parameter_list" << endl;
+    (yyval.sval) = (char*) malloc(strlen((yyvsp[(1) - (1)].sval)) + 1);
+    strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));
+    }
     break;
 
   case 98:
 
 /* Line 1806 of yacc.c  */
-#line 843 "parser.y"
-    { cout << "actual_parameter_list_empty" << endl; }
+#line 959 "parser.y"
+    { cout << "actual_parameter_list_empty" << endl;
+    string str = string("empty");
+    (yyval.sval) = (char*) malloc(str.length() + 1);
+    strcpy((yyval.sval), str.c_str());
+    }
     break;
 
   case 99:
 
 /* Line 1806 of yacc.c  */
-#line 845 "parser.y"
+#line 965 "parser.y"
     {
     cout << "expressions_more" << endl;
-    addQuadruple("param", string((yyvsp[(3) - (3)].sval)), string("NULL"), string("NULL"));
+    vector<string> fields = split((yyvsp[(3) - (3)].sval));
+    addQuadruple("param", fields[0], string("NULL"), string("NULL"));
+    vector<string> fields2 = split((yyvsp[(1) - (3)].sval));
+    stringstream ss;
+    ss << fields2[0] << " " << quadruples.size() - 1;
+    (yyval.sval) = (char*) malloc(ss.str().length() + 1);
+    strcpy((yyval.sval), ss.str().c_str());
     }
     break;
 
   case 100:
 
 /* Line 1806 of yacc.c  */
-#line 849 "parser.y"
+#line 975 "parser.y"
     { cout << "expressions" << endl;
-    addQuadruple("param", string((yyvsp[(1) - (1)].sval)), string("NULL"), string("NULL"));
+    vector<string> fields = split((yyvsp[(1) - (1)].sval));
+    addQuadruple("param", fields[0], string("NULL"), string("NULL"));
+    stringstream ss;
+    ss << fields[1] << " " << quadruples.size() - 1;
+    (yyval.sval) = (char*) malloc(ss.str().length() + 1);
+    strcpy((yyval.sval), ss.str().c_str());
     }
     break;
 
   case 101:
 
 /* Line 1806 of yacc.c  */
-#line 854 "parser.y"
+#line 985 "parser.y"
     { cout << "identifier_list_more" << endl;
       (yyval.sval) = (char*) malloc (strlen((yyvsp[(1) - (3)].sval)) + strlen((yyvsp[(3) - (3)].sval)) + 2);
       int i = 0;
@@ -2853,7 +2984,7 @@ yyreduce:
   case 102:
 
 /* Line 1806 of yacc.c  */
-#line 869 "parser.y"
+#line 1000 "parser.y"
     { cout << "identifier_list" << endl;
       (yyval.sval) = (char*) malloc (strlen((yyvsp[(1) - (1)].sval)) + 1);
       strcpy((yyval.sval), (yyvsp[(1) - (1)].sval)); }
@@ -2862,7 +2993,7 @@ yyreduce:
   case 103:
 
 /* Line 1806 of yacc.c  */
-#line 873 "parser.y"
+#line 1004 "parser.y"
     {
       // Lab4
       (yyval.sval) = (char*) malloc(2);
@@ -2874,7 +3005,7 @@ yyreduce:
   case 104:
 
 /* Line 1806 of yacc.c  */
-#line 879 "parser.y"
+#line 1010 "parser.y"
     {
       // Lab4
       (yyval.sval) = (char*) malloc(2);
@@ -2886,7 +3017,7 @@ yyreduce:
 
 
 /* Line 1806 of yacc.c  */
-#line 2890 "parser.tab.c"
+#line 3021 "parser.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -3117,7 +3248,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 886 "parser.y"
+#line 1017 "parser.y"
 
 main(int argc, char **argv) {
   FILE *myfile = fopen(argv[1], "r");
@@ -3257,6 +3388,7 @@ vector<string> split(const char* ids) {
 string processVarWithCompSel(string varStr) {
   vector<string> fields = split((char*)varStr.c_str());
   string prevVar = fields[0];
+  int beginIndex = quadruples.size();
   for (int i = 1; i < fields.size(); ++i) {
     if (fields[i].compare(".") == 0) {
       ++i;
@@ -3277,7 +3409,10 @@ string processVarWithCompSel(string varStr) {
       prevVar = newTemp;
     }
   }
-  return prevVar;
+
+  stringstream ss;
+  ss << prevVar << " " << beginIndex << " " << quadruples.size() - 1;
+  return ss.str();
 }
 
 void addQuadruple(const string& op, const string& arg1, const string& arg2,
@@ -3285,6 +3420,13 @@ void addQuadruple(const string& op, const string& arg1, const string& arg2,
   stringstream ss;
   ss << op << " " << arg1 << " " << arg2 << " " << result;
   quadruples.push_back(ss.str());
+} 
+
+void addQuadrupleWithIndex(const string& op, const string& arg1, const string& arg2,
+    const string& result, int index) {
+  stringstream ss;
+  ss << op << " " << arg1 << " " << arg2 << " " << result;
+  quadruples[index] = ss.str();
 } 
 
 int getQuadrupleIndex(const string& result) {
@@ -3380,6 +3522,13 @@ bool isQuadOpAssign(int index) {
   } else {
     assert(fields.size() == 5);
     return fields[1].compare(":=") == 0;
+  }
+}
+
+void shiftQuads(int index) {
+  quadruples.resize(quadruples.size() + 1);
+  for (int i = quadruples.size() - 1; i > index; --i) {
+    quadruples[i] = quadruples[i - 1];
   }
 }
 
