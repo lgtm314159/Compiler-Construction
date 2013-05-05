@@ -2766,7 +2766,7 @@ yyreduce:
 #line 796 "parser.y"
     { cout << "identifier_list" << endl;
       (yyval.sval) = (char*) malloc (strlen((yyvsp[(1) - (1)].sval)) + 1);
-      strcpy((yyval.sval), (yyvsp[(1) - (1)].sval));}
+      strcpy((yyval.sval), (yyvsp[(1) - (1)].sval)); }
     break;
 
   case 101:

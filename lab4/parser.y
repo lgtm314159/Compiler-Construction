@@ -795,7 +795,7 @@ identifierList: identifierList TOKEN_COMMAS TOKEN_ID
     | TOKEN_ID
     { cout << "identifier_list" << endl;
       $$ = (char*) malloc (strlen($1) + 1);
-      strcpy($$, $1);};
+      strcpy($$, $1); };
 
 sign: TOKEN_PLUS %prec UPLUS {
       // Lab4
